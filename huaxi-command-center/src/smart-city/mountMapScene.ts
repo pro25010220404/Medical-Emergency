@@ -98,8 +98,8 @@ export function mountMapScene(mount: HTMLDivElement, options: MountMapSceneOptio
   const view =
     variant === 'command'
       ? layout === 'fullscreen'
-        ? { ...INITIAL_VIEW, fov: 32, camX: 0.2, camY: 0.36, camZ: 0.98, mapScale: 1.12, minDistRatio: 0.52 }
-        : { ...INITIAL_VIEW, camZ: 1.12, mapScale: 1.0, minDistRatio: 0.62 }
+        ? { ...INITIAL_VIEW, fov: 32, camX: 0, camY: 0.44, camZ: 1.12, mapScale: 1.12, minDistRatio: 0.52 }
+        : { ...INITIAL_VIEW, camX: 0, camY: 0.44, camZ: 1.12, mapScale: 1.0, minDistRatio: 0.62 }
       : INITIAL_VIEW
   const theme = getMapTheme(themeId)
   const t = theme.three
@@ -177,6 +177,11 @@ export function mountMapScene(mount: HTMLDivElement, options: MountMapSceneOptio
       controls.minPolarAngle = 0.35
       controls.maxPolarAngle = Math.PI * 0.48
       controls.target.set(0, 0, 0.25)
+      if (variant === 'command') {
+        const home = new THREE.Spherical(controls.maxDistance, 0.82, 0)
+        camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(home))
+      }
+      controls.update()
 
       const onMapZoom = (ev: Event) => {
         const dir = (ev as CustomEvent<{ dir?: string }>).detail?.dir

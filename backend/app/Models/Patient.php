@@ -67,4 +67,36 @@ class Patient extends BaseModel
     {
         return $this->hasMany(Transfer::class, 'patient_id', 'patient_id');
     }
+
+    /**
+     * 临床记录（护理/检验/用药/评估记录，clinical_notes）
+     */
+    public function clinicalNotes(): HasMany
+    {
+        return $this->hasMany(ClinicalNote::class, 'patient_id', 'patient_id');
+    }
+
+    /**
+     * 会诊共享资料（含病程记录，consult_materials）
+     */
+    public function consultMaterials(): HasMany
+    {
+        return $this->hasMany(ConsultMaterial::class, 'patient_id', 'patient_id');
+    }
+
+    /**
+     * 预警管控记录（warnings）
+     */
+    public function warnings(): HasMany
+    {
+        return $this->hasMany(Warning::class, 'patient_id', 'patient_id');
+    }
+
+    /**
+     * 检验危急值（critical_values）
+     */
+    public function criticalValues(): HasMany
+    {
+        return $this->hasMany(CriticalValue::class, 'patient_id', 'patient_id');
+    }
 }

@@ -3,9 +3,9 @@
  * 运行: npm run sync:app-html
  */
 export const APP_SHELL_VERSION = {
-  themeLight: '20261015nav1',
+  themeLight: '20261015org1',
   sidebarLayout: '42',
-  mapPresentation: '20260315map12',
+  mapPresentation: '20261015map18',
   reactBundle: 'app-shell-3',
 }
 
@@ -47,6 +47,7 @@ export const reactEntry = {
 export const mapScripts = [
   { src: '/assets/enhance/map-threemaps-enhance.js', defer: true },
   { src: '/assets/enhance/map-light-3d-enhance.js', defer: true },
+  { src: '/assets/enhance/map-hospital-glb-enhance.js?v=33', type: 'module' },
   { src: '/assets/backend/app-integrated-nav.js?v=3' },
   { src: '/assets/enhance/monitoring-off-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/dispatch-hub-bridge.js?v=6', defer: true },
@@ -96,7 +97,7 @@ export const enhanceScripts = [
   { src: '/assets/enhance/nav-back-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/grassroots-demo-enhance.js', defer: true },
   { src: '/assets/enhance/ia-query-views-enhance.js?v=12', defer: true },
-  { src: '/assets/enhance/organizations-flow-enhance.js?v=4', defer: true },
+  { src: '/assets/enhance/organizations-flow-enhance.js?v=8', defer: true },
   { src: '/assets/enhance/plate-three-backend-enhance.js?v=6', defer: true },
   { src: '/assets/enhance/medical-quality-backend-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/demo-compliance-enhance.js?v=2', defer: true },

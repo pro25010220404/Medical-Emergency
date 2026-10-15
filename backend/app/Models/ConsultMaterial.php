@@ -30,4 +30,9 @@ class ConsultMaterial extends Model
     {
         return $this->belongsTo(ConsultSession::class, 'session_id', 'session_id');
     }
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
+    }
 }
