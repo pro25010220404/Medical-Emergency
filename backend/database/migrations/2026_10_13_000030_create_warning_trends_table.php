@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('trend_id', 32)->unique()->comment('趋势编号，如 TR-01');
             $table->string('patient_label', 64)->default('');
+            $table->string('patient_id', 32)->nullable()->index()->comment('关联患者业务编号');
             $table->string('metric', 32)->default('');
             $table->decimal('current_value', 10, 2)->default(0);
             $table->decimal('predicted_value', 10, 2)->default(0);

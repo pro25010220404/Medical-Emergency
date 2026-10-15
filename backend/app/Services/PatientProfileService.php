@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\ResponseCode;
 use App\Models\ClinicalNote;
+use App\Models\ConsultMaterial;
 use App\Models\ConsultSession;
 use App\Models\Patient;
 use App\Models\PatientEvent;
@@ -100,7 +101,23 @@ class PatientProfileService extends Service
                 'actorName' => null,
             ]);
 
-        $timeline = $notes->concat($events)
+        // 病程记录：来自会诊共享资料 consult_materials（kind=病程记录）
+        $courseNotes = ConsultMaterial::query()
+            ->where('patient_id', $patient->patient_id)
+            ->where('kind', '病程记录')
+            ->get()
+            ->map(fn (ConsultMaterial $m) => [
+                'id' => 'MAT-'.$m->id,
+                'category' => 'note',
+                'kind' => $m->kind,
+                'title' => $m->title,
+                'text' => $m->content,
+                'at' => optional($m->shared_at)->toIso8601String(),
+                'actorId' => $m->author_id,
+                'actorName' => $m->author_name,
+            ]);
+
+        $timeline = $notes->concat($events)->concat($courseNotes)
             ->sortByDesc(fn (array $item) => $item['at'] ?? '')
             ->values()
             ->all();

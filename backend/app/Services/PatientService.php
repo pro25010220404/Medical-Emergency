@@ -4,9 +4,17 @@ namespace App\Services;
 
 use App\Enums\ResponseCode;
 use App\Models\Bed;
+use App\Models\ClinicalNote;
+use App\Models\ConsultMaterial;
+use App\Models\CriticalValue;
 use App\Models\Department;
+use App\Models\IcuBed;
 use App\Models\Organization;
 use App\Models\Patient;
+use App\Models\PatientVital;
+use App\Models\Warning;
+use App\Models\WarningDisposeRecord;
+use App\Models\WarningTrend;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -42,6 +50,39 @@ class PatientService extends Service
     private const SOURCE_LABELS = [
         'manual' => '手动登记',
         '120' => '120院前急救',
+    ];
+
+    /** 危重程度字典 */
+    private const SEVERITY_LABELS = [
+        'critical' => '危重',
+        'acute' => '重症',
+        'general' => '一般',
+    ];
+
+    /** 预警等级字典 */
+    private const WARNING_LEVEL_LABELS = [
+        'urgent' => '紧急',
+        'warning' => '关注',
+    ];
+
+    /** 预警状态字典 */
+    private const WARNING_STATUS_LABELS = [
+        'new' => '待确认',
+        'acknowledged' => '已确认',
+        'treating' => '处置中',
+        'resolved' => '已闭环',
+    ];
+
+    /** 危急值等级/状态字典 */
+    private const CRITICAL_LEVEL_LABELS = [
+        'urgent' => '紧急',
+        'warning' => '关注',
+    ];
+
+    private const CRITICAL_STATUS_LABELS = [
+        'pending' => '待通知',
+        'notified' => '已通知',
+        'handled' => '已处理',
     ];
 
     /** 列表入参 → 数据库列映射（camelCase → snake_case） */
@@ -124,6 +165,16 @@ class PatientService extends Service
             ],
             'createdAt' => optional($patient->created_at)->toIso8601String(),
             'updatedAt' => optional($patient->updated_at)->toIso8601String(),
+
+            // 监护模块：概览 / 护理 / 用药 / 危急值 / 检验 / 病程 / 管控 / 辅助分析
+            'overview' => $this->overview($patient->patient_id),
+            'nursingRecords' => $this->mergedRecords($patient->patient_id, '护理记录'),
+            'medicationRecords' => $this->mergedRecords($patient->patient_id, '用药记录'),
+            'criticalValues' => $this->criticalValues($patient->patient_id),
+            'labRecords' => $this->mergedRecords($patient->patient_id, '检验记录'),
+            'courseRecords' => $this->courseRecords($patient->patient_id),
+            'controlRecords' => $this->controlRecords($patient->patient_id),
+            'auxiliaryAnalysis' => $this->auxiliaryAnalysis($patient->patient_id),
         ];
     }
 
@@ -254,6 +305,234 @@ class PatientService extends Service
             'bedId' => $bed->bed_id,
             'label' => $bed->label,
         ];
+    }
+
+    /**
+     * 概览：ICU 床位 + 最新一条床旁体征
+     */
+    private function overview(string $pid): array
+    {
+        $icuBed = IcuBed::query()->where('patient_id', $pid)->first();
+        $vital = PatientVital::query()->where('patient_id', $pid)->orderByDesc('measured_at')->first();
+
+        return [
+            'bedId' => $icuBed?->bed_id,
+            'bedLabel' => $icuBed?->label,
+            'severity' => $icuBed?->severity,
+            'severityLabel' => $icuBed ? (self::SEVERITY_LABELS[$icuBed->severity] ?? $icuBed->severity) : null,
+            'vital' => $vital === null ? null : [
+                'heartRate' => (int) $vital->heart_rate,
+                'spo2' => (int) $vital->spo2,
+                'resp' => (int) $vital->resp,
+                'temp' => (float) $vital->temp,
+                'systolic' => (int) $vital->systolic,
+                'diastolic' => (int) $vital->diastolic,
+                'news' => $vital->news,
+                'newsLabel' => $this->newsLabel($vital->news),
+                'alert' => $this->isVitalAlert($vital),
+                'measuredAt' => $vital->measured_at?->toIso8601String(),
+            ],
+        ];
+    }
+
+    /**
+     * 合并临床记录（clinical_notes）与会诊共享资料（consult_materials）中指定 kind 的记录
+     */
+    private function mergedRecords(string $pid, string $kind): array
+    {
+        $notes = ClinicalNote::query()
+            ->where('patient_id', $pid)
+            ->where('kind', $kind)
+            ->orderByDesc('at')
+            ->get()
+            ->map(fn (ClinicalNote $n) => [
+                'id' => $n->note_id,
+                'kind' => $n->kind,
+                'title' => $n->title,
+                'text' => $n->text,
+                'at' => $n->at?->toIso8601String(),
+                'actorId' => $n->actor_id,
+                'actorName' => null,
+            ]);
+
+        $materials = ConsultMaterial::query()
+            ->where('patient_id', $pid)
+            ->where('kind', $kind)
+            ->orderByDesc('shared_at')
+            ->get()
+            ->map(fn (ConsultMaterial $m) => [
+                'id' => 'MAT-'.$m->id,
+                'kind' => $m->kind,
+                'title' => $m->title,
+                'text' => $m->content,
+                'at' => $m->shared_at?->toIso8601String(),
+                'actorId' => $m->author_id,
+                'actorName' => $m->author_name,
+            ]);
+
+        return $notes->concat($materials)
+            ->sortByDesc(fn (array $r) => $r['at'] ?? '')
+            ->values()
+            ->all();
+    }
+
+    /**
+     * 病程记录：来自会诊共享资料 consult_materials（kind=病程记录）
+     */
+    private function courseRecords(string $pid): array
+    {
+        return ConsultMaterial::query()
+            ->where('patient_id', $pid)
+            ->where('kind', '病程记录')
+            ->orderByDesc('shared_at')
+            ->get()
+            ->map(fn (ConsultMaterial $m) => [
+                'id' => 'MAT-'.$m->id,
+                'kind' => $m->kind,
+                'title' => $m->title,
+                'text' => $m->content,
+                'at' => $m->shared_at?->toIso8601String(),
+                'actorId' => $m->author_id,
+                'actorName' => $m->author_name,
+            ])
+            ->all();
+    }
+
+    /**
+     * 检验危急值记录
+     */
+    private function criticalValues(string $pid): array
+    {
+        return CriticalValue::query()
+            ->where('patient_id', $pid)
+            ->orderByDesc('reported_at')
+            ->get()
+            ->map(fn (CriticalValue $c) => [
+                'criticalNo' => $c->critical_no,
+                'itemName' => $c->item_name,
+                'resultValue' => $c->result_value,
+                'unit' => $c->unit,
+                'refRange' => $c->ref_range,
+                'criticalRange' => $c->critical_range,
+                'specimen' => $c->specimen,
+                'level' => $c->level,
+                'levelLabel' => self::CRITICAL_LEVEL_LABELS[$c->level] ?? $c->level,
+                'status' => $c->status,
+                'statusLabel' => self::CRITICAL_STATUS_LABELS[$c->status] ?? $c->status,
+                'reportedAt' => $c->reported_at?->toIso8601String(),
+            ])
+            ->all();
+    }
+
+    /**
+     * 管控记录：预警 + 处置闭环记录
+     */
+    private function controlRecords(string $pid): array
+    {
+        $warnings = Warning::query()
+            ->where('patient_id', $pid)
+            ->with('disposeRecords')
+            ->orderByDesc('occurred_at')
+            ->get();
+
+        return $warnings->map(fn (Warning $w) => [
+            'warningNo' => $w->warning_no,
+            'title' => $w->title,
+            'metric' => $w->metric,
+            'currentValue' => $w->current_value === null ? null : (float) $w->current_value,
+            'level' => $w->level,
+            'levelLabel' => self::WARNING_LEVEL_LABELS[$w->level] ?? $w->level,
+            'status' => $w->status,
+            'statusLabel' => self::WARNING_STATUS_LABELS[$w->status] ?? $w->status,
+            'occurredAt' => $w->occurred_at?->toIso8601String(),
+            'records' => $w->disposeRecords
+                ->sortBy('acted_at')
+                ->map(fn (WarningDisposeRecord $d) => [
+                    'stage' => $d->stage,
+                    'note' => $d->note,
+                    'actorId' => $d->actor_id,
+                    'actorName' => $d->actor_name,
+                    'actedAt' => $d->acted_at?->toIso8601String(),
+                ])
+                ->values()
+                ->all(),
+        ])->all();
+    }
+
+    /**
+     * 辅助分析：体征时序趋势 + 预警趋势预测（AI 辅助分析）
+     */
+    private function auxiliaryAnalysis(string $pid): array
+    {
+        $vitalTrend = PatientVital::query()
+            ->where('patient_id', $pid)
+            ->orderBy('measured_at')
+            ->get()
+            ->map(fn (PatientVital $v) => [
+                'at' => $v->measured_at?->toIso8601String(),
+                'heartRate' => (int) $v->heart_rate,
+                'spo2' => (int) $v->spo2,
+                'resp' => (int) $v->resp,
+                'temp' => (float) $v->temp,
+                'systolic' => (int) $v->systolic,
+                'diastolic' => (int) $v->diastolic,
+                'news' => $v->news,
+            ])
+            ->values()
+            ->all();
+
+        $predictions = WarningTrend::query()
+            ->where('patient_id', $pid)
+            ->orderBy('id')
+            ->get()
+            ->map(fn (WarningTrend $t) => [
+                'id' => $t->trend_id,
+                'patientLabel' => $t->patient_label,
+                'metric' => $t->metric,
+                'currentValue' => (float) $t->current_value,
+                'predictedValue' => (float) $t->predicted_value,
+                'withinMinutes' => (int) $t->within_minutes,
+                'note' => $t->note,
+            ])
+            ->all();
+
+        return [
+            'vitalTrend' => $vitalTrend,
+            'predictions' => $predictions,
+        ];
+    }
+
+    /**
+     * NEWS 评分标签：0–4 低风险 / 5–6 预警关注 / ≥7 高危
+     */
+    private function newsLabel(?int $news): string
+    {
+        if ($news === null) {
+            return '正常';
+        }
+        if ($news >= 7) {
+            return '高危';
+        }
+        if ($news >= 5) {
+            return '预警关注';
+        }
+
+        return '低风险';
+    }
+
+    /**
+     * 体征预警判定：news ≥ 5 或 SpO₂ < 93 或心率 > 100
+     */
+    private function isVitalAlert(PatientVital $vital): bool
+    {
+        if ($vital->news !== null && $vital->news >= 5) {
+            return true;
+        }
+        if ((int) $vital->spo2 > 0 && (int) $vital->spo2 < 93) {
+            return true;
+        }
+
+        return (int) $vital->heart_rate > 100;
     }
 
     /**

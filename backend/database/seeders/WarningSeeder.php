@@ -82,11 +82,11 @@ class WarningSeeder extends Seeder
         ]);
 
         DB::table('warning_trends')->insert([
-            ['id' => 1, 'trend_id' => 'TR-01', 'patient_label' => '心内科 12床', 'metric' => 'NEWS', 'current_value' => 7.00, 'predicted_value' => 9.00, 'within_minutes' => 30, 'note' => '预计 30 分钟内病情恶化', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 2, 'trend_id' => 'TR-02', 'patient_label' => 'ICU 01床', 'metric' => 'SpO2', 'current_value' => 89.00, 'predicted_value' => 85.00, 'within_minutes' => 15, 'note' => '血氧持续下降', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 3, 'trend_id' => 'TR-03', 'patient_label' => '神经内科 08床', 'metric' => '收缩压', 'current_value' => 186.00, 'predicted_value' => 195.00, 'within_minutes' => 45, 'note' => '血压进行性升高', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 4, 'trend_id' => 'TR-04', 'patient_label' => '呼吸内科 05床', 'metric' => 'PaO2', 'current_value' => 58.00, 'predicted_value' => 52.00, 'within_minutes' => 20, 'note' => '呼吸衰竭风险', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 5, 'trend_id' => 'TR-05', 'patient_label' => '心内科 06床', 'metric' => 'D-二聚体', 'current_value' => 12.50, 'predicted_value' => 14.00, 'within_minutes' => 60, 'note' => '血栓风险升高', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 1, 'trend_id' => 'TR-01', 'patient_id' => "PAT-{$ymd}-001", 'patient_label' => '心内科 12床', 'metric' => 'NEWS', 'current_value' => 7.00, 'predicted_value' => 9.00, 'within_minutes' => 30, 'note' => '预计 30 分钟内病情恶化', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'trend_id' => 'TR-02', 'patient_id' => "PAT-{$ymd}-003", 'patient_label' => 'ICU 01床', 'metric' => 'SpO2', 'current_value' => 89.00, 'predicted_value' => 85.00, 'within_minutes' => 15, 'note' => '血氧持续下降', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 3, 'trend_id' => 'TR-03', 'patient_id' => "PAT-{$ymd}-002", 'patient_label' => '神经内科 08床', 'metric' => '收缩压', 'current_value' => 186.00, 'predicted_value' => 195.00, 'within_minutes' => 45, 'note' => '血压进行性升高', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 4, 'trend_id' => 'TR-04', 'patient_id' => "PAT-{$ymd}-006", 'patient_label' => '呼吸内科 05床', 'metric' => 'PaO2', 'current_value' => 58.00, 'predicted_value' => 52.00, 'within_minutes' => 20, 'note' => '呼吸衰竭风险', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 5, 'trend_id' => 'TR-05', 'patient_id' => "PAT-{$ymd}-008", 'patient_label' => '心内科 06床', 'metric' => 'D-二聚体', 'current_value' => 12.50, 'predicted_value' => 14.00, 'within_minutes' => 60, 'note' => '血栓风险升高', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         DB::table('warning_closed_loop')->insert([
