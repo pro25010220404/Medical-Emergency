@@ -188,19 +188,12 @@
       const vitals = await get('/critical/vitals', { pageNum: 1, pageSize: 40 })
       const vlist = vitals?.list || vitals?.data || []
       if (!vlist.length) return 0
-      // 与 backend-full-sync 保持一致：详情页体征单元需要 resp/temp/systolic/diastolic，
-      // 时间取后端 measuredAt（原 recorded_at 字段不存在，会退化成当前时间）
       out.measurements = vlist.map((v) => ({
         patientId: v.patientId || v.patient_id,
         bedId: v.bedId || v.bed_id,
-        at: v.measuredAt || v.at || v.recordedAt || v.recorded_at || new Date().toISOString(),
-        heartRate: v.heartRate ?? v.heart_rate ?? null,
-        spo2: v.spo2 ?? null,
-        resp: v.resp ?? null,
-        temp: v.temp ?? v.temperature ?? null,
-        systolic: v.systolic ?? v.sbp ?? 0,
-        diastolic: v.diastolic ?? v.dbp ?? 0,
-        news: v.news ?? v.newsScore ?? null,
+        at: v.recorded_at || v.recordedAt || new Date().toISOString(),
+        heartRate: v.heartRate ?? v.heart_rate,
+        spo2: v.spo2,
       }))
       return 1
     })

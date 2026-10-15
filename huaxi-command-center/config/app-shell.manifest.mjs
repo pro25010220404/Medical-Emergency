@@ -4,8 +4,8 @@
  */
 export const APP_SHELL_VERSION = {
   themeLight: '20261015nav1',
-  sidebarLayout: '43',
-  mapPresentation: '20260315map17',
+  sidebarLayout: '42',
+  mapPresentation: '20260315map12',
   reactBundle: 'app-shell-3',
 }
 
@@ -54,15 +54,7 @@ export const mapScripts = [
   { src: '/assets/enhance/dispatch-subnav-parity-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/sidebar-shell-enhance.js?v=35', defer: true },
   { src: '/assets/enhance/breadcrumb-nav-enhance.js?v=14', defer: true },
-  { src: '/assets/enhance/command-map-page-enhance.js?v=17', defer: true },
-]
-
-/** src-shell.html：源码 React + 侧栏/地图 enhance + 首页三栏布局补丁 */
-export const srcShellHomeEnhanceScripts = [
-  { src: '/assets/enhance/home-panel-enhance.js?v=2', defer: true },
-  { src: '/assets/enhance/home-dashboard-more-modal-enhance.js?v=3', defer: true },
-  { src: '/assets/enhance/home-dashboard-nav-enhance.js?v=6', defer: true },
-  { src: '/assets/enhance/auth-logout-enhance.js?v=1', defer: true },
+  { src: '/assets/enhance/command-map-page-enhance.js?v=14', defer: true },
 ]
 
 export const enhanceScripts = [

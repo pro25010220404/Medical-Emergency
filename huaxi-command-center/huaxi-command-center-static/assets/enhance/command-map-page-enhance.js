@@ -90,10 +90,10 @@
     chrome.setAttribute('role', 'toolbar')
     chrome.innerHTML =
       '<div class="hx-map-chrome-left">' +
-      '<button type="button" class="hx-map-chrome-btn" data-action="menu">菜单</button>' +
-      '<button type="button" class="hx-map-chrome-btn" data-action="exit">返回概览</button>' +
+      '<button type="button" class="hx-map-chrome-btn" data-action="menu">鑿滃崟</button>' +
+      '<button type="button" class="hx-map-chrome-btn" data-action="exit">杩斿洖姒傝</button>' +
       '</div>' +
-      '<span class="hx-map-chrome-title">协作三维地图</span>'
+      '<span class="hx-map-chrome-title">鍗忎綔涓夌淮鍦板浘</span>'
     host.appendChild(chrome)
 
     chrome.querySelector('[data-action="menu"]')?.addEventListener('click', () => {

@@ -9,7 +9,6 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "sync:app-html": "node scripts/sync-app-html.mjs",
-    "sync:src-shell": "node scripts/sync-src-shell.mjs",
     "verify:app-shell": "node scripts/verify-app-shell.mjs",
     "verify:backend-api": "node scripts/verify-backend-api.mjs",
     "patch:map": "node scripts/patch-map-3d.mjs",

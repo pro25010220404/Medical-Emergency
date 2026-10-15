@@ -15,7 +15,6 @@ type BackendEvent = {
   vehiclePlate?: string | null
   status?: string
   statusLabel?: string
-  occurredAt?: string | null
   startedAt?: string | null
   etaHospitalMinutes?: number | null
 }
@@ -30,15 +29,10 @@ type BackendEventsPayload = {
 }
 
 const STATUS_FILTERS = [
-  { value: '', label: '全部状态' },
+  { value: '', label: '全部' },
   { value: 'DISPATCHING', label: '出警中' },
   { value: 'ON_SCENE', label: '现场处置' },
   { value: 'RETURNING', label: '返院途中' },
-] as const
-
-const SCOPE_FILTERS = [
-  { value: 'all', label: '全部事件' },
-  { value: 'today', label: '仅当日' },
 ] as const
 
 const FALLBACK_LEVEL_LABELS: Record<string, string> = {
@@ -55,7 +49,6 @@ const activeCount = ref(0)
 const updated = ref('')
 const page = ref(1)
 const status = ref<string>('')
-const scope = ref<string>('all')
 const loading = ref(false)
 const error = ref('')
 
@@ -77,7 +70,6 @@ async function fetchPage() {
     if (!window.hxBackend?.enabled?.()) throw new Error('后端接口未连接，请检查登录状态')
     await window.hxBackend.ensureAuth()
     const query: Record<string, string | number> = { pageNum: page.value, pageSize: PAGE_SIZE }
-    if (scope.value === 'all') query.scope = 'all'
     if (status.value) query.status = status.value
     const data = await window.hxBackend.get<BackendEventsPayload>('/dispatch/events', query)
     events.value = Array.isArray(data?.list) ? data.list : []
@@ -97,13 +89,6 @@ async function fetchPage() {
 function pickStatus(value: string) {
   if (status.value === value) return
   status.value = value
-  page.value = 1
-  void fetchPage()
-}
-
-function pickScope(value: string) {
-  if (scope.value === value) return
-  scope.value = value
   page.value = 1
   void fetchPage()
 }
@@ -152,19 +137,6 @@ onMounted(fetchPage)
     </section>
 
     <section class="dh-panel">
-      <div class="dh-date-toolbar" role="tablist" aria-label="事件范围筛选">
-        <button
-          v-for="f in SCOPE_FILTERS"
-          :key="f.value"
-          class="dh-date-btn"
-          :class="{ 'dh-date-btn--active': scope === f.value }"
-          type="button"
-          :disabled="loading"
-          @click="pickScope(f.value)"
-        >
-          {{ f.label }}
-        </button>
-      </div>
       <div class="dh-date-toolbar" role="tablist" aria-label="事件状态筛选">
         <button
           v-for="f in STATUS_FILTERS"
@@ -184,9 +156,7 @@ onMounted(fetchPage)
       事件列表加载失败：{{ error }}
       <button class="dh-date-btn" type="button" @click="fetchPage">重试</button>
     </p>
-    <p v-else-if="!loading && !events.length" class="dh-day-empty">
-      {{ scope === 'all' ? '暂无急救事件记录。' : '当日暂无急救事件记录，可切换「全部事件」查看历史。' }}
-    </p>
+    <p v-else-if="!loading && !events.length" class="dh-day-empty">当日暂无急救事件记录。</p>
 
     <section v-show="events.length" class="dh-panel dh-table-wrap">
       <table class="dh-table">
@@ -197,7 +167,7 @@ onMounted(fetchPage)
             <th>主诉</th>
             <th>车辆</th>
             <th>状态</th>
-            <th>接警/出车时间</th>
+            <th>出车时间</th>
             <th>预计到院</th>
             <th class="col-act">操作</th>
           </tr>
@@ -214,7 +184,7 @@ onMounted(fetchPage)
             <td>
               <span class="dh-status" :class="statusTone(statusText(ev))">{{ statusText(ev) }}</span>
             </td>
-            <td>{{ ev.startedAt ? formatClock(ev.startedAt) : ev.occurredAt ? formatClock(ev.occurredAt) : '—' }}</td>
+            <td>{{ ev.startedAt ? formatClock(ev.startedAt) : '—' }}</td>
             <td>{{ etaText(ev.etaHospitalMinutes) }}</td>
             <td class="dh-row-actions">
               <a :href="liveHref(ev)">出警处理</a>

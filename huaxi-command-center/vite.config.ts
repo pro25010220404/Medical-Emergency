@@ -4,7 +4,6 @@ import vue from '@vitejs/plugin-vue'
 import { codeInspectorPlugin } from 'code-inspector-plugin'
 import { defineConfig, loadEnv } from 'vite'
 import { injectBackendEnvPlugin } from './src/vite-plugin-inject-backend-env.js'
-import { devAppReactSrcPlugin } from './src/vite-plugin-dev-app-react-src.ts'
 
 export default defineConfig(({ mode }) => {
   // 注意：vite.config.ts 里 process.env 不会包含 .env 文件的变量，
@@ -16,7 +15,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       injectBackendEnvPlugin(),
-      devAppReactSrcPlugin(),
       vue(),
       react(),
       mode === 'development' &&

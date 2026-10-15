@@ -241,14 +241,7 @@
       const bind = findBind()
 
       if (p.startsWith('/bed/') && document.querySelector('.single-bed')) {
-        if (document.querySelector('.single-bed.hx-bed-layout')) {
-          document.getElementById('hx-dock-bed')?.remove()
-          return
-        }
-        const host =
-          document.querySelector('.single-bed .hx-bed-p1-left') ||
-          document.querySelector('.single-bed aside') ||
-          document.querySelector('.single-bed')
+        const host = document.querySelector('.single-bed aside') || document.querySelector('.single-bed')
         const bedId = decodeURIComponent((p.match(/^\/bed\/([^/]+)/) || [])[1] || '')
         const html = bind
           ? stripHtml(bind, 'bed')

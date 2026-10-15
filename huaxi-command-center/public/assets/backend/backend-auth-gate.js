@@ -3,7 +3,7 @@
  */
 ;(function () {
   const path = location.pathname.replace(/\\/g, '/')
-  const isApp = /\/(app|src-shell)\.html$/i.test(path)
+  const isApp = /\/app\.html$/i.test(path)
   if (!isApp) return
 
   function demoOnly() {
@@ -28,6 +28,6 @@
 
   if (demoOnly() || hasToken()) return
 
-  const next = path + location.search + location.hash
+  const next = '/app.html' + location.search + location.hash
   location.replace('/index.html?next=' + encodeURIComponent(next))
 })()

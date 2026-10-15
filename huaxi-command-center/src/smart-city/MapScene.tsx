@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import type { CollabNodeDetail } from '../lib/campusMapInfoPanel'
 import type { MapThemeId } from '../mapTheme'
 import { mountMapScene } from './mountMapScene'
@@ -15,7 +15,7 @@ export type MapSceneProps = {
   collabPack?: { nodes: CollabNodeDetail[]; links?: CollabLink[] }
 }
 
-function MapSceneView({
+export function MapScene({
   themeId,
   region = 'weiyuan',
   variant = 'default',
@@ -57,15 +57,11 @@ function MapSceneView({
     }
   }, [])
 
-  const commandCls =
-    variant === 'command' ?
-      `command-map-canvas map-stage${useCampusGlb ? '' : ' hx-map-diamond-nodes'}`
-    : 'sc-map-canvas'
-
   return (
-    <div className={commandCls} ref={mountRef} aria-label="3D 态势地图" />
+    <div
+      className={variant === 'command' ? 'command-map-canvas map-stage' : 'sc-map-canvas'}
+      ref={mountRef}
+      aria-label="3D 态势地图"
+    />
   )
 }
-
-/** 全屏只改 body class。此组件若跟着重渲染，React 会拆掉 Three 画布并导致整页崩溃。 */
-export const MapScene = memo(MapSceneView)

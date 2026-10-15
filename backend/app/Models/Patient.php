@@ -60,12 +60,7 @@ class Patient extends BaseModel
 
     public function emergencyEvents(): HasMany
     {
-        return $this->hasMany(EmergencyEvent::class, 'patient_id', 'patient_id');
-    }
-
-    public function beds(): HasMany
-    {
-        return $this->hasMany(Bed::class, 'patient_id', 'patient_id');
+        return $this->hasMany(EmergencyEvent::class, 'patient_id');
     }
 
     public function transfers(): HasMany

@@ -4,12 +4,11 @@
 ;(function () {
   /** @type {Record<string, string>} */
   /**
-   * 仅 P2「出警列表」「事件列表」走 Vue；其余 L2 用 app 内原有 React 页（与顶栏 subnav 一致）
+   * 仅 P2「出警列表」走 Vue live；其余 L2 用 app 内原有 React 页（与顶栏 subnav 一致）
    * 120 四页 hash 对照：live / events / register / ambulances
    */
   const TAB_BY_PATH = {
     '/dispatch/list': 'live',
-    '/dispatch/events': 'events',
   }
 
   function path() {

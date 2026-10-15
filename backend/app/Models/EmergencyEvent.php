@@ -55,7 +55,7 @@ class EmergencyEvent extends BaseModel
 
     public function patient(): BelongsTo
     {
-        return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
+        return $this->belongsTo(Patient::class, 'patient_id');
     }
 
     public function acceptOrg(): BelongsTo
@@ -71,10 +71,5 @@ class EmergencyEvent extends BaseModel
     public function transfers(): HasMany
     {
         return $this->hasMany(Transfer::class, 'event_id');
-    }
-
-    public function beds(): HasMany
-    {
-        return $this->hasMany(Bed::class, 'event_id', 'event_code');
     }
 }

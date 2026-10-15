@@ -18,6 +18,9 @@ export function MapCollabPanel({ loading, error, payload }: Props) {
   const nodes = payload ? nodesFromCountyPayload(payload) : []
   const [open, setOpen] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [mapFullPage, setMapFullPage] = useState(() =>
+    document.body.classList.contains('hx-page-map-only'),
+  )
 
   useEffect(() => {
     const onSelect = (ev: Event) => {
@@ -42,6 +45,7 @@ export function MapCollabPanel({ loading, error, payload }: Props) {
         setOpen(false)
         document.querySelector('.dashboard-center .main-map')?.classList.remove('map-nodes-open')
       }
+      setMapFullPage((prev) => (prev === active ? prev : active))
     }
     window.addEventListener('hx-map-page', onMapPage)
     return () => window.removeEventListener('hx-map-page', onMapPage)

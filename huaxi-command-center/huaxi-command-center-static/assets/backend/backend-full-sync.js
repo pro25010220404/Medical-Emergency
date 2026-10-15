@@ -186,19 +186,12 @@
     try {
       const vitals = await get('/critical/vitals', { pageNum: 1, pageSize: 50 })
       const vlist = vitals?.list || []
-      // 详情页「病情摘要」体征单元读取 resp/temp/systolic/diastolic，必须完整映射；
-      // 时间字段后端返回 measuredAt（不是 recorded_at），缺失会退化为“当前时间”
       base.measurements = vlist.map((v) => ({
         patientId: v.patientId || v.patient_id,
         bedId: v.bedId || v.bed_id,
-        at: v.measuredAt || v.at || v.recordedAt || v.recorded_at || new Date().toISOString(),
-        heartRate: v.heartRate ?? v.heart_rate ?? null,
-        spo2: v.spo2 ?? null,
-        resp: v.resp ?? null,
-        temp: v.temp ?? v.temperature ?? null,
-        systolic: v.systolic ?? v.sbp ?? 0,
-        diastolic: v.diastolic ?? v.dbp ?? 0,
-        news: v.news ?? v.newsScore ?? null,
+        at: v.recorded_at || v.recordedAt || new Date().toISOString(),
+        heartRate: v.heartRate ?? v.heart_rate,
+        spo2: v.spo2,
       }))
     } catch {
       /* optional */

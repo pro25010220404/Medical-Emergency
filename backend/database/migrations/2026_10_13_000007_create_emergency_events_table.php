@@ -32,7 +32,7 @@ return new class extends Migration
             $table->string('scene_spo2', 20)->nullable()->comment('现场血氧');
             $table->string('scene_rr', 20)->nullable()->comment('现场呼吸');
             $table->string('scene_temp', 20)->nullable()->comment('现场体温');
-            $table->string('patient_id', 32)->nullable()->index()->comment('关联患者业务编号');
+            $table->unsignedBigInteger('patient_id')->nullable()->index()->comment('关联患者');
             $table->string('patient_mode', 32)->default('PATIENT_MODE_TEMP')->comment('患者模式：临时/建档');
             $table->string('temp_gender', 20)->default('GENDER_UNKNOWN')->comment('临时患者性别');
             $table->text('temp_summary')->nullable()->comment('临时患者摘要');

@@ -13,10 +13,6 @@
  *   - 等待 transfer-classify-enhance.js 完成 DOM 初始化后再注入
  *   - 注入后让 transfer-classify-enhance 重新执行过滤
  *   - 支持"外院转诊 / 本院转科室"双模式
- *
- * 操作列：
- *   - 查看：打开转诊详情弹窗（原有）
- *   - 发起会诊：仅外院转诊行显示，跳到「远程会诊」发起页（#/consultations）
  */
 ;(function () {
   /* ---------- 配置 ---------- */
@@ -77,20 +73,6 @@
     return ''
   }
 
-  /**
-   * 是否外院转诊（与 transfer-classify-enhance.js 同一口径）
-   * direction=UP → 上转（外院）；DOWN → 本院转科室
-   * 无 direction 时退回机构名比较：转出 ≠ 接收 → 外院转诊
-   */
-  function isExternal(rec) {
-    if (rec.direction === 'UP') return true
-    if (rec.direction === 'DOWN') return false
-    const from = (rec.sourceInstitutionName || '').trim()
-    const to = (rec.targetInstitutionName || '').trim()
-    if (!from || !to) return false
-    return from !== to
-  }
-
   /** 状态徽章 */
   function statusBadge(label, status) {
     const cls =
@@ -112,13 +94,7 @@
     tr.dataset.status = rec.status || ''
 
     const deptNote = rec.targetDeptName ? `<br><small class="muted">${rec.targetDeptName}</small>` : ''
-    const tid = rec.transferId || rec.id || ''
-    // 外院转诊才有「发起会诊」：跳远程会诊发起页（#/consultations）
-    const consultBtn = isExternal(rec)
-      ? `<button class="hx-btn-sm is-primary" onclick="window.hxStartTransferConsult?.('${tid}')">发起会诊</button>`
-      : ''
-    const actionBtn =
-      consultBtn + `<button class="hx-btn-sm" onclick="window.hxViewTransfer?.('${tid}')">查看</button>`
+    const actionBtn = `<button class="hx-btn-sm" onclick="window.hxViewTransfer?.('${rec.transferId || rec.id || ''}')">查看</button>`
 
     tr.innerHTML =
       `<td>${rec.patientName || '—'}</td>` +
@@ -275,19 +251,6 @@
   }
 
   window.hxViewTransfer = openTransferModal
-
-  /* ---------- 全局「发起会诊」处理器 ---------- */
-  /** 跳转远程会诊发起页（与现有「5G远程会诊 → 发起会诊」同目标：#/consultations） */
-  window.hxStartTransferConsult = function (transferId) {
-    if (!transferId) return
-    const rec = window.__HX_TRANSFERS_CACHE__.find((r) => (r.transferId || r.id) === transferId)
-    if (!rec) {
-      alert('未找到该转诊记录：' + transferId)
-      return
-    }
-    location.hash = '#/consultations'
-  }
-
   // 同时也暴露给 React 行内 onclick 使用
   window.hxCloseTransferModal = function () {
     document.querySelectorAll('[data-hx-transfer-modal]').forEach((el) => el.remove())
@@ -342,8 +305,6 @@
       '.hx-badge-muted{background:#f1f5f9;color:#64748b}' +
       '.hx-btn-sm{padding:3px 10px;border-radius:4px;border:1px solid #cbd5e1;background:#fff;color:#475569;cursor:pointer;font-size:12px}' +
       '.hx-btn-sm:hover{background:#f1f5f9}' +
-      '.hx-btn-sm.is-primary{border-color:#2563eb;background:#2563eb;color:#fff;margin-right:6px}' +
-      '.hx-btn-sm.is-primary:hover{background:#1d4ed8}' +
       'table .actions{white-space:nowrap}' +
       // 弹窗
       '.hx-modal-mask{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:9999;display:flex;align-items:center;justify-content:center;animation:hxFadeIn .15s ease-out}' +

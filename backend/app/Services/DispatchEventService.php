@@ -40,19 +40,15 @@ class DispatchEventService extends Service
     ];
 
     /**
-     * 急救事件列表（默认当日；scope=all 查全部事件按接警时间倒序；status 支持逗号分隔的枚举名过滤）
+     * 急救事件列表（当日；status 支持逗号分隔的枚举名过滤）
      */
     public function paginate(array $filters): array
     {
-        $scopeAll = ($filters['scope'] ?? '') === 'all';
         $date = ! empty($filters['date']) ? (string) $filters['date'] : now()->toDateString();
         $pageNum = max(1, (int) ($filters['pageNum'] ?? 1));
         $pageSize = min(200, max(1, (int) ($filters['pageSize'] ?? 50)));
 
-        $base = EmergencyEvent::query();
-        if (! $scopeAll) {
-            $base->whereDate('occurred_at', $date);
-        }
+        $base = EmergencyEvent::query()->whereDate('occurred_at', $date);
         $activeCount = (clone $base)->where('status', '>', self::STATUS_MAP['STANDBY'])->count();
 
         $query = clone $base;
@@ -62,12 +58,8 @@ class DispatchEventService extends Service
         }
 
         $total = (clone $query)->count();
-        if ($scopeAll) {
-            $query->orderByDesc('occurred_at');
-        } else {
-            $query->orderBy('status')->orderBy('started_at');
-        }
-        $items = $query
+        $items = $query->orderBy('status')
+            ->orderBy('started_at')
             ->forPage($pageNum, $pageSize)
             ->get();
 
@@ -213,7 +205,6 @@ class DispatchEventService extends Service
             'vehiclePlate' => $event->vehicle_plate ?: null,
             'status' => $this->statusName((int) $event->status),
             'statusLabel' => self::STATUS_LABELS[(int) $event->status] ?? '',
-            'occurredAt' => $event->occurred_at?->toIso8601String(),
             'startedAt' => $event->started_at?->toIso8601String(),
             'etaHospitalMinutes' => (int) $event->eta_hospital_minutes,
             'etaPatientMinutes' => $event->eta_patient_minutes !== null ? (int) $event->eta_patient_minutes : null,

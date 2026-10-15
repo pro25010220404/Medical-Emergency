@@ -120,7 +120,6 @@ main.dashboard.screen .dashboard-center .hx-glb-map-overlay {
   position: absolute !important;
   inset: 0 !important;
   z-index: 8 !important;
-  overflow: visible !important;
   width: 100% !important;
   height: 100% !important;
   min-height: 240px !important;
@@ -207,7 +206,7 @@ main.dashboard.screen .dashboard-center .hx-glb-map-overlay .hx-campus-info-pane
   position: absolute;
   right: 12px;
   bottom: 12px;
-  z-index: 24;
+  z-index: 12;
   width: min(340px, 92%);
   padding: 14px 14px 12px;
   border-radius: 14px;
@@ -388,21 +387,10 @@ main.dashboard.screen .dashboard-center .hx-glb-map-overlay .hx-campus-info-pane
 }
 
 /* 杩涘叆棣栭〉鏃?3D 鍘跨晫鐣ユ斁澶э紝鍑忓皯涓ぎ鐣欑櫧 */
-main.dashboard.screen .dashboard-center .main-map.hx-map-light-3d .map-stage:not(.command-map-canvas) canvas {
+main.dashboard.screen .dashboard-center .main-map.hx-map-light-3d .map-stage canvas {
   transform: scale(1.14);
   transform-origin: 50% 54%;
   filter: drop-shadow(0 10px 24px rgba(30, 75, 123, 0.14));
-}
-
-main.dashboard.screen .dashboard-center .main-map.hx-map-light-3d .command-map-canvas.map-stage canvas {
-  transform: none !important;
-}
-
-.command-map-canvas.hx-map-diamond-nodes .sc-map-label-layer,
-.command-map-canvas.hx-map-diamond-nodes .hx-command-map-label {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
 }
 
 /* 宸﹀彸 KPI锛氬幓鎺夊渾瑙掓弿杈瑰崱鐗?*/
@@ -908,8 +896,13 @@ body.hx-page-map-only .hx-glb-map-host--full .hx-glb-map-overlay canvas {
 }
 
 /* 鍏ㄥ睆鍗忎綔鍦板浘锛氳鏍?渚ф爮涓庨椤靛湴鍥句竴鑷达紝椤舵爮鑿滃崟涓嬫尓涓€鐐?*/
+body.hx-page-map-only .dashboard-center .hx-map-region-bar {
+  top: 48px;
+  left: 52px;
+}
+
 body.hx-page-map-only .dashboard-center .map-legend {
-  top: 12px !important;
+  top: 48px !important;
   bottom: auto !important;
   right: 12px !important;
   background: transparent !important;
@@ -928,20 +921,9 @@ body.hx-page-map-only .dashboard-center .map-kpi.left {
   right: 14px !important;
 }
 
-/* 全屏协作地图：不要页签式 UI（顶栏多页签 / 协作节点竖条 / 县域 segmented） */
-body.hx-page-map-only .hx-nav-tabs,
-body.hx-page-map-only .map-med-tab,
-body.hx-page-map-only .map-med-backdrop,
-body.hx-page-map-only .map-med-sidepanel,
-body.hx-page-map-only .hx-map-region-bar,
-body.hx-page-map-only .region-switch.segmented {
-  display: none !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-}
-
-body.hx-page-map-only.hx-nav-tabs-active .app-shell.hx-sidebar-ready > main.dashboard.screen {
-  margin-top: 0 !important;
+body.hx-page-map-only .map-med-tab {
+  top: 48px;
+  left: 8px;
 }
 
 .hx-map-drawer-backdrop {
@@ -957,8 +939,8 @@ body.hx-page-map-only.hx-nav-tabs-active .app-shell.hx-sidebar-ready > main.dash
 }
 
 .hx-map-page-chrome {
-  position: fixed;
-  z-index: 80;
+  position: absolute;
+  z-index: 30;
   top: 10px;
   left: 12px;
   right: 12px;

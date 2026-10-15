@@ -3,7 +3,6 @@
  */
 
 const TOKEN_KEY = 'huaxi-jwt-token'
-const FRESH_TOKEN_KEY = 'huaxi-jwt-just-logged-in'
 
 export type ApiEnvelope<T = unknown> = {
   code?: number
@@ -71,7 +70,7 @@ export function clearAuthTokens() {
   }
 }
 
-export function getStoredToken(): string | null {
+function loadToken(): string | null {
   try {
     return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY)
   } catch {
@@ -83,7 +82,6 @@ function saveToken(token: string) {
   try {
     sessionStorage.setItem(TOKEN_KEY, token)
     localStorage.setItem(TOKEN_KEY, token)
-    sessionStorage.setItem(FRESH_TOKEN_KEY, '1')
   } catch {
     /* ignore */
   }
@@ -167,7 +165,7 @@ export async function login(username?: string, password?: string): Promise<strin
 }
 
 async function authHeaders(): Promise<HeadersInit> {
-  let token = getStoredToken()
+  let token = loadToken()
   if (!token) token = await login()
   return {
     Accept: 'application/json',

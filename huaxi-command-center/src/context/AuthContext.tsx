@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { apiGet, clearAuthTokens, getStoredToken, login as apiLogin } from '../lib/apiClient'
+import { apiGet, clearAuthTokens, login as apiLogin } from '../lib/apiClient'
 
 type AuthUser = Record<string, unknown> | null
 
@@ -58,26 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false
     ;(async () => {
       try {
-        if (getStoredToken()) {
-          await refreshMe()
-        } else {
-          await apiLogin()
-          if (cancelled) return
-          await refreshMe()
-        }
+        await apiLogin()
+        if (cancelled) return
+        await refreshMe()
       } catch (e) {
         if (!cancelled) {
-          const hadToken = !!getStoredToken()
-          if (hadToken) {
-            try {
-              clearAuthTokens()
-              await apiLogin()
-              await refreshMe()
-              return
-            } catch {
-              /* fall through */
-            }
-          }
           clearAuthTokens()
           setUser(null)
           setAuthenticated(false)

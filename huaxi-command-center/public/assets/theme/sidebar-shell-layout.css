@@ -836,13 +836,6 @@ body.hx-sidebar-shell:not(.hx-sidebar-home):not(.hx-page-map-only):not(.hx-sideb
   display: none !important;
 }
 
-/* 协作三维地图：必须露出首页 dashboard（否则全屏只剩灰底） */
-body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > main.dashboard.screen,
-body.hx-sidebar-shell.hx-sidebar-map-view .app-shell.hx-sidebar-ready > main.dashboard.screen {
-  display: grid !important;
-  visibility: visible !important;
-}
-
 body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.workspace,
 body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.dispatch-screen,
 body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.warning-screen,
@@ -911,22 +904,8 @@ body.hx-sidebar-shell.hx-page-map-only .huaxi-demo-links {
   display: none !important;
 }
 
-body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready,
 body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready:has(#hx-panel-toggles) {
-  grid-template-columns: minmax(0, 1fr) !important;
-  grid-template-rows: minmax(0, 1fr) !important;
-}
-
-/* 首页规则会把 dashboard 放到第 3 行；全屏只有 1 行时地图高度为 0 */
-body.hx-sidebar-shell.hx-page-map-only.hx-sidebar-home
-  .app-shell.hx-sidebar-ready:has(#hx-panel-toggles)
-  > main.dashboard.screen,
-body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > main.dashboard.screen {
-  grid-row: 1 / -1 !important;
-  grid-column: 1 / -1 !important;
-  display: grid !important;
-  height: 100% !important;
-  min-height: 0 !important;
+  grid-template-rows: var(--hx-topbar-h) minmax(0, 1fr) !important;
 }
 
 body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > #hx-panel-toggles {
@@ -1020,15 +999,6 @@ body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > header.comm
   display: none !important;
 }
 
-body.hx-sidebar-shell.hx-page-map-only .hx-nav-tabs {
-  display: none !important;
-}
-
-body.hx-sidebar-shell.hx-page-map-only.hx-nav-tabs-active .app-shell.hx-sidebar-ready > main,
-body.hx-sidebar-shell.hx-page-map-only.hx-nav-tabs-active .app-shell.hx-sidebar-ready > #hx-ambulances-page {
-  margin-top: 0 !important;
-}
-
 body.hx-sidebar-shell.hx-page-map-only .hx-sidebar {
   position: fixed;
   left: 0;
@@ -1047,49 +1017,9 @@ body.hx-sidebar-shell.hx-page-map-only.hx-map-drawer-open .hx-sidebar {
   box-shadow: 12px 0 40px rgba(15, 23, 42, 0.14);
 }
 
-/* 脱离网格：首页规则会把 dashboard 放到高度为 0 的第 3 行，固定铺满视口 */
-body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen {
-  position: fixed !important;
-  inset: 0 !important;
-  z-index: 50 !important;
-  width: 100vw !important;
-  height: 100dvh !important;
-  min-height: 100dvh !important;
-  max-height: none !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  display: block !important;
-  overflow: hidden !important;
-  background: #e8f0f8 !important;
-  visibility: visible !important;
-}
-
-body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen > .dashboard-center,
-body.hx-sidebar-shell.hx-page-map-only .dashboard-center .main-map,
-body.hx-sidebar-shell.hx-page-map-only .dashboard-center .county-map,
-body.hx-sidebar-shell.hx-page-map-only .command-map-canvas.map-stage {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100% !important;
-  max-height: none !important;
-  display: block !important;
-  visibility: visible !important;
-  overflow: hidden !important;
-}
-
-body.hx-sidebar-shell.hx-page-map-only .command-map-canvas canvas,
-body.hx-sidebar-shell.hx-page-map-only .command-map-canvas .sc-map-label-layer {
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100dvh !important;
-  display: block !important;
-}
-
-body.hx-sidebar-shell.hx-page-map-only .command-map-canvas.hx-map-diamond-nodes .sc-map-label-layer {
-  display: none !important;
-  min-height: 0 !important;
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > main.dashboard.screen {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
 }
 
 /* Vue 120 嵌入：侧栏四入口对应 dispatch.html 子页，无 Tab 壳 */

@@ -15,8 +15,7 @@ return new class extends Migration
             $table->string('institution_id', 32);
             $table->string('department_id', 32);
             $table->unsignedTinyInteger('status')->default(0)->index()->comment('状态：0空床1占用2预留3维护');
-            $table->string('patient_id', 32)->nullable()->comment('关联患者业务编号');
-            $table->string('event_id', 50)->nullable()->comment('关联急救事件业务编号');
+            $table->string('patient_id', 32)->nullable();
             $table->string('reserve_reason', 128)->default('');
             $table->dateTime('reserved_until')->nullable();
             $table->boolean('enabled')->default(true);
@@ -24,7 +23,6 @@ return new class extends Migration
 
             $table->index(['institution_id', 'department_id']);
             $table->index('patient_id');
-            $table->index('event_id');
         });
     }
 

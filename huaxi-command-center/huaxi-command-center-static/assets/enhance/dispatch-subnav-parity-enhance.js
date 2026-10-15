@@ -5,7 +5,6 @@
   const DISPATCH_LINKS = [
     ['/dispatch', '实时出警'],
     ['/dispatch/list', '出警列表'],
-    ['/dispatch/events', '事件列表'],
     ['/ambulances', '救护车列表'],
     ['/patients', '患者列表'],
     ['/register', '患者登记'],
