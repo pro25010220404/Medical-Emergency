@@ -40,7 +40,7 @@
       else main.insertBefore(box, main.firstChild)
     }
     box.innerHTML = `<p><strong>如何绑定</strong>：在表格「操作」列点 <strong>编辑</strong>，在弹窗内依次选择 <strong>机构 → 绑定科室 → 关联床位</strong>，再按需指定 <strong>关联医生 / 关联患者</strong>，点保存。保存后「绑定科室 / 关联床位 / 关联医生 / 关联患者」列同步更新。</p>
-    <p class="hx-device-bind-hint__sub"><strong>演示说明</strong>：绑定只写入本机（<code>${STORAGE_KEY}</code>）；<strong>采集状态 · 未连接</strong>表示未接真实物联网，不会因绑定变在线。会议交付完整台账见 <a href="/meeting-portal.html#devices">设备绑定门户</a>。</p>`
+    <p class="hx-device-bind-hint__sub"><strong>演示说明</strong>：绑定只写入本机（<code>${STORAGE_KEY}</code>）；<strong>采集状态 · 未连接</strong>表示未接真实物联网，不会因绑定变在线。</p>`
   }
 
   function annotateRows(map) {
