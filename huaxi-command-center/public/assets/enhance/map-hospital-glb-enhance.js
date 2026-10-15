@@ -20503,13 +20503,15 @@ function Ov(e, t) {
 	let { themeId: n, region: r = "weiyuan", variant: i = "default", useCampusGlb: a = !1, campusDisplayScale: o = i === "command" ? 1.18 : 1, layout: s = "dashboard", collabPack: c } = t, l = i === "command" ? s === "fullscreen" ? {
 		...Ev,
 		fov: 32,
-		camX: .2,
-		camY: .36,
-		camZ: .98,
+		camX: 0,
+		camY: .44,
+		camZ: 1.12,
 		mapScale: 1.12,
 		minDistRatio: .52
 	} : {
 		...Ev,
+		camX: 0,
+		camY: .44,
 		camZ: 1.12,
 		mapScale: 1,
 		minDistRatio: .62
@@ -20545,7 +20547,11 @@ function Ov(e, t) {
 			let O = new Er(), k = new fu(l.fov, T / E, .1, 200);
 			k.position.set(-C * l.camX, -C * l.camY, C * l.camZ), k.lookAt(0, 0, 0);
 			let A = new lg(k, w.domElement);
-			A.enableDamping = !0, A.enablePan = !1, A.minDistance = C * l.minDistRatio, A.maxDistance = C * l.maxDistRatio, A.minPolarAngle = .35, A.maxPolarAngle = Math.PI * .48, A.target.set(0, 0, .25);
+			if (A.enableDamping = !0, A.enablePan = !1, A.minDistance = C * l.minDistRatio, A.maxDistance = C * l.maxDistRatio, A.minPolarAngle = .35, A.maxPolarAngle = Math.PI * .48, A.target.set(0, 0, .25), i === "command") {
+				let e = new Id(A.maxDistance, .82, 0);
+				k.position.copy(A.target).add(new G().setFromSpherical(e));
+			}
+			A.update();
 			let j = (e) => {
 				let t = e.detail?.dir;
 				if (t !== "in" && t !== "out") return;
