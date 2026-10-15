@@ -3,12 +3,13 @@ import { APP_ROUTES } from '../routes/meta'
 import { ConsultRoomPage } from './consult/ConsultRoomPage'
 import { createLegacyPage } from './createLegacyPage'
 import { createScaffoldPage } from './createScaffoldPage'
+import { EmergencyEventDetailPage } from './episode/EmergencyEventDetailPage'
 import { HomePage } from './HomePage'
 import { PatientDetailPage } from './patients/PatientDetailPage'
 import { PatientRegisterPage } from './patients/PatientRegisterPage'
 import { PatientsListPage } from './patients/PatientsListPage'
 
-const BUSINESS_PAGES = new Set(['/patients', '/patient/:id', '/register'])
+const BUSINESS_PAGES = new Set(['/patients', '/patient/:id', '/register', '/episode/:id'])
 
 /**
  * 仅 src-shell.html + main.tsx 使用本表。
@@ -38,6 +39,7 @@ export const routeElements: Record<string, ComponentType> = {
   '/patients': PatientsListPage,
   '/patient/:id': PatientDetailPage,
   '/register': PatientRegisterPage,
+  '/episode/:id': EmergencyEventDetailPage,
   // 会诊室走定制页：在后端数据面板之上增加远程会诊入会入口
   '/room/:token': ConsultRoomPage,
   ...legacyByPath,

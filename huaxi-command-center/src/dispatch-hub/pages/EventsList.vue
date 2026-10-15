@@ -75,6 +75,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 const PAGE_SIZE = 15
 
+/** 列表行无 patient_name 时，按 patient_id 调 /patients/{id} 解析出的姓名缓存 */
+const patientNames = ref<Record<string, string>>({})
+
 const events = ref<EmergencyEventRow[]>([])
 const total = ref(0)
 const lastPage = ref(1)
@@ -118,19 +121,24 @@ function patientBizId(ev: EmergencyEventRow) {
   return id
 }
 
+function resolvedName(ev: EmergencyEventRow) {
+  const biz = patientBizId(ev)
+  return (biz && patientNames.value[biz]) || ''
+}
+
 function patientPrimary(ev: EmergencyEventRow) {
   if (isTempPatient(ev)) {
     return ev.temp_summary || TEMP_GENDER_LABELS[ev.temp_gender || ''] || '临时患者'
   }
   if (ev.patient_name) return ev.patient_name
   if (ev.patient?.name) return ev.patient.name
-  return patientBizId(ev) || '已登记患者'
+  return resolvedName(ev) || patientBizId(ev) || '已登记患者'
 }
 
 function patientSecondary(ev: EmergencyEventRow) {
   if (isTempPatient(ev)) return '临时 · 待登记'
   const biz = patientBizId(ev)
-  const name = ev.patient_name || ev.patient?.name
+  const name = ev.patient_name || ev.patient?.name || resolvedName(ev)
   if (name && biz) return biz
   return biz || ''
 }
@@ -143,6 +151,31 @@ function statusTone(text: string) {
   if (/进行|现场|途中/.test(text)) return 'dh-status--warn'
   if (/关闭/.test(text)) return 'dh-status--muted'
   return 'dh-status--ok'
+}
+
+/** 列表行缺 patient_name 时按 patient_id 逐个解析（结果缓存，换页不重复请求） */
+async function resolvePatientNames(rows: EmergencyEventRow[]) {
+  const ids = [
+    ...new Set(
+      rows
+        .filter((r) => !isTempPatient(r) && !r.patient_name && !r.patient?.name)
+        .map((r) => patientBizId(r))
+        .filter((pid) => pid && !(pid in patientNames.value)),
+    ),
+  ]
+  await Promise.all(
+    ids.map(async (pid) => {
+      try {
+        // hxBackend.get 已拆 {code,data} 信封，返回的即患者对象本身
+        const res = await window.hxBackend!.get<{ name?: string | null }>(
+          `/patients/${encodeURIComponent(pid)}`,
+        )
+        patientNames.value = { ...patientNames.value, [pid]: res?.name || '' }
+      } catch {
+        patientNames.value = { ...patientNames.value, [pid]: '' }
+      }
+    }),
+  )
 }
 
 async function fetchPage() {
@@ -169,6 +202,8 @@ async function fetchPage() {
     lastPage.value = Number(payload?.meta?.last_page ?? 1) || 1
     if (page.value > lastPage.value) page.value = lastPage.value
     updated.value = formatClock(new Date().toISOString())
+    // 列表行不携带姓名：后台异步按 patient_id 解析，不阻塞表格渲染
+    void resolvePatientNames(rows)
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
     events.value = []
@@ -224,7 +259,6 @@ onMounted(fetchPage)
     <section class="dh-page-head">
       <div>
         <h2 class="dh-h2">事件列表</h2>
-        <p class="dh-lead">120 接警急救事件 · 数据来自 <code>GET /v1/emergency-events</code>。</p>
       </div>
       <p class="dh-stats">
         共 {{ total }} 条 · 本页进行中 {{ activeOnPage }} · 更新 {{ updated || '—' }}
