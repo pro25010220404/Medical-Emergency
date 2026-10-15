@@ -79,11 +79,11 @@ export const enhanceScripts = [
   { src: '/assets/enhance/warning-messages-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/device-binding-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/device-bind-modal-enhance.js?v=3', defer: true },
-  { src: '/assets/enhance/care-link-enhance.js?v=3', defer: true },
+  { src: '/assets/enhance/care-link-enhance.js?v=5', defer: true },
   { src: '/assets/enhance/qc-sla-enhance.js', defer: true },
   { src: '/assets/enhance/qc-task-sla-enhance.js', defer: true },
   { src: '/assets/enhance/video-placeholder-enhance.js?v=1', defer: true },
-  { src: '/assets/enhance/bed-page-layout-enhance.js?v=10', defer: true },
+  // 单床页已由 vendor bundle 直连后端渲染，bed-page-layout-enhance 已停用
   { src: '/assets/enhance/bed-video-fill-enhance.js?v=3', defer: true },
   { src: '/assets/enhance/critical-bed-summary-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/ward-video-enhance.js?v=3', defer: true },

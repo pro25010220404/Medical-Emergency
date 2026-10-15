@@ -238,25 +238,9 @@
     }
 
     loadIndex().then((idx) => {
-      const bind = findBind()
-
       if (p.startsWith('/bed/') && document.querySelector('.single-bed')) {
-        if (document.querySelector('.single-bed.hx-bed-layout')) {
-          document.getElementById('hx-dock-bed')?.remove()
-          return
-        }
-        const host =
-          document.querySelector('.single-bed .hx-bed-p1-left') ||
-          document.querySelector('.single-bed aside') ||
-          document.querySelector('.single-bed')
-        const bedId = decodeURIComponent((p.match(/^\/bed\/([^/]+)/) || [])[1] || '')
-        const html = bind
-          ? stripHtml(bind, 'bed')
-          : `<div class="hx-strip">
-              <a class="hx-back" href="/#/beds">返回科室床位</a>
-              <a href="/#/devices?bed=${encodeURIComponent(bedId)}">床旁设备</a>
-            </div>`
-        mount(host, 'hx-dock-bed', html)
+        // 单床页已由后端接口直渲（vendor bundle hfe），不再注入 scenario 演示数据工具条
+        document.getElementById('hx-dock-bed')?.remove()
         return
       }
 

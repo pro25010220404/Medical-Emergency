@@ -140,6 +140,7 @@ Route::prefix('v1')->group(function () {
         Route::get('messages/todos', [MessageController::class, 'todos']);
 
         // 2.2 / 2.4 床位监控（02 §3.1~3.7）静态段必须先于 {id} 注册
+        Route::get('beds', [BedController::class, 'index']);
         Route::get('beds/by-dept', [BedController::class, 'byDept']);
         Route::get('beds/overview', [BedController::class, 'overview']);
         Route::get('beds/reserved', [BedController::class, 'reserved']);
