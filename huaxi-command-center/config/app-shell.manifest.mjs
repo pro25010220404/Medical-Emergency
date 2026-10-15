@@ -47,7 +47,7 @@ export const reactEntry = {
 export const mapScripts = [
   { src: '/assets/enhance/map-threemaps-enhance.js', defer: true },
   { src: '/assets/enhance/map-light-3d-enhance.js', defer: true },
-  { src: '/assets/enhance/map-hospital-glb-enhance.js?v=31', type: 'module' },
+  { src: '/assets/enhance/map-hospital-glb-enhance.js?v=33', type: 'module' },
   { src: '/assets/backend/app-integrated-nav.js?v=3' },
   { src: '/assets/enhance/monitoring-off-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/dispatch-hub-bridge.js?v=6', defer: true },
