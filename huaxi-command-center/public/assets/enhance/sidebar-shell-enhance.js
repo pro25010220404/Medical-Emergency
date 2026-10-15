@@ -8,6 +8,7 @@
     links: [
       ['/', '县域指挥概览'],
       ['/map', '协作三维地图'],
+      ['/gis-command.html', 'GIS 大屏'],
     ],
   }
 
@@ -92,6 +93,7 @@
   }
 
   function hrefToHash(link) {
+    if (/\.html(?:$|[?#])/.test(link)) return link
     return `#${link.startsWith('/') ? link : `/${link}`}`
   }
 
@@ -322,8 +324,8 @@
   }
 
   function buildMenu(menu) {
-    if (menu.dataset.built === '10') return
-    menu.dataset.built = '10'
+    if (menu.dataset.built === '11') return
+    menu.dataset.built = '11'
     menu.innerHTML = ''
 
     GROUPS.forEach((group, index) => {

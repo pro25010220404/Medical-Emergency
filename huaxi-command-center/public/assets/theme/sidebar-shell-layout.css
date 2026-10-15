@@ -1343,7 +1343,7 @@ body.hx-sidebar-shell .app-shell.hx-sidebar-ready main.department-overview.scree
   grid-column: 1 !important;
   grid-row: 2 !important;
   display: grid !important;
-  grid-template-columns: 228px minmax(0, 1fr) 268px !important;
+  grid-template-columns: 260px minmax(0, 1fr) 268px !important;
   grid-template-rows: minmax(0, 1fr) !important;
   gap: 10px !important;
   padding: 8px 10px !important;
@@ -1368,8 +1368,7 @@ body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type {
   display: flex !important;
   flex-direction: column !important;
   gap: 8px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  overflow: hidden !important;
   align-items: stretch !important;
 }
 
@@ -1398,8 +1397,9 @@ body.hx-sidebar-shell main.department-overview.screen > section {
   flex-direction: column !important;
   gap: 10px !important;
   min-width: 0 !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
 }
 
 body.hx-sidebar-shell main.department-overview.screen .department-totals {
@@ -1407,31 +1407,123 @@ body.hx-sidebar-shell main.department-overview.screen .department-totals {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px !important;
-  padding: 10px 12px !important;
+  padding: 0 !important;
   margin: 0 !important;
-  background: #fff !important;
-  border: 1px solid #e2e8f0 !important;
-  border-radius: 10px !important;
-  border-bottom: 1px solid #e2e8f0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 body.hx-sidebar-shell main.department-overview.screen .department-matrix {
   flex: 0 0 auto !important;
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px !important;
+  margin: 0 !important;
 }
 
 body.hx-sidebar-shell main.department-overview.screen .department-matrix > a {
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  column-gap: 8px !important;
+  align-items: start !important;
   border-radius: 10px !important;
   border: 1px solid #e2e8f0 !important;
   padding: 10px !important;
+  min-height: 78px !important;
+  background: #fff !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix > a > div {
+  min-width: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix h3 {
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #0f172a !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix small,
+body.hx-sidebar-shell main.department-overview.screen .department-matrix p {
+  display: block !important;
+  margin: 2px 0 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin: 0 0 8px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts span {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 6px 2px !important;
+  border-radius: 8px !important;
+  background: #f8fafc !important;
+  color: #64748b !important;
+  font-size: 11px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts b {
+  order: -1 !important;
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+  color: #0f172a !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .compact-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .compact-table td {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel {
+  flex: 1 1 0 !important;
   min-height: 0 !important;
+  max-height: none !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  padding: 10px 12px 8px !important;
+  overflow: auto !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel th,
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel td {
+  padding: 6px 8px !important;
+  text-align: left !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
 body.hx-sidebar-shell main.department-overview.screen > section > .panel {
-  flex: 1 1 auto !important;
-  min-height: 120px !important;
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
   display: flex !important;
   flex-direction: column !important;
   background: #fff !important;
@@ -1476,19 +1568,26 @@ body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen .pa
 
 body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:nth-child(2) {
   flex: 0 0 auto !important;
-  max-height: 132px !important;
+  max-height: none !important;
 }
 
 body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:nth-child(2) .panel-body {
-  padding: 6px 10px !important;
-  font-size: 11px !important;
-  line-height: 1.35 !important;
+  padding: 8px 12px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
   overflow: hidden !important;
 }
 
 body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:first-child {
   flex: 1 1 auto !important;
-  min-height: 200px !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type .panel:first-child .panel-body {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f8fafc !important;
 }
 
 body.hx-sidebar-shell main.department-overview.screen .panel-title {
