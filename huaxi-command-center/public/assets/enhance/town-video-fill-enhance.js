@@ -8,9 +8,7 @@
  * 视频从 v03 起（v01/v02 已用于「重症监控」Canvas 平面图两张床），
  * 第 N 个终端对应 v(3+N)。若仅两个终端，则为 v03、v04。
  *
- * 触发策略（与 bed-video-fill 一致，应对刷新/路由切换后 React 异步渲染）：
- *  - 立即执行一次 + 持续轮询 fillOnce（幂等，已注入则跳过）
- *  - MutationObserver 观察 document.body，捕获 React 渲染/重渲染
+ * 只轮询填充，不监听整页变化，避免和 React 重渲染互相触发把页面卡死。
  */
 ;(function () {
   const START = 3
@@ -45,11 +43,5 @@
 
   fillOnce()
   setInterval(fillOnce, 1500)
-
-  const mo = new MutationObserver(() => fillOnce())
-  function observe() {
-    mo.observe(document.body, { childList: true, subtree: true })
-  }
-  if (document.body) observe()
-  else document.addEventListener('DOMContentLoaded', observe, { once: true })
+  window.addEventListener('hashchange', () => setTimeout(fillOnce, 200))
 })()

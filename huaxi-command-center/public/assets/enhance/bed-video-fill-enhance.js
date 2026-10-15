@@ -6,17 +6,29 @@
  * 按床位顺序循环分配 public/media/v01.mp4 … v11.mp4 模拟实时监控画面。
  * 有患者体征的床显示 `.bed-mini-monitor`（无 video-pane），不受影响。
  *
- * 触发策略（不依赖 hxEnhance / hashchange，应对刷新直接进 #/critical）：
- *  - 立即执行一次 + 持续轮询 fillOnce（幂等，已注入则跳过）
- *  - MutationObserver 观察 document.body，捕获 React 异步渲染/重渲染
+ * 只轮询填充。不要用 MutationObserver 盯整页：往 React 床位里插 video 会触发重渲染，再插一次，页面会卡死。
  */
 ;(function () {
   const VIDEO_COUNT = 11
   const pad = (n) => (n < 10 ? '0' : '') + n
+  let filling = false
+
+  function onCriticalBeds() {
+    const raw = location.hash.replace(/^#/, '')
+    const path = (raw.split('?')[0] || '/').replace(/\/$/, '') || '/'
+    if (path !== '/critical') return false
+    const q = raw.includes('?') ? raw.slice(raw.indexOf('?') + 1) : ''
+    const query = new URLSearchParams(q)
+    if (query.get('view') === 'wards' || query.get('mode') === 'town') return false
+    return true
+  }
 
   function fillOnce() {
+    if (filling || !onCriticalBeds()) return
     const grid = document.querySelector('.critical-grid')
     if (!grid) return
+    filling = true
+    try {
     grid.querySelectorAll('.critical-bed').forEach((bed, idx) => {
       const pane = bed.querySelector('.video-pane')
       if (!pane || pane.querySelector('video')) return
@@ -40,24 +52,12 @@
         sig.classList.add('online')
       }
     })
+    } finally {
+      filling = false
+    }
   }
 
   fillOnce()
   setInterval(fillOnce, 1500)
-
-  const mo = new MutationObserver(() => fillOnce())
-  function observe() {
-    mo.observe(document.body, { childList: true, subtree: true })
-  }
-  if (document.body) observe()
-  else document.addEventListener('DOMContentLoaded', observe, { once: true })
-
-  // 若存在 hxEnhance 也挂上，作为额外触发点；失败不影响主流程
-  try {
-    if (typeof window.hxEnhance === 'function') {
-      window.hxEnhance(fillOnce, { wait: 250, afterNav: 100 })
-    }
-  } catch (e) {
-    /* ignore */
-  }
+  window.addEventListener('hashchange', () => setTimeout(fillOnce, 200))
 })()

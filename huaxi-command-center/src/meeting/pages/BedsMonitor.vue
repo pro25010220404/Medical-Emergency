@@ -8,15 +8,11 @@ const depts = ref<Dept[]>([])
 const updated = ref('')
 
 async function load() {
-  const data = await fetch('/api/beds-by-dept.json', { cache: 'no-store' }).then((r) => r.json())
+  const data = await window.hxBackend!.get<{ updatedAt: string; hospitalId: string; departments: Dept[] }>(
+    '/beds/by-dept',
+  )
   updated.value = data.updatedAt
-  depts.value = (data.departments as Dept[]).map((d) => {
-    if (Math.random() > 0.7) {
-      const delta = Math.random() > 0.5 ? 1 : -1
-      return { ...d, occupied: Math.max(0, Math.min(d.total, d.occupied + delta)), free: Math.max(0, d.free - delta) }
-    }
-    return d
-  })
+  depts.value = data.departments
 }
 
 let stop: (() => void) | null = null
