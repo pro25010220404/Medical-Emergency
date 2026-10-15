@@ -23,8 +23,11 @@ type EmergencyEventRow = {
   triage_level?: string | null
   target_dept_name?: string | null
   patient_id?: string | null
+  patient_name?: string | null
   patient_mode?: string | null
+  temp_gender?: string | null
   temp_summary?: string | null
+  patient?: { patientId?: string; name?: string; genderLabel?: string; age?: number } | null
   risk_level?: string | null
   event_stage?: string | null
   event_status?: string | null
@@ -95,11 +98,45 @@ function orgName(ev: EmergencyEventRow) {
   return o?.shortName || o?.name || '—'
 }
 
-function patientHint(ev: EmergencyEventRow) {
-  if (ev.patient_id) return ev.patient_id
-  if (ev.temp_summary) return ev.temp_summary
-  if (ev.patient_mode === 'PATIENT_MODE_TEMP') return '临时患者'
-  return '—'
+const TEMP_GENDER_LABELS: Record<string, string> = {
+  GENDER_MALE: '男',
+  GENDER_FEMALE: '女',
+  GENDER_UNKNOWN: '未知',
+}
+
+function isTempPatient(ev: EmergencyEventRow) {
+  if (ev.patient_mode === 'PATIENT_MODE_TEMP') return true
+  if (ev.patient_mode === 'PATIENT_MODE_REGISTERED') return false
+  return !patientBizId(ev) && !(ev.patient_name || ev.patient?.name)
+}
+
+function patientBizId(ev: EmergencyEventRow) {
+  const fromNested = ev.patient?.patientId
+  const fromRow = ev.patient_id != null ? String(ev.patient_id) : ''
+  const id = (fromNested || fromRow).trim()
+  if (!id || id === 'null' || id === 'undefined') return ''
+  return id
+}
+
+function patientPrimary(ev: EmergencyEventRow) {
+  if (isTempPatient(ev)) {
+    return ev.temp_summary || TEMP_GENDER_LABELS[ev.temp_gender || ''] || '临时患者'
+  }
+  if (ev.patient_name) return ev.patient_name
+  if (ev.patient?.name) return ev.patient.name
+  return patientBizId(ev) || '已登记患者'
+}
+
+function patientSecondary(ev: EmergencyEventRow) {
+  if (isTempPatient(ev)) return '临时 · 待登记'
+  const biz = patientBizId(ev)
+  const name = ev.patient_name || ev.patient?.name
+  if (name && biz) return biz
+  return biz || ''
+}
+
+function canLinkPatient(ev: EmergencyEventRow) {
+  return !isTempPatient(ev) && !!patientBizId(ev)
 }
 
 function statusTone(text: string) {
@@ -174,8 +211,9 @@ function registerHref(ev: EmergencyEventRow) {
 }
 
 function patientAppHref(ev: EmergencyEventRow) {
-  if (!ev.patient_id) return ''
-  return `/app.html#/patient/${encodeURIComponent(ev.patient_id)}`
+  const id = patientBizId(ev)
+  if (!id) return ''
+  return `/app.html#/patient/${encodeURIComponent(id)}`
 }
 
 onMounted(fetchPage)
@@ -260,9 +298,17 @@ onMounted(fetchPage)
             <td>{{ label(RISK_LABELS, ev.risk_level) }}</td>
             <td>{{ ev.occurred_at ? formatClock(ev.occurred_at) : '—' }}</td>
             <td>{{ ev.eta ? formatClock(ev.eta) : '—' }}</td>
-            <td>
-              <a v-if="ev.patient_id" :href="patientAppHref(ev)" target="_top">{{ patientHint(ev) }}</a>
-              <span v-else>{{ patientHint(ev) }}</span>
+            <td class="dh-patient-cell">
+              <template v-if="canLinkPatient(ev)">
+                <a :href="patientAppHref(ev)" target="_top" class="dh-patient-link">
+                  <strong>{{ patientPrimary(ev) }}</strong>
+                </a>
+                <small v-if="patientSecondary(ev)">{{ patientSecondary(ev) }}</small>
+              </template>
+              <template v-else>
+                <span class="dh-patient-temp">{{ patientPrimary(ev) }}</span>
+                <small>{{ patientSecondary(ev) }}</small>
+              </template>
             </td>
             <td class="dh-row-actions">
               <a :href="liveHref(ev)">出警处理</a>

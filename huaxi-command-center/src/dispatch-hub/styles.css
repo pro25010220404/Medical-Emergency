@@ -493,6 +493,22 @@ body {
 
 .dh-table small {
   color: #94a3b8;
+  display: block;
+  margin-top: 2px;
+}
+
+.dh-patient-cell .dh-patient-link {
+  color: #1e4b7b;
+  text-decoration: none;
+}
+
+.dh-patient-cell .dh-patient-link:hover {
+  text-decoration: underline;
+}
+
+.dh-patient-cell .dh-patient-temp {
+  color: #334155;
+  font-weight: 500;
 }
 
 .dh-table .col-task {
