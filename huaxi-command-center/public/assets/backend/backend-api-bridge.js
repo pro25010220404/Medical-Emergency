@@ -156,6 +156,29 @@
     location.replace('/index.html?next=' + encodeURIComponent(next || '/app.html'))
   }
 
+  function isDemoOnly() {
+    try {
+      if (localStorage.getItem('huaxi-demo-only') === '1') return true
+    } catch {
+      /* ignore */
+    }
+    return false
+  }
+
+  function savedLoginCredentials() {
+    let username = 'admin'
+    let password = '123456'
+    try {
+      const u = localStorage.getItem('huaxi-api-user')?.trim()
+      const p = localStorage.getItem('huaxi-api-pass')
+      if (u) username = u
+      if (p) password = p
+    } catch {
+      /* ignore */
+    }
+    return { username, password }
+  }
+
   /** 仅校验已有 JWT（不在此函数内 POST login） */
   async function ensureAuth(force) {
     if (bridgeOff()) return false
@@ -176,22 +199,71 @@
       /* ignore */
     }
 
+    let meStatus = 0
+    let networkError = false
     try {
       const me = await nativeFetch(ME_URL(), {
         headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
       })
+      meStatus = me.status
       if (me.ok) {
         tokenVerified = true
         authBlockedUntil = 0
+        window.__HX_AUTH_LAST_ERROR__ = ''
         return true
       }
-    } catch {
-      /* ignore */
+    } catch (e) {
+      networkError = true
+      window.__HX_AUTH_LAST_ERROR__ = String(e?.message || e || '网络错误')
+    }
+
+    /** 反代未配 / 502 等：保留 token，避免误清后只能进演示模式 */
+    if (networkError || meStatus === 404 || meStatus === 502 || meStatus === 503 || meStatus === 504) {
+      return false
+    }
+
+    if (meStatus === 401 || meStatus === 403) {
+      clearToken()
+      redirectToLoginPage()
+      return false
     }
 
     clearToken()
     redirectToLoginPage()
     return false
+  }
+
+  /**
+   * 列表页等：非演示模式下尽量拿到 JWT（已有 token 或静默 POST login）
+   * @returns {Promise<{ ok: boolean, reason?: string }>}
+   */
+  async function ensureSession() {
+    if (bridgeOff()) return { ok: false, reason: 'bridge-off' }
+    if (mockAllowed()) return { ok: false, reason: 'mock' }
+    if (isDemoOnly()) return { ok: false, reason: 'demo-only' }
+    if (authBlocked()) return { ok: false, reason: 'auth-cooldown' }
+
+    loadToken()
+    if (token && (await ensureAuth(false))) return { ok: true }
+
+    if (loginPromise) {
+      try {
+        await loginPromise
+        return { ok: true }
+      } catch (e) {
+        return { ok: false, reason: 'login-failed', error: String(e?.message || e) }
+      }
+    }
+
+    try {
+      const cred = savedLoginCredentials()
+      await postLogin(cred)
+      return { ok: true }
+    } catch (e) {
+      authBlockedUntil = Date.now() + AUTH_COOLDOWN_MS
+      window.__HX_AUTH_LAST_ERROR__ = String(e?.message || e)
+      return { ok: false, reason: 'login-failed', error: window.__HX_AUTH_LAST_ERROR__ }
+    }
   }
 
   async function login(username, password) {
@@ -480,6 +552,7 @@
     scenarioCacheAt = 0
   }
 
+  window.invalidateScenarioCache = invalidateScenarioCache
   window.addEventListener('hashchange', invalidateScenarioCache)
 
   async function hydrateScenarioInner() {
@@ -673,6 +746,8 @@
     base: apiV1(),
     apiRoot: apiBase,
     ensureAuth,
+    ensureSession,
+    isDemoOnly,
     unwrap: unwrapEnvelope,
     get: getJson,
     post(path, body) {

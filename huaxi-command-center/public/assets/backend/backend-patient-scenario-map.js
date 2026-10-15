@@ -2,6 +2,24 @@
  * Laravel GET /patients list 项 → React scenario.state.patients（#/patients 急救事件表）
  */
 ;(function () {
+  /** 后端 org_code → scenario 机构 slug（yt/ln  lookup） */
+  const ORG_SLUG = {
+    WY001: 'weiyuan',
+    LJ001: 'lianjie',
+    XC001: 'xinchang',
+    HX001: 'huaxi',
+  }
+
+  /** 科室编码 → scenario 科室 slug */
+  const DEPT_SLUG = {
+    EMERGENCY: 'emergency',
+    ICU: 'icu',
+    CARDIO: 'cardio',
+    NEURO: 'neuro',
+    RESP: 'resp',
+    GEN: 'general',
+  }
+
   function mapPatientFromApi(p) {
     if (!p || typeof p !== 'object') return null
     const pid = p.patientId ?? p.patient_id ?? p.patient_code ?? p.id
@@ -33,17 +51,28 @@
 
     const name = String(p.name ?? p.real_name ?? p.patientName ?? '').trim()
 
+    const rawOrg = String(p.institutionId ?? p.institution_id ?? 'weiyuan')
+    const rawDept = String(p.departmentId ?? p.department_id ?? 'emergency')
+    const institutionId = ORG_SLUG[rawOrg] || rawOrg.toLowerCase()
+    const departmentId = DEPT_SLUG[rawDept] || rawDept.toLowerCase()
+
     return {
       id,
+      patientId: id,
       name: name || '未命名患者',
       gender,
       age: p.age ?? 0,
-      institutionId: p.institutionId ?? p.institution_id ?? 'weiyuan',
-      departmentId: p.departmentId ?? p.department_id ?? 'emergency',
-      assignedTo: Array.isArray(p.assignedTo) ? p.assignedTo : [],
+      institutionId,
+      institutionName: p.institutionName ?? p.institution_name ?? '',
+      departmentId,
+      departmentName: p.departmentName ?? p.department_name ?? '',
+      bedLabel: p.bedLabel ?? p.bed_label ?? '',
       stage: p.stage ?? 'admitted',
+      stageLabel: p.stageLabel ?? p.stage_label ?? '',
+      sourceLabel: p.sourceLabel ?? p.source_label ?? '',
+      assignedTo: Array.isArray(p.assignedTo) ? p.assignedTo : [],
       symptoms,
-      notes: p.notes || '后端 /patients',
+      notes: p.notes || cc || '后端 /patients',
       createdAt: p.createdAt ?? p.created_at ?? new Date().toISOString(),
       updatedAt: p.updatedAt ?? p.updated_at ?? new Date().toISOString(),
       source,

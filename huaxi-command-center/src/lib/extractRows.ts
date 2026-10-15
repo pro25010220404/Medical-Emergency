@@ -102,6 +102,7 @@ export function labelForApiPath(path: string): string {
     alerts: '告警',
     streams: '监控流',
     patients: '患者',
+    stages: '病程阶段',
     overview: '床位总览',
     distribution: '床位分布',
     reserved: '预留床位',

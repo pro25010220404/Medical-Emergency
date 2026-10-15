@@ -67,7 +67,8 @@ export function normalizePatient(raw: unknown): PatientRecord {
     id: code ?? pickString(o, ['id']) ?? '',
     patient_code: code,
     real_name: pickString(o, ['name', 'real_name']),
-    gender: pickString(o, ['gender', 'genderLabel']),
+    gender: pickString(o, ['gender']),
+    gender_label: pickString(o, ['genderLabel', 'gender_label']),
     birth_date: pickString(o, ['birthDate', 'birth_date']) ?? null,
     age: pickNumber(o, ['age']),
     id_card: pickString(o, ['idCard', 'id_card']) ?? null,
@@ -76,7 +77,24 @@ export function normalizePatient(raw: unknown): PatientRecord {
     medical_history: pickString(o, ['medicalHistory', 'medical_history']) ?? null,
     allergy_history: pickString(o, ['allergyHistory', 'allergy_history']) ?? null,
     created_at: pickString(o, ['createdAt', 'created_at']) ?? null,
+    stage: pickString(o, ['stage']) ?? null,
+    stage_label: pickString(o, ['stageLabel', 'stage_label']) ?? null,
+    institution_id: pickString(o, ['institutionId', 'institution_id']) ?? null,
+    institution_name: pickString(o, ['institutionName', 'institution_name']) ?? null,
+    department_id: pickString(o, ['departmentId', 'department_id']) ?? null,
+    department_name: pickString(o, ['departmentName', 'department_name']) ?? null,
+    bed_id: pickString(o, ['bedId', 'bed_id']) ?? null,
+    bed_label: pickString(o, ['bedLabel', 'bed_label']) ?? null,
+    chief_complaint: pickString(o, ['chiefComplaint', 'chief_complaint']) ?? null,
+    source: pickString(o, ['source']) ?? null,
+    source_label: pickString(o, ['sourceLabel', 'source_label']) ?? null,
+    admitted_at: pickString(o, ['admittedAt', 'admitted_at']) ?? null,
   }
+}
+
+export function patientGenderDisplay(p: PatientRecord) {
+  if (p.gender_label) return p.gender_label
+  return genderLabel(p.gender)
 }
 
 export function patientDisplayName(p: PatientRecord) {
@@ -95,6 +113,13 @@ export function patientDetailFields(p: PatientRecord): { label: string; value: s
     { label: '住址', value: p.address ?? '—' },
     { label: '既往史', value: p.medical_history ?? '—' },
     { label: '过敏史', value: p.allergy_history ?? '—' },
+    { label: '阶段', value: p.stage_label ?? p.stage ?? '—' },
+    { label: '机构', value: p.institution_name ?? '—' },
+    { label: '科室', value: p.department_name ?? '—' },
+    { label: '床位', value: p.bed_label ?? '—' },
+    { label: '主诉', value: p.chief_complaint ?? '—' },
+    { label: '来源', value: p.source_label ?? p.source ?? '—' },
+    { label: '入院时间', value: formatPatientTime(p.admitted_at) },
     { label: '建档时间', value: formatPatientTime(p.created_at) },
   ]
 }

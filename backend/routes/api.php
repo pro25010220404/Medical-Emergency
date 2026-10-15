@@ -100,12 +100,19 @@ Route::prefix('v1')->group(function () {
         // 静态段必须先于 {sessionId} 注册
         Route::get('consultations/admission', [ConsultationController::class, 'admission']);
         Route::get('consultations/workspace', [ConsultationController::class, 'workspace']);
+        Route::get('consultations/summary', [ConsultationController::class, 'summary']);
         Route::get('consultations/doctors', [ConsultationController::class, 'doctors']);
         Route::get('consultations', [ConsultationController::class, 'index']);
         Route::post('consultations', [ConsultationController::class, 'store']);
-        Route::get('consultations/{sessionId}', [ConsultationController::class, 'show']);
-        Route::post('consultations/{sessionId}/accept', [ConsultationController::class, 'accept']);
+        Route::get('consultations/{sessionId}/members', [ConsultationController::class, 'members']);
+        Route::post('consultations/{sessionId}/members', [ConsultationController::class, 'addMember']);
         Route::get('consultations/{sessionId}/join-link', [ConsultationController::class, 'joinLink']);
+        Route::put('consultations/{sessionId}/claim', [ConsultationController::class, 'claim']);
+        Route::put('consultations/{sessionId}/status', [ConsultationController::class, 'updateStatus']);
+        Route::put('consultations/{sessionId}/assign', [ConsultationController::class, 'assign']);
+        Route::put('consultations/{sessionId}', [ConsultationController::class, 'update']);
+        Route::post('consultations/{sessionId}/accept', [ConsultationController::class, 'accept']);
+        Route::get('consultations/{sessionId}', [ConsultationController::class, 'show']);
 
         Route::get('rooms/{token}/materials', [ConsultRoomController::class, 'materials']);
         Route::post('rooms/{token}/opinions', [ConsultRoomController::class, 'opinions']);

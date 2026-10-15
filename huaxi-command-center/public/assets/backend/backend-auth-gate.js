@@ -6,16 +6,13 @@
   const isApp = /\/app\.html$/i.test(path)
   if (!isApp) return
 
-  function demoOnly() {
+  function clearLegacyDemoFlags() {
     try {
-      if (localStorage.getItem('huaxi-demo-only') === '1') return true
-      if (localStorage.getItem('huaxi-api-mock') === '1') return true
-      if (new URLSearchParams(location.search).get('api') === 'mock') return true
-      if (new URLSearchParams(location.search).get('demo') === '1') return true
+      localStorage.removeItem('huaxi-demo-only')
+      localStorage.removeItem('huaxi-api-mock')
     } catch {
       /* ignore */
     }
-    return false
   }
 
   function hasToken() {
@@ -26,8 +23,12 @@
     }
   }
 
-  if (demoOnly() || hasToken()) return
+  if (!hasToken()) {
+    clearLegacyDemoFlags()
+    const next = '/app.html' + location.search + location.hash
+    location.replace('/index.html?next=' + encodeURIComponent(next))
+    return
+  }
 
-  const next = '/app.html' + location.search + location.hash
-  location.replace('/index.html?next=' + encodeURIComponent(next))
+  clearLegacyDemoFlags()
 })()

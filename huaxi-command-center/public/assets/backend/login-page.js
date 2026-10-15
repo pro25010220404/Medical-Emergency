@@ -4,6 +4,17 @@
 ;(function () {
   const FRESH_TOKEN_KEY = 'huaxi-jwt-just-logged-in'
 
+  function clearLegacyDemoFlags() {
+    try {
+      localStorage.removeItem('huaxi-demo-only')
+      localStorage.removeItem('huaxi-api-mock')
+    } catch {
+      /* ignore */
+    }
+  }
+
+  clearLegacyDemoFlags()
+
   function nextUrl() {
     try {
       const q = new URLSearchParams(location.search).get('next')
@@ -64,21 +75,6 @@
     if (el) el.textContent = msg || ''
   }
 
-  function enterDemoOnly() {
-    try {
-      localStorage.setItem('huaxi-demo-only', '1')
-      localStorage.setItem('huaxi-api-mock', '1')
-      localStorage.removeItem('huaxi-jwt-token')
-      sessionStorage.removeItem('huaxi-jwt-token')
-      sessionStorage.removeItem(FRESH_TOKEN_KEY)
-    } catch {
-      /* ignore */
-    }
-    showError('')
-    setStatus('演示模式：使用本地数据，不请求远程 API')
-    location.replace(nextUrl())
-  }
-
   async function postLogin(username, password) {
     if (!window.hxBackend?.loginWithPassword) {
       throw new Error('登录模块未加载，请刷新页面')
@@ -103,7 +99,6 @@
     if (userInput && !userInput.value.trim()) userInput.value = savedUsername()
 
     document.getElementById('hx-login-fill-demo')?.addEventListener('click', () => fillDemoCredentials(form))
-    document.getElementById('hx-login-demo-only')?.addEventListener('click', () => enterDemoOnly())
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
@@ -118,7 +113,7 @@
         if (remember) localStorage.setItem('huaxi-api-user', username)
         else localStorage.removeItem('huaxi-api-user')
         localStorage.removeItem('huaxi-api-pass')
-        localStorage.removeItem('huaxi-demo-only')
+        clearLegacyDemoFlags()
       } catch {
         /* ignore */
       }
@@ -132,7 +127,7 @@
         console.error('[hx-login]', err)
         let msg = String(err.message || err).replace(/^Error:\s*/, '') || '登录失败'
         if (/HTTP\s*404|无法连接/i.test(msg)) {
-          msg += '。远程 API 未部署或地址不对，请点下方「演示模式进入」。'
+          msg += '。请确认服务器已配置 Nginx /backend-api 反代，或联系管理员检查 API 地址。'
         }
         showError(msg)
         setStatus('')
