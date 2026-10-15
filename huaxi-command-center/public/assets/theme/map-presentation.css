@@ -896,9 +896,9 @@ body.hx-page-map-only .hx-glb-map-host--full .hx-glb-map-overlay canvas {
 }
 
 /* 鍏ㄥ睆鍗忎綔鍦板浘锛氳鏍?渚ф爮涓庨椤靛湴鍥句竴鑷达紝椤舵爮鑿滃崟涓嬫尓涓€鐐?*/
-body.hx-page-map-only .dashboard-center .hx-map-region-bar {
-  top: 48px;
-  left: 52px;
+body.hx-page-map-only .dashboard-center .hx-map-region-bar,
+body.hx-page-map-only .dashboard-center .region-switch {
+  display: none !important;
 }
 
 body.hx-page-map-only .dashboard-center .map-legend {
