@@ -53,8 +53,8 @@ export const mapScripts = [
   { src: '/assets/enhance/dispatch-hub-bridge.js?v=6', defer: true },
   { src: '/assets/enhance/nav-ia-enhance.js?v=14', defer: true },
   { src: '/assets/enhance/dispatch-subnav-parity-enhance.js?v=2', defer: true },
-  { src: '/assets/enhance/sidebar-shell-enhance.js?v=36', defer: true },
-  { src: '/assets/enhance/breadcrumb-nav-enhance.js?v=14', defer: true },
+  { src: '/assets/enhance/sidebar-shell-enhance.js?v=37', defer: true },
+  { src: '/assets/enhance/breadcrumb-nav-enhance.js?v=15', defer: true },
   { src: '/assets/enhance/command-map-page-enhance.js?v=14', defer: true },
 ]
 

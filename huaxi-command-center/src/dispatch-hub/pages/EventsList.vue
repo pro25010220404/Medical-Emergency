@@ -1,66 +1,111 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { buildHash, etaText, formatClock, statusTone, vehicleLabel } from '../context'
+import { buildHash, formatClock } from '../context'
 
-/** 后端 GET /dispatch/events 列表项（camelCase 契约，见 backend DispatchEventService::item） */
-type BackendEvent = {
-  eventId: string
-  task120Id: string
-  level?: string
+/** GET /api/v1/emergency-events 列表项（snake_case，Laravel 分页 Style B） */
+type AcceptOrg = {
+  orgId?: string
+  name?: string
+  shortName?: string
   levelLabel?: string
-  chiefComplaint?: string
-  pickupAddress?: string
-  destination?: string
-  vehicleId?: string | null
-  vehiclePlate?: string | null
-  status?: string
-  statusLabel?: string
-  startedAt?: string | null
-  etaHospitalMinutes?: number | null
 }
 
-type BackendEventsPayload = {
-  updatedAt?: string
-  activeCount?: number
-  total?: number
-  list?: BackendEvent[]
-  pageNum?: number
-  pageSize?: number
+type EmergencyEventRow = {
+  id?: number
+  event_code?: string
+  event_source?: string
+  occurred_at?: string | null
+  eta?: string | null
+  scene_address?: string | null
+  scene_phone?: string | null
+  chief?: string | null
+  provisional_dx?: string | null
+  triage_level?: string | null
+  target_dept_name?: string | null
+  patient_id?: string | null
+  patient_mode?: string | null
+  temp_summary?: string | null
+  risk_level?: string | null
+  event_stage?: string | null
+  event_status?: string | null
+  accept_org?: AcceptOrg | null
+}
+
+type PaginatedEvents = {
+  data?: EmergencyEventRow[]
+  meta?: { total?: number; current_page?: number; last_page?: number; per_page?: number }
 }
 
 const STATUS_FILTERS = [
-  { value: '', label: '全部' },
-  { value: 'DISPATCHING', label: '出警中' },
-  { value: 'ON_SCENE', label: '现场处置' },
-  { value: 'RETURNING', label: '返院途中' },
+  { value: '', label: '全部', query: {} as Record<string, string | number> },
+  { value: 'active', label: '进行中', query: { active: 1 } },
+  { value: 'STAGE_SCENE', label: '现场处置', query: { event_stage: 'STAGE_SCENE' } },
+  { value: 'STAGE_ENROUTE', label: '转运途中', query: { event_stage: 'STAGE_ENROUTE' } },
 ] as const
 
-const FALLBACK_LEVEL_LABELS: Record<string, string> = {
-  CRITICAL: '重症',
-  ACUTE: '急症',
-  GENERAL: '一般',
+const TRIAGE_LABELS: Record<string, string> = {
+  TRIAGE_I: 'I级',
+  TRIAGE_II: 'II级',
+  TRIAGE_III: 'III级',
+  TRIAGE_IV: 'IV级',
+  TRIAGE_V: 'V级',
 }
 
-const PAGE_SIZE = 20
+const STAGE_LABELS: Record<string, string> = {
+  STAGE_CREATED: '已创建',
+  STAGE_SCENE: '现场',
+  STAGE_ENROUTE: '途中',
+  STAGE_ARRIVAL: '到院',
+  STAGE_CLOSED: '已关闭',
+}
 
-const events = ref<BackendEvent[]>([])
+const RISK_LABELS: Record<string, string> = {
+  RISK_HIGH: '高风险',
+  RISK_MEDIUM: '中风险',
+  RISK_LOW: '低风险',
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  EVENT_ACTIVE: '进行中',
+  EVENT_CLOSED: '已关闭',
+}
+
+const PAGE_SIZE = 15
+
+const events = ref<EmergencyEventRow[]>([])
 const total = ref(0)
-const activeCount = ref(0)
+const lastPage = ref(1)
 const updated = ref('')
 const page = ref(1)
 const status = ref<string>('')
 const loading = ref(false)
 const error = ref('')
 
-const totalPages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
+const activeOnPage = computed(
+  () => events.value.filter((e) => e.event_status === 'EVENT_ACTIVE').length,
+)
 
-function levelText(ev: BackendEvent) {
-  if (ev.levelLabel) return ev.levelLabel
-  return FALLBACK_LEVEL_LABELS[ev.level ?? ''] ?? ev.level ?? '—'
+function label(map: Record<string, string>, key?: string | null) {
+  if (!key) return '—'
+  return map[key] ?? key.replace(/^TRIAGE_|^STAGE_|^RISK_|^EVENT_/, '')
 }
 
-function statusText(ev: BackendEvent) {
-  return ev.statusLabel || ev.status || '—'
+function orgName(ev: EmergencyEventRow) {
+  const o = ev.accept_org
+  return o?.shortName || o?.name || '—'
+}
+
+function patientHint(ev: EmergencyEventRow) {
+  if (ev.patient_id) return ev.patient_id
+  if (ev.temp_summary) return ev.temp_summary
+  if (ev.patient_mode === 'PATIENT_MODE_TEMP') return '临时患者'
+  return '—'
+}
+
+function statusTone(text: string) {
+  if (/进行|现场|途中/.test(text)) return 'dh-status--warn'
+  if (/关闭/.test(text)) return 'dh-status--muted'
+  return 'dh-status--ok'
 }
 
 async function fetchPage() {
@@ -68,15 +113,25 @@ async function fetchPage() {
   error.value = ''
   try {
     if (!window.hxBackend?.enabled?.()) throw new Error('后端接口未连接，请检查登录状态')
-    await window.hxBackend.ensureAuth()
-    const query: Record<string, string | number> = { pageNum: page.value, pageSize: PAGE_SIZE }
-    if (status.value) query.status = status.value
-    const data = await window.hxBackend.get<BackendEventsPayload>('/dispatch/events', query)
-    events.value = Array.isArray(data?.list) ? data.list : []
-    total.value = Number(data?.total ?? events.value.length) || 0
-    activeCount.value = Number(data?.activeCount ?? 0) || 0
-    updated.value = data?.updatedAt ? formatClock(data.updatedAt) : formatClock(new Date().toISOString())
-    if (page.value > totalPages.value) page.value = totalPages.value
+    const authed = window.hxBackend.ensureSession
+      ? (await window.hxBackend.ensureSession()).ok
+      : await window.hxBackend.ensureAuth(false)
+    if (!authed) throw new Error('未登录或无法连接 API')
+
+    const filter = STATUS_FILTERS.find((f) => f.value === status.value) ?? STATUS_FILTERS[0]
+    const query: Record<string, string | number> = {
+      page: page.value,
+      per_page: PAGE_SIZE,
+      ...filter.query,
+    }
+
+    const payload = await window.hxBackend.get<PaginatedEvents>('/emergency-events', query)
+    const rows = Array.isArray(payload?.data) ? payload.data : []
+    events.value = rows
+    total.value = Number(payload?.meta?.total ?? rows.length) || 0
+    lastPage.value = Number(payload?.meta?.last_page ?? 1) || 1
+    if (page.value > lastPage.value) page.value = lastPage.value
+    updated.value = formatClock(new Date().toISOString())
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
     events.value = []
@@ -94,30 +149,33 @@ function pickStatus(value: string) {
 }
 
 function goPage(next: number) {
-  const target = Math.min(totalPages.value, Math.max(1, next))
+  const target = Math.min(lastPage.value, Math.max(1, next))
   if (target === page.value) return
   page.value = target
   void fetchPage()
 }
 
-function liveHref(ev: BackendEvent) {
+function liveHref(ev: EmergencyEventRow) {
+  const code = ev.event_code || String(ev.id ?? '')
   return buildHash('live', {
-    eventId: ev.eventId,
-    task120Id: ev.task120Id,
-    vehicleId: ev.vehicleId || '',
-    vehiclePlate: ev.vehiclePlate || '',
-    chiefComplaint: ev.chiefComplaint || '',
+    eventId: code,
+    task120Id: code,
+    chiefComplaint: ev.chief || '',
   })
 }
 
-function registerHref(ev: BackendEvent) {
+function registerHref(ev: EmergencyEventRow) {
+  const code = ev.event_code || String(ev.id ?? '')
   return buildHash('register', {
-    eventId: ev.eventId,
-    task120Id: ev.task120Id,
-    vehicleId: ev.vehicleId || '',
-    vehiclePlate: ev.vehiclePlate || '',
-    chiefComplaint: ev.chiefComplaint || '',
+    eventId: code,
+    task120Id: code,
+    chiefComplaint: ev.chief || '',
   })
+}
+
+function patientAppHref(ev: EmergencyEventRow) {
+  if (!ev.patient_id) return ''
+  return `/app.html#/patient/${encodeURIComponent(ev.patient_id)}`
 }
 
 onMounted(fetchPage)
@@ -128,10 +186,10 @@ onMounted(fetchPage)
     <section class="dh-page-head">
       <div>
         <h2 class="dh-h2">事件列表</h2>
-        <p class="dh-lead">120 接警急救事件 · 数据来自后端事件接口。</p>
+        <p class="dh-lead">120 接警急救事件 · 数据来自 <code>GET /v1/emergency-events</code>。</p>
       </div>
       <p class="dh-stats">
-        共 {{ total }} 条 · 处置中 {{ activeCount }} · 更新 {{ updated || '—' }}
+        共 {{ total }} 条 · 本页进行中 {{ activeOnPage }} · 更新 {{ updated || '—' }}
         <button class="dh-date-btn" type="button" :disabled="loading" @click="fetchPage">刷新</button>
       </p>
     </section>
@@ -156,36 +214,56 @@ onMounted(fetchPage)
       事件列表加载失败：{{ error }}
       <button class="dh-date-btn" type="button" @click="fetchPage">重试</button>
     </p>
-    <p v-else-if="!loading && !events.length" class="dh-day-empty">当日暂无急救事件记录。</p>
+    <p v-else-if="!loading && !events.length" class="dh-day-empty">暂无急救事件记录。</p>
 
     <section v-show="events.length" class="dh-panel dh-table-wrap">
       <table class="dh-table">
         <thead>
           <tr>
             <th>事件编号</th>
-            <th class="col-task">任务号</th>
-            <th>主诉</th>
-            <th>车辆</th>
-            <th>状态</th>
-            <th>出车时间</th>
+            <th>主诉 / 拟诊</th>
+            <th>现场地址</th>
+            <th>受理机构</th>
+            <th>分诊</th>
+            <th>阶段</th>
+            <th>风险</th>
+            <th>发生时间</th>
             <th>预计到院</th>
+            <th>患者</th>
             <th class="col-act">操作</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="ev in events" :key="ev.eventId || ev.task120Id">
-            <td><strong>{{ ev.eventId || '—' }}</strong></td>
+          <tr v-for="ev in events" :key="ev.event_code || ev.id">
             <td>
-              <strong>{{ ev.task120Id || '—' }}</strong><br />
-              <small>{{ levelText(ev) }} · {{ ev.pickupAddress || '—' }}</small>
+              <strong>{{ ev.event_code || '—' }}</strong>
+              <br />
+              <small>{{ label(STATUS_LABELS, ev.event_status) }}</small>
             </td>
-            <td>{{ ev.chiefComplaint || '—' }}</td>
-            <td>{{ vehicleLabel(ev.vehiclePlate) }}</td>
             <td>
-              <span class="dh-status" :class="statusTone(statusText(ev))">{{ statusText(ev) }}</span>
+              {{ ev.chief || '—' }}
+              <br v-if="ev.provisional_dx" />
+              <small v-if="ev.provisional_dx">{{ ev.provisional_dx }}</small>
             </td>
-            <td>{{ ev.startedAt ? formatClock(ev.startedAt) : '—' }}</td>
-            <td>{{ etaText(ev.etaHospitalMinutes) }}</td>
+            <td>{{ ev.scene_address || '—' }}</td>
+            <td>
+              {{ orgName(ev) }}
+              <br v-if="ev.target_dept_name" />
+              <small v-if="ev.target_dept_name">{{ ev.target_dept_name }}</small>
+            </td>
+            <td>{{ label(TRIAGE_LABELS, ev.triage_level) }}</td>
+            <td>
+              <span class="dh-status" :class="statusTone(label(STAGE_LABELS, ev.event_stage))">
+                {{ label(STAGE_LABELS, ev.event_stage) }}
+              </span>
+            </td>
+            <td>{{ label(RISK_LABELS, ev.risk_level) }}</td>
+            <td>{{ ev.occurred_at ? formatClock(ev.occurred_at) : '—' }}</td>
+            <td>{{ ev.eta ? formatClock(ev.eta) : '—' }}</td>
+            <td>
+              <a v-if="ev.patient_id" :href="patientAppHref(ev)" target="_top">{{ patientHint(ev) }}</a>
+              <span v-else>{{ patientHint(ev) }}</span>
+            </td>
             <td class="dh-row-actions">
               <a :href="liveHref(ev)">出警处理</a>
               <a :href="registerHref(ev)">登记</a>
@@ -199,11 +277,11 @@ onMounted(fetchPage)
       <button class="dh-date-btn" type="button" :disabled="loading || page <= 1" @click="goPage(page - 1)">
         上一页
       </button>
-      <span>第 {{ page }} / {{ totalPages }} 页</span>
+      <span>第 {{ page }} / {{ lastPage }} 页</span>
       <button
         class="dh-date-btn"
         type="button"
-        :disabled="loading || page >= totalPages"
+        :disabled="loading || page >= lastPage"
         @click="goPage(page + 1)"
       >
         下一页
