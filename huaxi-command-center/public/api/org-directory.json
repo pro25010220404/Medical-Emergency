@@ -1,15 +1,19 @@
 {
   "updatedAt": "2026-10-15T10:30:00+08:00",
   "tiers": [
-    { "id": "village", "label": "村 / 社区", "desc": "村卫生室、社区站 — 首诊、慢病、上转起点" },
-    { "id": "township", "label": "乡镇", "desc": "乡镇卫生院 — 医共体基层枢纽、远程会诊发起" },
-    { "id": "county", "label": "县级", "desc": "县级医院 — 县域转诊中心、危重症收治" },
-    { "id": "metro", "label": "市级及以上", "desc": "地市三甲、大学附属医院 — 会诊与专科接收" }
+    { "id": "village", "label": "村卫生室", "desc": "村卫生室、社区站 — 首诊、慢病、上转起点" },
+    { "id": "township", "label": "乡镇卫生院", "desc": "乡镇卫生院 — 医共体基层枢纽、远程会诊发起" },
+    { "id": "county", "label": "县级医院", "desc": "县级医院 — 县域转诊中心、危重症收治" },
+    { "id": "city", "label": "市级医院", "desc": "地市医院 — 专科协作与危重症上转" },
+    { "id": "province", "label": "省级及以上", "desc": "省级医院、国家区域医疗中心 — 会诊与专科接收" }
   ],
   "counties": [
     { "id": "weiyuan", "label": "威远县", "city": "内江市", "tierScope": ["village", "township", "county"] },
-    { "id": "neijiang-urban", "label": "内江市区", "city": "内江市", "tierScope": ["metro"] },
-    { "id": "chengdu", "label": "成都市", "city": "成都市", "tierScope": ["metro"] }
+    { "id": "neijiang-shizhong", "label": "市中区", "city": "内江市", "tierScope": ["city"] },
+    { "id": "neijiang-dongxing", "label": "东兴区", "city": "内江市", "tierScope": ["city"] },
+    { "id": "neijiang-urban", "label": "市本级", "city": "内江市", "tierScope": ["city"] },
+    { "id": "chengdu-wuhou", "label": "武侯区", "city": "成都市", "tierScope": ["province"] },
+    { "id": "chengdu", "label": "市本级", "city": "成都市", "tierScope": ["province"] }
   ],
   "towns": [
     { "id": "lianjie", "countyId": "weiyuan", "label": "连界镇" },
@@ -189,6 +193,7 @@
       "id": "weiyuan",
       "tier": "county",
       "countyId": "weiyuan",
+      "townId": "yanling",
       "name": "威远县人民医院",
       "shortName": "威远县医院",
       "region": "威远县 · 严陵镇",
@@ -206,6 +211,7 @@
       "id": "cy-weiyuan-tcm",
       "tier": "county",
       "countyId": "weiyuan",
+      "townId": "yanling",
       "name": "威远县中医医院",
       "region": "威远县 · 严陵镇",
       "collab": "县域中医医共体牵头",
@@ -226,8 +232,8 @@
     },
     {
       "id": "neijiang-first",
-      "tier": "metro",
-      "countyId": "neijiang-urban",
+      "tier": "city",
+      "countyId": "neijiang-shizhong",
       "name": "内江市第一人民医院",
       "shortName": "内江一院",
       "region": "内江市 · 市中区",
@@ -240,8 +246,8 @@
     },
     {
       "id": "metro-nj-second",
-      "tier": "metro",
-      "countyId": "neijiang-urban",
+      "tier": "city",
+      "countyId": "neijiang-dongxing",
       "name": "内江市第二人民医院",
       "region": "内江市 · 东兴区",
       "collab": "专科联盟",
@@ -249,7 +255,7 @@
     },
     {
       "id": "metro-nj-tcm",
-      "tier": "metro",
+      "tier": "city",
       "countyId": "neijiang-urban",
       "name": "内江市中医医院",
       "region": "内江市",
@@ -258,8 +264,8 @@
     },
     {
       "id": "huaxi",
-      "tier": "metro",
-      "countyId": "chengdu",
+      "tier": "province",
+      "countyId": "chengdu-wuhou",
       "name": "四川大学华西医院",
       "shortName": "华西医院",
       "region": "成都市 · 武侯区",
@@ -273,7 +279,7 @@
     },
     {
       "id": "metro-cdu-second",
-      "tier": "metro",
+      "tier": "province",
       "countyId": "chengdu",
       "name": "四川大学华西第二医院",
       "region": "成都市",
