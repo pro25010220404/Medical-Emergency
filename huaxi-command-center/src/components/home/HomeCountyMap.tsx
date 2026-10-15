@@ -112,14 +112,16 @@ export function HomeCountyMap({
     <>
       <CenterMetricsBar region={region} bedsOverview={bedsOverview} />
       <div className="main-map">
-        <div className="hx-map-region-bar region-switch segmented" aria-label="县域切换">
-          <button type="button" className={region === 'dafang' ? 'selected' : ''} onClick={() => setRegion('dafang')}>
-            大方参考
-          </button>
-          <button type="button" className={region === 'weiyuan' ? 'selected' : ''} onClick={() => setRegion('weiyuan')}>
-            威远协作
-          </button>
-        </div>
+        {mapFullPage ? null : (
+          <div className="hx-map-region-bar region-switch segmented" aria-label="县域切换">
+            <button type="button" className={region === 'dafang' ? 'selected' : ''} onClick={() => setRegion('dafang')}>
+              大方参考
+            </button>
+            <button type="button" className={region === 'weiyuan' ? 'selected' : ''} onClick={() => setRegion('weiyuan')}>
+              威远协作
+            </button>
+          </div>
+        )}
         <MapLegend />
         <MapTools />
         <div className="county-map">
