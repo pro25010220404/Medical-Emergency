@@ -26,7 +26,23 @@
   function findDeptHost() {
     const main = document.querySelector('main.department-overview.screen')
     if (!main) return null
-    return main.querySelector('section') || main
+    return main.querySelector(':scope > section')
+  }
+
+  function placeBedPanel(host, html) {
+    const id = 'hx-beds-live-panel'
+    let box = document.getElementById(id)
+    if (!box) {
+      box = document.createElement('div')
+      box.id = id
+    }
+    const matrix = host.querySelector('.department-matrix')
+    if (matrix) matrix.insertAdjacentElement('afterend', box)
+    else host.appendChild(box)
+    if (box.dataset.html === html) return true
+    box.dataset.html = html
+    box.innerHTML = html
+    return true
   }
 
   function mount(host, id, html) {
@@ -145,6 +161,77 @@
       <div class="hx-gr-grid">${cards || '<p class="hx-ia-view-empty">暂无监护点数据</p>'}</div>
     </section>`
     mount(host, 'hx-grassroots-remote', html)
+  }
+
+  function buildBedStatsHtml(byDept, reserved) {
+    const depts = byDept?.departments || []
+    const reservedList = reserved?.list || []
+    const updated = fmtMonitorTime(byDept?.updatedAt || reserved?.updatedAt)
+    const deptRows = depts
+      .map((d) => {
+        const total = Number(d.total) || 0
+        const occupied = Number(d.occupied) || 0
+        const rate = total > 0 ? Math.round((occupied / total) * 100) : 0
+        return `<tr><td>${esc(d.name)}</td><td>${total}</td><td>${occupied}</td><td>${Number(d.reserved) || 0}</td><td>${Number(d.free) || 0}</td><td>${rate}%</td></tr>`
+      })
+      .join('')
+    const reservedRows = reservedList
+      .map((r) => {
+        const until = r.reservedUntil ? fmtMonitorTime(r.reservedUntil) : '—'
+        return `<tr><td>${esc(r.label)}</td><td>${esc(r.departmentName || '')}</td><td>${esc(r.reserveReason || '—')}</td><td>${until}</td></tr>`
+      })
+      .join('')
+    return `<section class="hx-beds-live" aria-label="床位实时数据">
+      <style>
+        .hx-beds-live{margin:16px 0;padding:14px 16px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;box-sizing:border-box;clear:both;}
+        .hx-beds-live .hx-beds-live-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+        .hx-beds-live .hx-beds-live-head strong{font-size:15px;color:#111827;font-weight:600;}
+        .hx-beds-live .hx-beds-live-head span{font-size:12px;color:#9ca3af;}
+        .hx-beds-live .hx-beds-live-title{margin:14px 0 6px;font-size:13px;font-weight:600;color:#374151;}
+        .hx-beds-live table{width:100%;border-collapse:collapse;}
+        .hx-beds-live th,.hx-beds-live td{padding:6px 10px;border:1px solid #e5e7eb;text-align:left;font-size:13px;line-height:1.5;vertical-align:middle;}
+        .hx-beds-live th{background:#f9fafb;color:#6b7280;font-weight:600;white-space:nowrap;}
+        .hx-beds-live td{color:#111827;}
+        .department-matrix>a{align-items:flex-start;gap:0;}
+        .department-matrix>a>div{min-width:0;flex:1 1 auto;margin-left:12px !important;}
+        .department-matrix h3{white-space:normal;word-break:break-word;overflow-wrap:anywhere;line-height:1.35;}
+      </style>
+      <div class="hx-beds-live-head"><strong>科室床位</strong>${updated ? `<span>更新 ${updated}</span>` : ''}</div>
+      <div class="hx-beds-live-title">按科室床位</div>
+      <table>
+        <thead><tr><th>科室</th><th>总床</th><th>占用</th><th>预留</th><th>空床</th><th>占用率</th></tr></thead>
+        <tbody>${deptRows || '<tr><td colspan="6">暂无数据</td></tr>'}</tbody>
+      </table>
+      <div class="hx-beds-live-title">预留床位</div>
+      <table>
+        <thead><tr><th>床号</th><th>科室</th><th>预留原因</th><th>预留截止</th></tr></thead>
+        <tbody>${reservedRows || '<tr><td colspan="4">暂无预留</td></tr>'}</tbody>
+      </table>
+    </section>`
+  }
+
+  function renderBedStats() {
+    const { p, q } = pathAndQuery()
+    remove('hx-beds-live-panel')
+    if (p !== '/warning' || q.get('view') !== 'departments') return
+    if (typeof window.hxBackend?.get !== 'function') return
+    Promise.all([
+      window.hxBackend.get('/beds/by-dept').catch(() => null),
+      window.hxBackend.get('/beds/reserved').catch(() => null),
+    ]).then(([byDept, reserved]) => {
+      const html = buildBedStatsHtml(byDept, reserved)
+      let tries = 0
+      const tryMount = () => {
+        if (pathAndQuery().p !== '/warning' || pathAndQuery().q.get('view') !== 'departments') return
+        const host = findDeptHost()
+        if (!host) {
+          if (++tries < 20) setTimeout(tryMount, 300)
+          return
+        }
+        placeBedPanel(host, html)
+      }
+      tryMount()
+    })
   }
 
   const remoteCache = { value: null, promise: null }
@@ -574,6 +661,7 @@
     remove('hx-dept-today-focus')
     remove('hx-dept-linkage-bar')
     remove('hx-dept-beds-panel')
+    remove('hx-beds-live-panel')
     const main = document.querySelector('main.department-overview.screen')
     if (!main) return
     main.querySelectorAll('.panel-body .hx-dm-hh--append').forEach((el) => el.remove())
@@ -641,6 +729,7 @@
     remove('hx-sub-hospital-monitor')
     loadJson('/api/grassroots-remote-monitor.json', remoteCache).then(renderGrassrootsRemote)
     renderDeptBeds()
+    renderBedStats()
     loadJson('/api/dept-monitor-context.json', monitorCache).then(renderDeptMonitorContext)
   }
 

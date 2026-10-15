@@ -195,7 +195,7 @@
     bar.setAttribute('aria-label', '演示入口')
     bar.title = '按住空白处拖动 · 点击文字进入页面'
     bar.innerHTML =
-      '<a href="/dispatch.html#live">120 调度</a><a href="/gis-command.html">GIS 大屏</a><a href="/meeting-portal.html">会议交付</a>'
+      '<a href="/dispatch.html#live">120 调度</a><a href="/gis-command.html">GIS 大屏</a>'
     document.body.appendChild(bar)
     requestAnimationFrame(() => {
       loadDemoLinksPos(bar)

@@ -4,7 +4,7 @@
  */
 export const APP_SHELL_VERSION = {
   themeLight: '20261015org1',
-  sidebarLayout: '42',
+  sidebarLayout: '44',
   mapPresentation: '20261015map18',
   reactBundle: 'app-shell-3',
 }
@@ -96,7 +96,8 @@ export const enhanceScripts = [
   { src: '/assets/enhance/grassroots-consult-enhance.js?v=11', defer: true },
   { src: '/assets/enhance/nav-back-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/grassroots-demo-enhance.js', defer: true },
-  { src: '/assets/enhance/ia-query-views-enhance.js?v=12', defer: true },
+  { src: '/assets/enhance/ia-query-views-enhance.js?v=16', defer: true },
+  { src: '/assets/enhance/dept-code-cn-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/organizations-flow-enhance.js?v=9', defer: true },
   { src: '/assets/enhance/plate-three-backend-enhance.js?v=6', defer: true },
   { src: '/assets/enhance/medical-quality-backend-enhance.js?v=4', defer: true },
