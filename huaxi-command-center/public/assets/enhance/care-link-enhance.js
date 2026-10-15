@@ -261,11 +261,8 @@
       }
 
       if (p.startsWith('/patient/') && document.querySelector('.patient-identity')) {
-        const host = document.querySelector('.patient-identity')?.parentElement || document.querySelector('main')
-        const html = bind
-          ? stripHtml(bind, 'patient')
-          : `<div class="hx-strip"><a class="hx-back" href="/#/patients">返回患者列表</a></div>`
-        mount(host, 'hx-dock-patient', html)
+        // 患者详情页顶部面包屑条按需求移除
+        document.getElementById('hx-dock-patient')?.remove()
         return
       }
 

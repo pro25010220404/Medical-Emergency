@@ -87,6 +87,69 @@ const status = ref<string>('')
 const loading = ref(false)
 const error = ref('')
 
+// 新增急救事件
+const showCreate = ref(false)
+const createSubmitting = ref(false)
+const createError = ref('')
+const createForm = ref({
+  task120Id: '',
+  level: 'CRITICAL',
+  chiefComplaint: '',
+  pickupAddress: '',
+  destination: '',
+  startedAt: '',
+})
+
+function resetCreateForm() {
+  createForm.value = {
+    task120Id: '',
+    level: 'CRITICAL',
+    chiefComplaint: '',
+    pickupAddress: '',
+    destination: '',
+    startedAt: new Date().toISOString().slice(0, 16),
+  }
+  createError.value = ''
+}
+
+function openCreate() {
+  resetCreateForm()
+  showCreate.value = true
+}
+
+function closeCreate() {
+  showCreate.value = false
+}
+
+async function submitCreate() {
+  const f = createForm.value
+  if (!f.task120Id.trim() || !f.chiefComplaint.trim()) {
+    createError.value = '请填写 120 任务号和主诉'
+    return
+  }
+  createSubmitting.value = true
+  createError.value = ''
+  try {
+    if (!window.hxBackend?.enabled?.()) throw new Error('后端接口未连接')
+    await window.hxBackend.ensureAuth()
+    await window.hxBackend.post('/dispatch/events', {
+      task120Id: f.task120Id.trim(),
+      level: f.level,
+      chiefComplaint: f.chiefComplaint.trim(),
+      pickupAddress: f.pickupAddress.trim() || undefined,
+      destination: f.destination.trim() || undefined,
+      startedAt: f.startedAt ? new Date(f.startedAt).toISOString() : undefined,
+    })
+    showCreate.value = false
+    page.value = 1
+    await fetchPage()
+  } catch (e) {
+    createError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    createSubmitting.value = false
+  }
+}
+
 const activeOnPage = computed(
   () => events.value.filter((e) => e.event_status === 'EVENT_ACTIVE').length,
 )
@@ -279,6 +342,10 @@ onMounted(fetchPage)
         >
           {{ f.label }}
         </button>
+        <span style="flex: 1"></span>
+        <button class="dh-date-btn dh-date-btn--primary" type="button" @click="openCreate">
+          新增急救事件
+        </button>
       </div>
     </section>
 
@@ -367,5 +434,54 @@ onMounted(fetchPage)
         下一页
       </button>
     </section>
+
+    <!-- 新增急救事件对话框 -->
+    <Teleport to="body">
+      <div v-if="showCreate" class="dh-modal-mask" @click.self="closeCreate">
+        <div class="dh-modal" role="dialog" aria-modal="true" aria-labelledby="create-event-title">
+          <header class="dh-modal-head">
+            <h3 id="create-event-title">新增急救事件</h3>
+            <button class="dh-modal-close" type="button" @click="closeCreate">×</button>
+          </header>
+          <div class="dh-modal-body">
+            <label class="dh-field">
+              <span class="dh-field-label">120 任务号 *</span>
+              <input v-model="createForm.task120Id" type="text" placeholder="如 120-20261016-001" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">事件级别</span>
+              <select v-model="createForm.level">
+                <option value="CRITICAL">紧急（CRITICAL）</option>
+                <option value="URGENT">危重（URGENT）</option>
+                <option value="NORMAL">普通（NORMAL）</option>
+              </select>
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">主诉 *</span>
+              <input v-model="createForm.chiefComplaint" type="text" placeholder="如 胸痛伴呼吸急促" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">接车地址</span>
+              <input v-model="createForm.pickupAddress" type="text" placeholder="如 某路某号" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">目的地</span>
+              <input v-model="createForm.destination" type="text" placeholder="如 县人民医院急诊科" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">开始时间</span>
+              <input v-model="createForm.startedAt" type="datetime-local" />
+            </label>
+            <p v-if="createError" class="dh-form-error">{{ createError }}</p>
+          </div>
+          <footer class="dh-modal-foot">
+            <button class="dh-date-btn" type="button" :disabled="createSubmitting" @click="closeCreate">取消</button>
+            <button class="dh-date-btn dh-date-btn--primary" type="button" :disabled="createSubmitting" @click="submitCreate">
+              {{ createSubmitting ? '提交中…' : '确认创建' }}
+            </button>
+          </footer>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

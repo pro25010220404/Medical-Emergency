@@ -689,6 +689,111 @@ body {
   color: #0b3a5b;
 }
 
+/* 新增急救事件弹窗 */
+.dh-modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dh-modal {
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.dh-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.dh-modal-head h3 {
+  margin: 0;
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.dh-modal-close {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.dh-modal-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dh-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dh-field-label {
+  font-size: 12px;
+  color: #475569;
+}
+
+.dh-field input,
+.dh-field select {
+  font: inherit;
+  font-size: 13px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.dh-field input:focus,
+.dh-field select:focus {
+  outline: none;
+  border-color: #1e4b7b;
+  box-shadow: 0 0 0 2px rgba(30, 75, 123, 0.15);
+}
+
+.dh-form-error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.dh-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 18px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.dh-date-btn--primary {
+  background: #1e4b7b;
+  border-color: #1e4b7b;
+  color: #fff;
+}
+
+.dh-date-btn--primary:hover:not(:disabled) {
+  background: #163a5f;
+  border-color: #163a5f;
+}
+
 .dh-side-note dl {
   margin: 12px 0 0;
   display: grid;
