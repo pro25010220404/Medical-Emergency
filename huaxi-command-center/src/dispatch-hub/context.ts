@@ -27,16 +27,6 @@ export type PatientForm = {
   chiefComplaint: string
 }
 
-/** 创建事件表单字段（与「事件列表」口径一致，后端 POST /dispatch/events） */
-export type EventCreateForm = {
-  task120Id: string
-  level: string
-  chiefComplaint: string
-  pickupAddress: string
-  destination: string
-  startedAt: string
-}
-
 export type TabId = 'live' | 'events' | 'ambulances' | 'register'
 
 const DRAFT_KEY = 'huaxi-dispatch-register-draft'
@@ -139,56 +129,6 @@ export async function savePatient(form: PatientForm, submit: boolean): Promise<s
   return submit
     ? `已提交登记（本地演示）· 任务 ${task}`
     : `草稿已保存 · ${time} · 任务 ${task || '未填'}`
-}
-
-const CREATED_EVENTS_KEY = 'huaxi-dispatch-created-events'
-
-export function emptyEventForm(): EventCreateForm {
-  return {
-    task120Id: '',
-    level: 'GENERAL',
-    chiefComplaint: '',
-    pickupAddress: '',
-    destination: '',
-    startedAt: '',
-  }
-}
-
-/** 创建急救事件（接警建档），初始状态为出警中；后端不可用时落本地演示 */
-export async function saveEvent(form: EventCreateForm): Promise<string> {
-  const task = form.task120Id.trim()
-  if (window.hxBackend?.enabled?.()) {
-    try {
-      await window.hxBackend.ensureAuth()
-      const res = await window.hxBackend.post<{ eventId?: string; status?: string }>(
-        '/dispatch/events',
-        {
-          task120Id: task,
-          level: form.level || 'GENERAL',
-          chiefComplaint: form.chiefComplaint.trim(),
-          pickupAddress: form.pickupAddress.trim(),
-          destination: form.destination.trim() || undefined,
-          startedAt: form.startedAt ? new Date(form.startedAt).toISOString() : undefined,
-        },
-      )
-      return `已创建事件 · 编号 ${res?.eventId || task} · 状态 出警中`
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      return `后端创建失败：${msg}`
-    }
-  }
-  const created: Array<Record<string, unknown>> = JSON.parse(
-    localStorage.getItem(CREATED_EVENTS_KEY) || '[]',
-  )
-  created.unshift({
-    ...form,
-    eventId: `EVT-LOCAL-${Date.now()}`,
-    status: 'DISPATCHING',
-    statusLabel: '出警中',
-    createdAt: new Date().toISOString(),
-  })
-  localStorage.setItem(CREATED_EVENTS_KEY, JSON.stringify(created))
-  return `已创建事件（本地演示）· 任务 ${task || '未填'}`
 }
 
 export type ConsultLaunchInput = Partial<

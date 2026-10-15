@@ -657,12 +657,6 @@ body {
   align-items: start;
 }
 
-.dh-register-main {
-  display: grid;
-  gap: 16px;
-  min-width: 0;
-}
-
 .dh-side-note {
   background: #f8fafc;
   border: 1px dashed #cbd5e1;
