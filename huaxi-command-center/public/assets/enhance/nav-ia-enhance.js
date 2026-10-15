@@ -15,7 +15,6 @@
   ]
   const DISPATCH_GO = {
     实时出警: '/dispatch.html#live',
-    急救事件: '/dispatch.html#events',
     患者登记: '/dispatch.html#register',
     救护车列表: '/dispatch.html#ambulances',
   }

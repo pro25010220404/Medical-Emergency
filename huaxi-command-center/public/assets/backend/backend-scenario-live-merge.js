@@ -10,7 +10,8 @@
     } catch {
       /* ignore */
     }
-    return window.hxBackend?.strict?.() && !window.hxFullBackend?.()
+    if (window.hxFullBackend?.()) return false
+    return window.hxBackend?.enabled?.()
   }
 
   window.hxLiveMergeEnabled = liveMergeEnabled

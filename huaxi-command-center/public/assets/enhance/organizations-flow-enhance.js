@@ -1,5 +1,5 @@
 /**
- * 协作机构 #/organizations：县域 → 乡镇 → 分级 → 选机构 → 详情
+ * 协作机构 #/organizations：地市 → 区县 → 乡镇 → 机构层级 → 详情
  */
 ;(function () {
   var ROUTE = '/organizations'
@@ -60,12 +60,16 @@
     var q = query()
     var tier = q.get('tier') || ''
     var changed = false
-    if (tier === 'grassroots' || tier === 'center' || tier === 'huaxi') {
+    if (tier === 'grassroots' || tier === 'center' || tier === 'huaxi' || tier === 'metro') {
       q.delete('tier')
       if (tier === 'grassroots') q.set('tier', 'township')
-      else {
-        q.set('tier', 'metro')
+      else if (tier === 'metro') {
+        var metroCounty = q.get('county') || ''
+        q.set('tier', metroCounty === 'chengdu' || metroCounty === 'chengdu-wuhou' ? 'province' : 'city')
+      } else {
+        q.set('tier', 'province')
         if (!q.get('org')) q.set('org', 'huaxi')
+        if (!q.get('county')) q.set('county', 'chengdu-wuhou')
       }
       changed = true
     }
@@ -122,6 +126,20 @@
     })
   }
 
+  function cities() {
+    var seen = []
+    ;(catalog.counties || []).forEach(function (c) {
+      if (c.city && seen.indexOf(c.city) < 0) seen.push(c.city)
+    })
+    return seen
+  }
+
+  function countiesInCity(city) {
+    return (catalog.counties || []).filter(function (c) {
+      return c.city === city
+    })
+  }
+
   function filterOrgs(state) {
     var tierId = state.tier
     var countyId = state.county
@@ -147,11 +165,19 @@
     var q = query()
     var countyId = q.get('county') || (catalog.defaults && catalog.defaults.county) || 'weiyuan'
     var tierId = q.get('tier') || (catalog.defaults && catalog.defaults.tier) || 'county'
+    if (tierId === 'metro') {
+      tierId = countyId === 'chengdu' || countyId === 'chengdu-wuhou' ? 'province' : 'city'
+    }
     if (!tierMeta(tierId)) tierId = 'county'
     if (!countyMeta(countyId)) countyId = 'weiyuan'
     var townId = q.get('town') || ''
     var orgId = q.get('org') || ''
     var search = q.get('q') || ''
+    var picked = orgId ? findOrg(orgId) : null
+    if (picked) {
+      countyId = picked.countyId || countyId
+      tierId = picked.tier || tierId
+    }
     var county = countyMeta(countyId)
     if (county && county.tierScope && county.tierScope.indexOf(tierId) < 0) {
       var altCounty = (catalog.counties || []).filter(function (c) {
@@ -161,8 +187,12 @@
       else tierId = county.tierScope[0] || tierId
       county = countyMeta(countyId)
     }
-    if (townId && tierId !== 'village' && tierId !== 'township') townId = ''
-    if (orgId && !findOrg(orgId)) orgId = ''
+    if (townId && !townMeta(townId)) townId = ''
+    if (townId) {
+      var townRec = townMeta(townId)
+      if (townRec && townRec.countyId !== countyId) townId = ''
+    }
+    if (orgId && !picked) orgId = ''
     return { county: countyId, tier: tierId, town: townId, org: orgId, q: search }
   }
 
@@ -534,47 +564,69 @@
     var town = state.town ? townMeta(state.town) : null
     var list = filterOrgs(state)
     var tiers = catalog.tiers || []
-    var showTown = state.tier === 'village' || state.tier === 'township'
+    var cityName = (county && county.city) || ''
+    var countyChoices = countiesInCity(cityName)
+    var townChoices = townsInCounty(state.county)
+    var showTown = !!state.town || townChoices.length > 0
 
-    var countyOpts = (catalog.counties || [])
-      .map(function (c) {
-        return (
-          '<option value="' +
-          esc(c.id) +
-          '"' +
-          (c.id === state.county ? ' selected' : '') +
-          '>' +
-          esc(c.label) +
-          '（' +
-          esc(c.city) +
-          '）</option>'
-        )
-      })
-      .join('')
-
-    var townOpts =
-      '<option value="">全部乡镇</option>' +
-      townsInCounty(state.county)
-        .map(function (t) {
+    function menuHtml(items, current) {
+      return items
+        .map(function (item) {
+          var on = String(item.value) === String(current)
           return (
-            '<option value="' +
-            esc(t.id) +
-            '"' +
-            (t.id === state.town ? ' selected' : '') +
-            '>' +
-            esc(t.label) +
-            '</option>'
+            '<li><button type="button" class="hx-org-menu-item" role="option" data-value="' +
+            esc(item.value) +
+            '" aria-selected="' +
+            (on ? 'true' : 'false') +
+            '">' +
+            esc(item.label) +
+            '</button></li>'
           )
         })
         .join('')
+    }
 
-    var tierTabs = tiers
-      .filter(function (t) {
-        if (!county || !county.tierScope) return true
-        return county.tierScope.indexOf(t.id) >= 0
+    function pickHtml(key, caption, valueText, items, current, disabled) {
+      return (
+        '<div class="hx-org-filter' +
+        (disabled ? ' is-disabled' : '') +
+        '"><span>' +
+        esc(caption) +
+        '</span><button type="button" class="hx-org-pick" data-filter="' +
+        esc(key) +
+        '"' +
+        (disabled ? ' disabled' : '') +
+        ' aria-haspopup="listbox" aria-expanded="false">' +
+        esc(valueText) +
+        '</button>' +
+        (disabled
+          ? ''
+          : '<ul class="hx-org-menu" role="listbox" hidden>' + menuHtml(items, current) + '</ul>') +
+        '</div>'
+      )
+    }
+
+    var cityItems = cities().map(function (name) {
+      return { value: name, label: name }
+    })
+    var countyItems = countyChoices.map(function (c) {
+      return { value: c.id, label: c.label }
+    })
+    var townItems = [{ value: '', label: townChoices.length ? '全部乡镇' : '无下级乡镇' }].concat(
+      townChoices.map(function (t) {
+        return { value: t.id, label: t.label }
       })
+    )
+    var townLabel = state.town && town ? town.label : townItems[0].label
+
+    var tierChoices = tiers.filter(function (t) {
+      if (!county || !county.tierScope) return true
+      return county.tierScope.indexOf(t.id) >= 0
+    })
+
+    var tierTabs = tierChoices
       .map(function (t) {
-        var n = tierCount(t.id, state.county, showTown ? state.town : '')
+        var n = tierCount(t.id, state.county, state.town)
         return (
           '<button type="button" class="hx-org-tier' +
           (t.id === state.tier ? ' active' : '') +
@@ -592,6 +644,7 @@
     var crumb =
       '<nav class="hx-org-crumb" aria-label="路径">' +
       '<span>协作机构</span>' +
+      (cityName ? '<span>' + esc(cityName) + '</span>' : '') +
       (county ? '<span>' + esc(county.label) + '</span>' : '') +
       (town ? '<span>' + esc(town.label) + '</span>' : '') +
       (tier ? '<span>' + esc(tier.label) + '</span>' : '') +
@@ -610,32 +663,23 @@
       HOST_ID +
       '" class="hx-org-flow">' +
       crumb +
-      '<div class="hx-org-steps">' +
-      '<span class="hx-org-step on">1 县域</span>' +
-      '<span class="hx-org-step' +
-      (showTown ? ' on' : '') +
-      '">2 乡镇</span>' +
-      '<span class="hx-org-step on">3 分级·机构</span>' +
-      '<span class="hx-org-step' +
-      (org ? ' on' : '') +
-      '">4 详情</span>' +
-      '</div>' +
       '<div class="hx-org-filters">' +
-      '<label class="hx-org-filter"><span>县域 / 地市</span><select data-filter="county">' +
-      countyOpts +
-      '</select></label>' +
-      (showTown
-        ? '<label class="hx-org-filter"><span>乡镇</span><select data-filter="town">' +
-          townOpts +
-          '</select></label>'
-        : '') +
-      '<label class="hx-org-filter hx-org-filter--search"><span>搜索</span><input type="search" data-filter="q" placeholder="机构名称、地区…" value="' +
+      '<div class="hx-org-cascade" role="group" aria-label="地区层级">' +
+      pickHtml('city', '地市', cityName, cityItems, cityName, false) +
+      '<span class="hx-org-cascade-sep" aria-hidden="true"></span>' +
+      pickHtml('county', '区县', county ? county.label : '', countyItems, state.county, false) +
+      '<span class="hx-org-cascade-sep" aria-hidden="true"></span>' +
+      pickHtml('town', '乡镇', townLabel, townItems, state.town || '', !townChoices.length) +
+      '</div>' +
+      '<label class="hx-org-filter hx-org-filter--search"><span>搜索</span><input type="search" data-filter="q" placeholder="机构名称、地区" value="' +
       esc(state.q) +
       '"></label>' +
       '</div>' +
-      stats +
+      '<div class="hx-org-tier-row">' +
       '<div class="hx-org-tier-tabs" role="tablist">' +
       tierTabs +
+      '</div>' +
+      stats +
       '</div>' +
       '<div class="hx-org-list-wrap">' +
       groupedOrgCards(list, state.town, state.org) +
@@ -652,10 +696,96 @@
     )
   }
 
+  function closeMenus(root) {
+    root.querySelectorAll('.hx-org-filter.is-open').forEach(function (filter) {
+      filter.classList.remove('is-open')
+      var pick = filter.querySelector('.hx-org-pick')
+      var menu = filter.querySelector('.hx-org-menu')
+      if (pick) pick.setAttribute('aria-expanded', 'false')
+      if (menu) menu.hidden = true
+    })
+  }
+
+  function applyFilter(key, value) {
+    var host = document.getElementById(HOST_ID)
+    if (host) closeMenus(host)
+    var st = readState()
+    if (key === 'city') {
+      var inCity = countiesInCity(value)
+      var nextCounty = inCity[0]
+      if (!nextCounty) return
+      var cityTier = st.tier
+      if (nextCounty.tierScope && nextCounty.tierScope.indexOf(cityTier) < 0) {
+        cityTier = nextCounty.tierScope[0] || cityTier
+      }
+      setHash({ county: nextCounty.id, tier: cityTier, town: '', org: '', q: '' })
+    } else if (key === 'county') {
+      var cm = countyMeta(value)
+      var nt = st.tier
+      if (cm && cm.tierScope && cm.tierScope.indexOf(nt) < 0) nt = cm.tierScope[0] || nt
+      setHash({ county: value, tier: nt, town: '', org: '', q: '' }, false)
+    } else if (key === 'town') {
+      setHash({ county: st.county, town: value, tier: st.tier, org: '', q: st.q })
+    } else if (key === 'tier') {
+      var countyId = st.county
+      var cmTier = countyMeta(countyId)
+      if (cmTier && cmTier.tierScope && cmTier.tierScope.indexOf(value) < 0) {
+        var altTierCounty = (catalog.counties || []).filter(function (x) {
+          return x.tierScope && x.tierScope.indexOf(value) >= 0
+        })[0]
+        if (altTierCounty) countyId = altTierCounty.id
+      }
+      setHash({
+        county: countyId,
+        tier: value,
+        org: '',
+        town: countyId === st.county ? st.town : '',
+        q: st.q,
+      })
+    }
+  }
+
+  var menuDocBound = false
+
   function bindFlow(root) {
+    if (!menuDocBound) {
+      menuDocBound = true
+      document.addEventListener('click', function () {
+        var host = document.getElementById(HOST_ID)
+        if (host) closeMenus(host)
+      })
+      document.addEventListener('keydown', function (ev) {
+        if (ev.key !== 'Escape') return
+        var host = document.getElementById(HOST_ID)
+        if (host) closeMenus(host)
+      })
+    }
     if (root.dataset.bound === '1') return
     root.dataset.bound = '1'
     root.addEventListener('click', function (ev) {
+      var menuItem = ev.target.closest('.hx-org-menu-item')
+      if (menuItem && root.contains(menuItem)) {
+        ev.stopPropagation()
+        var pickFrom = menuItem.closest('.hx-org-filter')
+        var pickBtn = pickFrom && pickFrom.querySelector('.hx-org-pick')
+        if (pickBtn) applyFilter(pickBtn.getAttribute('data-filter'), menuItem.getAttribute('data-value') || '')
+        return
+      }
+      var pick = ev.target.closest('.hx-org-pick')
+      if (pick && root.contains(pick)) {
+        ev.stopPropagation()
+        if (pick.disabled) return
+        var filter = pick.closest('.hx-org-filter')
+        var willOpen = filter && !filter.classList.contains('is-open')
+        closeMenus(root)
+        if (willOpen && filter) {
+          filter.classList.add('is-open')
+          pick.setAttribute('aria-expanded', 'true')
+          var menu = filter.querySelector('.hx-org-menu')
+          if (menu) menu.hidden = false
+        }
+        return
+      }
       var tierBtn = ev.target.closest('[data-tier]')
       if (tierBtn && root.contains(tierBtn)) {
         var st = readState()
@@ -668,7 +798,13 @@
           })[0]
           if (alt) county = alt.id
         }
-        setHash({ county: county, tier: newTier, org: '', town: '' })
+        setHash({
+          county: county,
+          tier: newTier,
+          org: '',
+          town: county === st.county ? st.town : '',
+          q: st.q,
+        })
         return
       }
       var orgBtn = ev.target.closest('[data-org]')
@@ -688,21 +824,6 @@
         setHash({ county: st3.county, town: st3.town, tier: st3.tier, org: '', q: st3.q })
       }
     })
-    root.addEventListener('change', function (ev) {
-      var sel = ev.target.closest('[data-filter]')
-      if (!sel || !root.contains(sel)) return
-      var st = readState()
-      var key = sel.getAttribute('data-filter')
-      if (key === 'county') {
-        var nc = sel.value
-        var cm = countyMeta(nc)
-        var nt = st.tier
-        if (cm && cm.tierScope && cm.tierScope.indexOf(nt) < 0) nt = cm.tierScope[0] || nt
-        setHash({ county: nc, tier: nt, town: '', org: '', q: '' }, false)
-      } else if (key === 'town') {
-        setHash({ county: st.county, town: sel.value, tier: st.tier, org: '', q: st.q })
-      }
-    })
     root.addEventListener('input', function (ev) {
       var inp = ev.target.closest('[data-filter="q"]')
       if (!inp || !root.contains(inp)) return
@@ -714,15 +835,16 @@
     })
   }
 
+  var mountRetry = null
+
   function mountFlow() {
-    if (!catalog) return
+    if (!catalog) return false
+    var main = document.querySelector('main.workspace')
+    if (!main) return false
     var state = readState()
     document.body.classList.add(BODY)
     document.body.classList.toggle(PICK, !state.org)
     document.body.classList.toggle('hx-org-detail-open', !!state.org)
-
-    var main = document.querySelector('main.workspace')
-    if (!main) return
     updateSubtitle()
 
     var html = shellHtml(state)
@@ -754,9 +876,14 @@
     } else {
       removeCustomDetail()
     }
+    return true
   }
 
   function unmount() {
+    if (mountRetry) {
+      clearInterval(mountRetry)
+      mountRetry = null
+    }
     document.body.classList.remove(BODY, PICK, CUSTOM, 'hx-org-detail-open')
     document.getElementById(HOST_ID)?.remove()
     removeCustomDetail()
@@ -768,10 +895,24 @@
       return
     }
     loadCatalog().then(function (d) {
+      if (path() !== ROUTE) return
       if (!d) return
       if (migrateHash()) return
       if (applyDefaults()) return
-      mountFlow()
+      if (mountFlow()) {
+        if (mountRetry) clearInterval(mountRetry)
+        mountRetry = null
+        return
+      }
+      if (mountRetry) return
+      var n = 0
+      mountRetry = setInterval(function () {
+        n += 1
+        if (path() !== ROUTE || mountFlow() || n > 40) {
+          clearInterval(mountRetry)
+          mountRetry = null
+        }
+      }, 200)
     })
   }
 

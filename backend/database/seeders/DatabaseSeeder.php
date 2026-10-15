@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             EmergencyDispatchSeeder::class,
             TransferSeeder::class,
             ClinicalRecordSeeder::class,
+            ClinicalNoteSeeder::class,
             ConsultationSeeder::class,
             MonitoringSeeder::class,
 

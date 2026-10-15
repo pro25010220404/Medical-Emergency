@@ -11,6 +11,25 @@ export type PatientRecord = {
   medical_history?: string | null
   allergy_history?: string | null
   created_at?: string | null
+  stage?: string | null
+  stage_label?: string | null
+  institution_id?: string | null
+  institution_name?: string | null
+  department_id?: string | null
+  department_name?: string | null
+  bed_id?: string | null
+  bed_label?: string | null
+  chief_complaint?: string | null
+  source?: string | null
+  source_label?: string | null
+  admitted_at?: string | null
+  gender_label?: string | null
+}
+
+export type PatientStageStat = {
+  value: string
+  label: string
+  count: number
 }
 
 export type PatientListMeta = {

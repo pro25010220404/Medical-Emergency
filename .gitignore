@@ -5,6 +5,10 @@
 **/dist/
 **/dist-ssr/
 
+# 部署包（本地 npm run build 后打包，勿进 GitHub）
+huaxi-command-center/release/
+**/*.zip
+
 # Environment & secrets
 .env
 .env.*

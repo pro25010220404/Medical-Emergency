@@ -121,7 +121,7 @@
     bar.className = 'huaxi-demo-links'
     bar.setAttribute('aria-label', '演示快捷入口')
     bar.innerHTML =
-      '<a href="/dispatch.html#live">120 调度</a><a href="/gis-command.html">GIS 大屏</a><a href="/meeting-portal.html">会议交付</a>'
+      '<a href="/dispatch.html#live">120 调度</a><a href="/gis-command.html">GIS 大屏</a>'
     document.body.appendChild(bar)
   }
 

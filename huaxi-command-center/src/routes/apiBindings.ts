@@ -51,11 +51,15 @@ export const ROUTE_API_BINDINGS: Record<string, ApiBinding[]> = {
   '/monitoring': [
     { method: 'GET', path: '/monitoring/streams' },
   ],
-  '/patients': [{ method: 'GET', path: '/patients?per_page=30' }],
+  '/patients': [
+    { method: 'GET', path: '/patients?pageNum=1&pageSize=30' },
+    { method: 'GET', path: '/patients/stages' },
+  ],
   '/patient/:id': [{ method: 'GET', path: '/patients/{id}' }],
   '/beds': [
     { method: 'GET', path: '/beds/overview' },
     { method: 'GET', path: '/beds/distribution' },
+    { method: 'GET', path: '/beds/reserved' },
   ],
   '/bed/:id': [
     { method: 'GET', path: '/beds/{id}' },
@@ -64,6 +68,7 @@ export const ROUTE_API_BINDINGS: Record<string, ApiBinding[]> = {
   ],
   '/consultations': [
     { method: 'GET', path: '/consultations?pageNum=1&pageSize=20' },
+    { method: 'GET', path: '/consultations/summary' },
     { method: 'GET', path: '/consultations/doctors' },
   ],
   '/room/:token': [

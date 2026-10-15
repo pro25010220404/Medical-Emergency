@@ -32,7 +32,13 @@ class EmergencyEventResource extends JsonResource
                 'rr' => $this->scene_rr,
                 'temp' => $this->scene_temp,
             ],
-            'patient_id' => $this->patient_id,
+            /** 业务编号 PAT-xxx（非 emergency_events.patient_id 外键整数） */
+            'patient_id' => $this->relationLoaded('patient') && $this->patient
+                ? $this->patient->patient_id
+                : null,
+            'patient_name' => $this->relationLoaded('patient') && $this->patient
+                ? $this->patient->name
+                : null,
             'patient_mode' => $this->patient_mode,
             'temp_gender' => $this->temp_gender,
             'temp_summary' => $this->temp_summary,

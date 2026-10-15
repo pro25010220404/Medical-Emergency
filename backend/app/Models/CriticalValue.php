@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CriticalValue extends Model
 {
@@ -15,4 +16,9 @@ class CriticalValue extends Model
     protected $casts = [
         'reported_at' => 'datetime',
     ];
+
+    public function patient(): BelongsTo
+    {
+        return $this->belongsTo(Patient::class, 'patient_id', 'patient_id');
+    }
 }

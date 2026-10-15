@@ -8,6 +8,7 @@
     links: [
       ['/', '县域指挥概览'],
       ['/map', '协作三维地图'],
+      ['/gis-command.html', 'GIS 大屏'],
     ],
   }
 
@@ -18,8 +19,9 @@
       links: [
         ['/dispatch', '实时出警'],
         ['/dispatch/list', '出警列表'],
+        ['/dispatch/events', '事件列表'],
         ['/ambulances', '救护车列表'],
-        ['/patients', '急救事件'],
+        ['/patients', '患者列表'],
         ['/register', '患者登记'],
         ['/consultations', '远程会诊'],
         ['/consultations?tab=grassroots', '基层会诊'],
@@ -92,6 +94,7 @@
   }
 
   function hrefToHash(link) {
+    if (/\.html(?:$|[?#])/.test(link)) return link
     return `#${link.startsWith('/') ? link : `/${link}`}`
   }
 
@@ -108,8 +111,9 @@
     const labels = {
       '/dispatch': '实时出警',
       '/dispatch/list': '出警列表',
+      '/dispatch/events': '事件列表',
       '/ambulances': '救护车列表',
-      '/patients': '急救事件',
+      '/patients': '患者列表',
       '/register': '患者登记',
       '/transfers': '医院转诊',
       '/critical': '重症监护',
@@ -322,8 +326,8 @@
   }
 
   function buildMenu(menu) {
-    if (menu.dataset.built === '10') return
-    menu.dataset.built = '10'
+    if (menu.dataset.built === '11') return
+    menu.dataset.built = '11'
     menu.innerHTML = ''
 
     GROUPS.forEach((group, index) => {

@@ -61,7 +61,6 @@ export default defineConfig(({ mode }) => {
           devtools: path.resolve(__dirname, 'index.devtools.html'),
           smartCity: path.resolve(__dirname, 'smart-city.html'),
           gisCommand: path.resolve(__dirname, 'gis-command.html'),
-          meetingPortal: path.resolve(__dirname, 'meeting-portal.html'),
           dispatch: path.resolve(__dirname, 'dispatch.html'),
           digitalTwinMap: path.resolve(__dirname, 'digital-twin-map.html'),
         },

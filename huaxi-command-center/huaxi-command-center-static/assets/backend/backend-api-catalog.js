@@ -208,6 +208,7 @@
     '/beds': [
       { method: 'GET', path: '/beds/overview' },
       { method: 'GET', path: '/beds/distribution' },
+      { method: 'GET', path: '/beds/reserved' },
     ],
     '/bed/:id': [
       { method: 'GET', path: '/beds/{id}' },

@@ -43,6 +43,76 @@ class BedService extends Service
     ];
 
     /**
+     * 床位明细列表（床位全景页数据源）
+     * 支持 institutionId / departmentId / status(free|occupied|reserved|maintenance) 过滤
+     */
+    public function index(array $filters): array
+    {
+        $statusCodes = array_flip(self::STATUS_CODES);
+        $status = $filters['status'] ?? null;
+
+        $beds = Bed::query()
+            ->when(
+                ! empty($filters['institutionId']),
+                fn ($q) => $q->where('institution_id', $filters['institutionId'])
+            )
+            ->when(
+                ! empty($filters['departmentId']),
+                fn ($q) => $q->where('department_id', $filters['departmentId'])
+            )
+            ->when(
+                $status !== null && $status !== '' && isset($statusCodes[$status]),
+                fn ($q) => $q->where('status', $statusCodes[$status])
+            )
+            ->orderBy('institution_id')
+            ->orderBy('department_id')
+            ->orderBy('bed_id')
+            ->get();
+
+        $orgNames = Organization::query()
+            ->whereIn('org_code', $beds->pluck('institution_id')->unique()->all())
+            ->pluck('org_name', 'org_code');
+
+        $deptNames = DepartmentBed::query()
+            ->get()
+            ->mapWithKeys(fn (DepartmentBed $d) => [$d->hospital_id.'|'.$d->dept_id => $d->name]);
+
+        $patients = Patient::query()
+            ->whereIn('patient_id', $beds->pluck('patient_id')->filter()->unique()->all())
+            ->get()
+            ->keyBy('patient_id');
+
+        $list = $beds->map(function (Bed $bed) use ($orgNames, $deptNames, $patients) {
+            $patient = $bed->patient_id !== null && $bed->patient_id !== ''
+                ? ($patients[$bed->patient_id] ?? null)
+                : null;
+
+            return [
+                'bedId' => $bed->bed_id,
+                'label' => $bed->label,
+                'institutionId' => $bed->institution_id,
+                'institutionName' => $orgNames[$bed->institution_id] ?? '',
+                'departmentId' => $bed->department_id,
+                'departmentName' => $deptNames[$bed->institution_id.'|'.$bed->department_id] ?? '',
+                'status' => self::STATUS_CODES[$bed->status] ?? 'unknown',
+                'statusLabel' => self::STATUS_LABELS[$bed->status] ?? '',
+                'patient' => $patient === null ? null : [
+                    'patientId' => $patient->patient_id,
+                    'name' => $patient->name,
+                    'genderLabel' => $this->genderLabel($patient->gender),
+                    'age' => $patient->age === null ? null : (int) $patient->age,
+                ],
+            ];
+        })->values()->all();
+
+        return [
+            'updatedAt' => now()->toIso8601String(),
+            'total' => count($list),
+            'list' => $list,
+        ];
+    }
+
+    /**
      * 科室床位统计（§3.1）
      */
     public function byDept(?string $hospitalId): array

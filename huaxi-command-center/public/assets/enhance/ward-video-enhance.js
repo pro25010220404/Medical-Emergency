@@ -82,14 +82,7 @@
 
   mount()
   setInterval(mount, 800)
-
-  const mo = new MutationObserver(mount)
-  function observe() {
-    mo.observe(document.body, { childList: true, subtree: true })
-  }
-  if (document.body) observe()
-  else document.addEventListener('DOMContentLoaded', observe, { once: true })
-
+  window.addEventListener('hashchange', () => setTimeout(mount, 200))
   window.addEventListener('resize', mount)
   window.addEventListener('scroll', mount)
 })()
