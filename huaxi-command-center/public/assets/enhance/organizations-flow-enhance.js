@@ -835,15 +835,16 @@
     })
   }
 
+  var mountRetry = null
+
   function mountFlow() {
-    if (!catalog) return
+    if (!catalog) return false
+    var main = document.querySelector('main.workspace')
+    if (!main) return false
     var state = readState()
     document.body.classList.add(BODY)
     document.body.classList.toggle(PICK, !state.org)
     document.body.classList.toggle('hx-org-detail-open', !!state.org)
-
-    var main = document.querySelector('main.workspace')
-    if (!main) return
     updateSubtitle()
 
     var html = shellHtml(state)
@@ -875,9 +876,14 @@
     } else {
       removeCustomDetail()
     }
+    return true
   }
 
   function unmount() {
+    if (mountRetry) {
+      clearInterval(mountRetry)
+      mountRetry = null
+    }
     document.body.classList.remove(BODY, PICK, CUSTOM, 'hx-org-detail-open')
     document.getElementById(HOST_ID)?.remove()
     removeCustomDetail()
@@ -889,10 +895,24 @@
       return
     }
     loadCatalog().then(function (d) {
+      if (path() !== ROUTE) return
       if (!d) return
       if (migrateHash()) return
       if (applyDefaults()) return
-      mountFlow()
+      if (mountFlow()) {
+        if (mountRetry) clearInterval(mountRetry)
+        mountRetry = null
+        return
+      }
+      if (mountRetry) return
+      var n = 0
+      mountRetry = setInterval(function () {
+        n += 1
+        if (path() !== ROUTE || mountFlow() || n > 40) {
+          clearInterval(mountRetry)
+          mountRetry = null
+        }
+      }, 200)
     })
   }
 
