@@ -98,29 +98,42 @@
     pane.appendChild(btn)
   }
 
-  function fillVehicleCameras() {
-    // 实时出警 · 查看车内画面弹窗：用本地录像填充车内摄像头视频区
+  function ensureVehicleLiveBox() {
+    // 实时出警 · 查看车内画面弹窗：单独一个「车内实时画面」盒子放本地录像；
+    // 云台 / 网络 / 终端三路摄像头保持「未接」占位，不再逐个注入视频
     const mon = document.querySelector('.vehicle-monitor')
-    if (!mon) return
-    mon.querySelectorAll('.video-pane').forEach((pane) => {
-      if (pane.querySelector('video[data-hx-vehicle-cam]')) return
-      const state = pane.querySelector('.video-state')
-      if (!state) return
-      const v = document.createElement('video')
-      v.src = '/media/v09.mp4'
-      v.autoplay = true
-      v.muted = true
-      v.loop = true
-      v.playsInline = true
-      v.setAttribute('playsinline', '')
-      v.dataset.hxVehicleCam = '9'
-      state.replaceWith(v)
-      const sig = pane.querySelector('.signal')
-      if (sig) {
-        sig.textContent = '实时画面'
-        sig.classList.add('online')
-      }
-    })
+    if (!mon || mon.querySelector('.hx-vehicle-live')) return
+
+    const box = document.createElement('section')
+    box.className = 'hx-vehicle-live'
+    box.style.cssText =
+      'grid-column:1/-1;display:flex;flex-direction:column;gap:8px;' +
+      'background:#fff;border:1px solid #e2e8f0;border-radius:10px;' +
+      'padding:10px 12px 12px;box-sizing:border-box;'
+
+    const head = document.createElement('div')
+    head.style.cssText = 'font-size:13px;font-weight:600;color:#0f172a;line-height:1.35;'
+    head.textContent = '车内实时画面'
+
+    const wrap = document.createElement('div')
+    wrap.style.cssText =
+      'position:relative;height:min(48dvh,400px);min-height:220px;' +
+      'background:#040c15;border:1px solid #204771;border-radius:8px;overflow:hidden;'
+
+    const v = document.createElement('video')
+    v.src = '/media/v09.mp4'
+    v.autoplay = true
+    v.muted = true
+    v.loop = true
+    v.playsInline = true
+    v.setAttribute('playsinline', '')
+    v.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;'
+    v.dataset.hxVehicleLive = '1'
+
+    wrap.appendChild(v)
+    box.appendChild(head)
+    box.appendChild(wrap)
+    mon.insertBefore(box, mon.firstChild)
   }
 
   function scan() {
@@ -154,8 +167,8 @@
   window.hxVideoPlaceholder = { blockHtml, chipHtml, scan }
   window.hxEnhance(scanAndSyncStrip, { wait: 350, observeRoot: true, afterNav: 100 })
 
-  // 车内画面弹窗由 React 状态切换（非 hashchange）打开，需独立轮询填充
-  fillVehicleCameras()
-  setInterval(fillVehicleCameras, 1500)
-  window.addEventListener('hashchange', () => setTimeout(fillVehicleCameras, 200))
+  // 车内画面弹窗由 React 状态切换（非 hashchange）打开，需独立轮询注入单视频盒
+  ensureVehicleLiveBox()
+  setInterval(ensureVehicleLiveBox, 1500)
+  window.addEventListener('hashchange', () => setTimeout(ensureVehicleLiveBox, 200))
 })()
