@@ -123,8 +123,8 @@ function closeCreate() {
 
 async function submitCreate() {
   const f = createForm.value
-  if (!f.task120Id.trim() || !f.chiefComplaint.trim()) {
-    createError.value = '请填写 120 任务号和主诉'
+  if (!f.task120Id.trim() || !f.chiefComplaint.trim() || !f.pickupAddress.trim()) {
+    createError.value = '请填写 120 任务号、主诉和接车地址'
     return
   }
   createSubmitting.value = true
@@ -452,8 +452,8 @@ onMounted(fetchPage)
               <span class="dh-field-label">事件级别</span>
               <select v-model="createForm.level">
                 <option value="CRITICAL">紧急（CRITICAL）</option>
-                <option value="URGENT">危重（URGENT）</option>
-                <option value="NORMAL">普通（NORMAL）</option>
+                <option value="ACUTE">重症（ACUTE）</option>
+                <option value="GENERAL">一般（GENERAL）</option>
               </select>
             </label>
             <label class="dh-field">
@@ -461,7 +461,7 @@ onMounted(fetchPage)
               <input v-model="createForm.chiefComplaint" type="text" placeholder="如 胸痛伴呼吸急促" />
             </label>
             <label class="dh-field">
-              <span class="dh-field-label">接车地址</span>
+              <span class="dh-field-label">接车地址 *</span>
               <input v-model="createForm.pickupAddress" type="text" placeholder="如 某路某号" />
             </label>
             <label class="dh-field">

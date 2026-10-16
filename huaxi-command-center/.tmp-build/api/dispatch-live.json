@@ -1,0 +1,54 @@
+{
+  "updatedAt": "2026-10-14T14:28:00+08:00",
+  "activeCount": 3,
+  "events": [
+    {
+      "id": "EVT-20261012-01",
+      "task120Id": "120-WY-88421",
+      "level": "重症",
+      "chiefComplaint": "胸痛、意识模糊",
+      "pickupAddress": "威远县连界镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-1",
+      "vehiclePlate": "演示001",
+      "status": "出警中",
+      "startedAt": "2026-10-14T14:05:00+08:00",
+      "etaHospitalMinutes": 8,
+      "etaPatientMinutes": 4,
+      "scorePlan": "胸痛绿色通道 · NEWS 关注",
+      "treatPlan": "吸氧、心电监护、准备阿司匹林，联系心内科会诊。"
+    },
+    {
+      "id": "EVT-20261012-02",
+      "task120Id": "120-WY-88435",
+      "level": "重症",
+      "chiefComplaint": "多发伤、呼吸困难",
+      "pickupAddress": "威远县严陵镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-2",
+      "vehiclePlate": "演示002",
+      "status": "现场处置",
+      "startedAt": "2026-10-14T13:58:00+08:00",
+      "etaHospitalMinutes": 14,
+      "etaPatientMinutes": 6,
+      "scorePlan": "多发伤救治方案 · 气道优先",
+      "treatPlan": "开放气道、止血包扎、建立静脉通道，通知外科备床。"
+    },
+    {
+      "id": "EVT-20261012-03",
+      "task120Id": "120-WY-88450",
+      "level": "重症",
+      "chiefComplaint": "疑似卒中 · 言语不清、单侧无力",
+      "pickupAddress": "威远县新店镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-3",
+      "vehiclePlate": "演示003",
+      "status": "返院途中",
+      "startedAt": "2026-10-14T13:40:00+08:00",
+      "etaHospitalMinutes": 5,
+      "etaPatientMinutes": null,
+      "scorePlan": "卒中绿色通道 · FAST 阳性",
+      "treatPlan": "维持气道、监测血糖血压，到院前通知神经内科备溶栓评估。"
+    }
+  ]
+}
