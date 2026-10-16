@@ -337,7 +337,14 @@
           headers: { ...headers, Authorization: token ? `Bearer ${token}` : headers.Authorization },
         })
       }
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${apiPath}`)
+      if (!res.ok) {
+        let detail = ''
+        try {
+          const eb = await res.clone().json()
+          detail = eb?.message || (eb?.errors ? Object.values(eb.errors).flat().join('；') : '')
+        } catch { /* ignore */ }
+        throw new Error(detail ? `${detail}（HTTP ${res.status}）` : `HTTP ${res.status} ${apiPath}`)
+      }
       const ct = res.headers.get('content-type') || ''
       const body = ct.includes('application/json') ? await res.json() : await res.text()
       if (method === 'GET' && !init?._skipCache) {

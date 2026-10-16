@@ -524,6 +524,15 @@ body.hx-sidebar-shell .app-shell.hx-sidebar-ready > main {
   overflow: hidden !important;
 }
 
+/* 重症监护（main.critical-screen）：固定视口下内容超高时在 main 内滚动，
+   否则被 body/#root/.app-shell 的 overflow:hidden 裁掉且无滚动条 */
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready main.critical-screen.screen {
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
 body.hx-sidebar-shell.hx-sidebar-home .app-shell.hx-sidebar-ready:has(#hx-panel-toggles) > main.dashboard.screen {
   grid-row: 3 !important;
 }
