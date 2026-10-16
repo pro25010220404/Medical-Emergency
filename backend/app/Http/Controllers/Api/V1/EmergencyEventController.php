@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreEmergencyEventRequest;
 use App\Http\Requests\StoreEventTimelineRequest;
 use App\Http\Requests\UpdateEmergencyEventRequest;
-use App\Http\Resources\EmergencyEventResource;
-use App\Http\Resources\EventTimelineResource;
+use App\Services\EmergencyEventService;
+use App\Services\EventTimelineService;
 use App\Models\EmergencyEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,7 +47,7 @@ class EmergencyEventController extends Controller
             ->paginate($request->integer('per_page', 15))
             ->appends($request->query());
 
-        return EmergencyEventResource::collection($events);
+        return EmergencyEventService::collection($events);
     }
 
     /**
@@ -60,7 +60,7 @@ class EmergencyEventController extends Controller
         $event->refresh();
         $event->load(['acceptOrg', 'patient']);
 
-        return (new EmergencyEventResource($event))
+        return (new EmergencyEventService($event))
             ->response()
             ->setStatusCode(201);
     }
@@ -68,28 +68,28 @@ class EmergencyEventController extends Controller
     /**
      * 事件详情（含时间线）
      */
-    public function show(EmergencyEvent $emergencyEvent): EmergencyEventResource
+    public function show(EmergencyEvent $emergencyEvent): EmergencyEventService
     {
         $emergencyEvent->load(['acceptOrg', 'patient', 'timelines']);
 
-        return new EmergencyEventResource($emergencyEvent);
+        return new EmergencyEventService($emergencyEvent);
     }
 
     /**
      * 更新事件（分诊 / 状态流转 / 补充信息）
      */
-    public function update(UpdateEmergencyEventRequest $request, EmergencyEvent $emergencyEvent): EmergencyEventResource
+    public function update(UpdateEmergencyEventRequest $request, EmergencyEvent $emergencyEvent): EmergencyEventService
     {
         $emergencyEvent->update($request->validated());
         $emergencyEvent->load(['acceptOrg', 'patient']);
 
-        return new EmergencyEventResource($emergencyEvent);
+        return new EmergencyEventService($emergencyEvent);
     }
 
     /**
      * 关闭事件
      */
-    public function close(Request $request, EmergencyEvent $emergencyEvent): EmergencyEventResource
+    public function close(Request $request, EmergencyEvent $emergencyEvent): EmergencyEventService
     {
         $validated = $request->validate([
             'close_reason' => ['required', 'string'],
@@ -103,7 +103,7 @@ class EmergencyEventController extends Controller
             'closed_by_user_id' => $validated['closed_by_user_id'] ?? null,
         ]);
 
-        return new EmergencyEventResource($emergencyEvent);
+        return new EmergencyEventService($emergencyEvent);
     }
 
     /**
@@ -152,7 +152,7 @@ class EmergencyEventController extends Controller
     {
         $timeline = $emergencyEvent->timelines()->create($request->validated());
 
-        return (new EventTimelineResource($timeline))
+        return (new EventTimelineService($timeline))
             ->response()
             ->setStatusCode(201);
     }

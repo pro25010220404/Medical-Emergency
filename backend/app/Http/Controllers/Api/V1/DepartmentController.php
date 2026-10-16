@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\DepartmentResource;
+use App\Services\DepartmentService;
 use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -22,11 +22,11 @@ class DepartmentController extends Controller
             ->paginate($request->integer('per_page', 50))
             ->appends($request->query());
 
-        return DepartmentResource::collection($departments);
+        return DepartmentService::collection($departments);
     }
 
-    public function show(Department $department): DepartmentResource
+    public function show(Department $department): DepartmentService
     {
-        return new DepartmentResource($department);
+        return new DepartmentService($department);
     }
 }

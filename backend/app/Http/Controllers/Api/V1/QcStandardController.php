@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreQcStandardRequest;
 use App\Http\Requests\UpdateQcStandardRequest;
-use App\Http\Resources\QcStandardResource;
+use App\Services\QcStandardService;
 use App\Models\QcIssue;
 use App\Models\QcStandard;
 use Illuminate\Http\JsonResponse;
@@ -28,7 +28,7 @@ class QcStandardController extends Controller
             ->paginate($request->integer('per_page', 50))
             ->appends($request->query());
 
-        return QcStandardResource::collection($standards);
+        return QcStandardService::collection($standards);
     }
 
     /**
@@ -38,21 +38,21 @@ class QcStandardController extends Controller
     {
         $standard = QcStandard::create($request->validated());
 
-        return (new QcStandardResource($standard))
+        return (new QcStandardService($standard))
             ->response()
             ->setStatusCode(201);
     }
 
-    public function show(QcStandard $qcStandard): QcStandardResource
+    public function show(QcStandard $qcStandard): QcStandardService
     {
-        return new QcStandardResource($qcStandard);
+        return new QcStandardService($qcStandard);
     }
 
-    public function update(UpdateQcStandardRequest $request, QcStandard $qcStandard): QcStandardResource
+    public function update(UpdateQcStandardRequest $request, QcStandard $qcStandard): QcStandardService
     {
         $qcStandard->update($request->validated());
 
-        return new QcStandardResource($qcStandard);
+        return new QcStandardService($qcStandard);
     }
 
     public function destroy(QcStandard $qcStandard): Response

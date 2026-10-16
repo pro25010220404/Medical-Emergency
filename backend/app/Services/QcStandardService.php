@@ -1,19 +1,22 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DepartmentResource extends JsonResource
+class QcStandardService extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
             'id' => $this->id,
-            'org_id' => $this->org_id,
-            'dept_code' => $this->dept_code,
-            'dept_name' => $this->dept_name,
+            'version' => $this->version,
+            'standard_name' => $this->standard_name,
+            'category' => $this->category,
+            'target_rate' => $this->target_rate,
+            'sort' => $this->sort,
+            'is_active' => $this->is_active,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

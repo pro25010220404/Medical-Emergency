@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class SlaRecordResource extends JsonResource
+class SlaRecordService extends JsonResource
 {
     public function toArray(Request $request): array
     {

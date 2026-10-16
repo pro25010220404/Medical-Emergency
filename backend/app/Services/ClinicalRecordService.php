@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class ClinicalRecordResource extends JsonResource
+class ClinicalRecordService extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -13,11 +13,11 @@ class ClinicalRecordResource extends JsonResource
             'id' => $this->id,
             'record_code' => $this->record_code,
             'patient_id' => $this->patient_id,
-            'patient' => new PatientResource($this->whenLoaded('patient')),
+            'patient' => new PatientService($this->whenLoaded('patient')),
             'doctor_user_id' => $this->doctor_user_id,
             'doctor_name' => $this->whenLoaded('doctor', fn () => $this->doctor?->real_name),
             'org_id' => $this->org_id,
-            'org' => new OrganizationResource($this->whenLoaded('organization')),
+            'org' => new OrganizationService($this->whenLoaded('organization')),
             'record_type' => $this->record_type,
             'chief_complaint' => $this->chief_complaint,
             'present_history' => $this->present_history,
