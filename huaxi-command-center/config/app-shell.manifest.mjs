@@ -69,7 +69,7 @@ export const enhanceScripts = [
   { src: '/assets/enhance/dispatch-consult-bridge-enhance.js?v=6', defer: true },
   { src: '/assets/enhance/consult-nav-fix-enhance.js?v=3', defer: true },
   { src: '/assets/enhance/dispatch-ui-enhance.js?v=2', defer: true },
-  { src: '/assets/enhance/dispatch-camera-room-enhance.js?v=1', defer: true },
+  { src: '/assets/enhance/dispatch-camera-room-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/dr-ui-enhance.js', defer: true },
   { src: '/assets/enhance/dr-video-enhance.js', defer: true },
   { src: '/assets/enhance/consult-stage-enhance.js', defer: true },
