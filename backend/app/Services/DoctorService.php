@@ -14,7 +14,7 @@ class DoctorService extends JsonResource
             'real_name' => $this->real_name,
             'username' => $this->username,
             'org_id' => $this->org_id,
-            'org' => new OrganizationResourceService($this->whenLoaded('organization')),
+            'org' => new OrganizationService($this->whenLoaded('organization')),
             'phone' => $this->phone,
             'email' => $this->email,
             'identity_type' => $this->identity_type,

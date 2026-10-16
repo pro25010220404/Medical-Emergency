@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ResponseCode;
+use App\Exceptions\BusinessException;
 use App\Models\Bed;
 use App\Models\ClinicalNote;
 use App\Models\ConsultMaterial;
@@ -16,12 +17,56 @@ use App\Models\Warning;
 use App\Models\WarningDisposeRecord;
 use App\Models\WarningTrend;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * 患者列表 / 详情 / 更新（03-患者与床位/02-患者管理接口 §3.2/§3.3/§3.7）
+ * 同时作为患者 JSON 资源输出（原 PatientResource）。
  */
-class PatientService extends Service
+class PatientService extends JsonResource
 {
+    public function __construct($resource = null)
+    {
+        parent::__construct($resource);
+    }
+
+    /**
+     * 业务断言，条件不满足时抛出业务异常
+     */
+    protected function assert(bool $condition, ResponseCode $code, ?string $message = null): void
+    {
+        if (! $condition) {
+            throw new BusinessException($code, $message);
+        }
+    }
+
+    /**
+     * 患者 JSON 资源输出（嵌套于事件 / 诊疗记录等场景）
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'patientId' => $this->patient_id,
+            'name' => $this->name,
+            'gender' => self::GENDER_CODES[$this->gender] ?? 'UNKNOWN',
+            'genderLabel' => self::GENDER_LABELS[$this->gender] ?? '未知',
+            'age' => $this->age === null ? null : (int) $this->age,
+            'idCard' => $this->id_card,
+            'phone' => $this->phone,
+            'institutionId' => $this->institution_id,
+            'departmentId' => $this->department_id,
+            'stage' => $this->stage,
+            'stageLabel' => self::STAGE_LABELS[$this->stage] ?? $this->stage,
+            'chiefComplaint' => $this->chief_complaint,
+            'symptoms' => $this->symptoms ?? [],
+            'notes' => $this->notes,
+            'source' => $this->source,
+            'createdAt' => $this->created_at?->toIso8601String(),
+            'updatedAt' => $this->updated_at?->toIso8601String(),
+        ];
+    }
+
     /** 性别：MALE/FEMALE/UNKNOWN ↔ 0/1/2 */
     private const GENDER_CODES = [
         0 => 'MALE',

@@ -19,7 +19,7 @@ class VehicleService extends JsonResource
             'latest_lng' => $this->latest_lng,
             'latest_lat' => $this->latest_lat,
             'latest_at' => $this->latest_at?->toIso8601String(),
-            'organization' => new OrganizationResourceService($this->whenLoaded('organization')),
+            'organization' => new OrganizationService($this->whenLoaded('organization')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
