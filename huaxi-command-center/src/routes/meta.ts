@@ -34,6 +34,24 @@ export const APP_ROUTES: AppRouteMeta[] = [
     modules: ['车辆定位', '任务分派', '院前病例推送', '到院交接'],
   },
   {
+    path: '/dispatch/list',
+    title: '出警列表',
+    group: '指挥大屏',
+    modules: ['实时出警队列', '历史出警记录'],
+  },
+  {
+    path: '/dispatch/events',
+    title: '事件列表',
+    group: '指挥大屏',
+    modules: ['急救事件', '事件归档'],
+  },
+  {
+    path: '/ambulances',
+    title: '救护车列表',
+    group: '指挥大屏',
+    modules: ['车辆状态', '班组配置', '绑定医院'],
+  },
+  {
     path: '/monitoring',
     title: '视频监控（已下线，重定向重症监护）',
     group: '指挥大屏',
