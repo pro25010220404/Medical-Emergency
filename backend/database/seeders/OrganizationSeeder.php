@@ -92,6 +92,8 @@ class OrganizationSeeder extends Seeder
             ['id' => 13, 'org_id' => 4, 'dept_code' => 'EMERGENCY', 'dept_name' => '急诊科', 'is_deleted' => 0, 'deleted_at' => null, 'created_at' => $now, 'updated_at' => $now],
             ['id' => 14, 'org_id' => 6, 'dept_code' => 'EMERGENCY', 'dept_name' => '急诊科', 'is_deleted' => 0, 'deleted_at' => null, 'created_at' => $now, 'updated_at' => $now],
             ['id' => 15, 'org_id' => 6, 'dept_code' => 'ICU', 'dept_name' => '重症医学科', 'is_deleted' => 0, 'deleted_at' => null, 'created_at' => $now, 'updated_at' => $now],
+            // 连界镇中心卫生院住院床位所在科室（前端 lianjie 机构公开科室仅含消化内科）
+            ['id' => 16, 'org_id' => 3, 'dept_code' => 'GASTRO', 'dept_name' => '消化内科', 'is_deleted' => 0, 'deleted_at' => null, 'created_at' => $now, 'updated_at' => $now],
         ]);
     }
 }

@@ -35,8 +35,8 @@ class PatientSeeder extends Seeder
             ],
             [
                 'id' => 2, 'name' => '李国强', 'gender' => 0, 'age' => 63, 'id_card' => '511024196304120013', 'phone' => '13600000002',
-                'institution_id' => 'LJ001', 'department_id' => 'EMERGENCY',
-                'assigned_to' => ['LJ001-EMERGENCY-doctor'],
+                'institution_id' => 'WY001', 'department_id' => 'NEURO',
+                'assigned_to' => ['WY001-NEURO-doctor'],
                 'stage' => 'admitted', 'chief_complaint' => '意识模糊伴呕吐2小时',
                 'symptoms' => ['意识模糊', '呕吐'],
                 'notes' => null,
@@ -47,8 +47,8 @@ class PatientSeeder extends Seeder
             ],
             [
                 'id' => 3, 'name' => '张桂英', 'gender' => 1, 'age' => 56, 'id_card' => '511024197008200014', 'phone' => '13600000003',
-                'institution_id' => 'XC001', 'department_id' => 'EMERGENCY',
-                'assigned_to' => ['XC001-EMERGENCY-doctor'],
+                'institution_id' => 'WY001', 'department_id' => 'ICU',
+                'assigned_to' => ['WY001-ICU-doctor'],
                 'stage' => 'admitted', 'chief_complaint' => '言语不清、右侧肢体无力1小时',
                 'symptoms' => ['言语不清', '肢体无力'],
                 'notes' => null,
@@ -118,6 +118,65 @@ class PatientSeeder extends Seeder
                 'admitted_at' => $at(10, 15), 'is_draft' => 0,
             ],
         ];
+
+        // —— 在院占床患者：与 BedSeeder 的「占用床位」一一对应，保证床位/患者同源 ——
+        // [机构, 科室, 姓名, 性别, 年龄, 主诉, 症状, 预警级别]
+        $bedded = [
+            ['WY001', 'EMERGENCY', '陈志明', 0, 57, '突发上腹痛3小时', ['腹痛', '恶心']],
+            ['WY001', 'EMERGENCY', '罗秀英', 1, 64, '头晕伴呕吐1天', ['头晕', '呕吐']],
+            ['WY001', 'EMERGENCY', '黄建平', 0, 45, '车祸致右小腿疼痛', ['外伤', '疼痛']],
+            ['WY001', 'ICU', '刘振华', 0, 72, '重症肺炎、呼吸衰竭', ['呼吸困难', '发热']],
+            ['WY001', 'ICU', '曾丽华', 1, 61, '感染性休克', ['低血压', '发热']],
+            ['WY001', 'ICU', '王大明', 0, 55, '急性心肌梗死溶栓后', ['胸痛', '心悸']],
+            ['WY001', 'ICU', '李桂芳', 1, 78, '脑出血术后监护', ['意识障碍']],
+            ['WY001', 'ICU', '杨建国', 0, 66, '重症急性胰腺炎', ['腹痛', '腹胀']],
+            ['WY001', 'ICU', '邓小燕', 1, 49, '多发伤术后', ['外伤', '疼痛']],
+            ['HX001', 'ICU', '周文彬', 0, 58, '主动脉夹层术后', ['胸痛']],
+            ['HX001', 'ICU', '吴海燕', 1, 63, '脓毒症休克', ['发热', '低血压']],
+            ['HX001', 'ICU', '郑国强', 0, 70, '重症肺炎 ECMO 辅助', ['呼吸困难']],
+            ['HX001', 'EMERGENCY', '冯雪梅', 1, 39, '转移性右下腹痛1天', ['腹痛']],
+            ['HX001', 'EMERGENCY', '何志强', 0, 52, '急性缺血性脑卒中', ['言语不清', '肢体无力']],
+            ['HX001', 'EMERGENCY', '唐小丽', 1, 31, '高热伴抽搐', ['发热', '抽搐']],
+            ['NJ001', 'ICU', '曹建华', 0, 67, '慢阻肺急性加重', ['呼吸困难', '咳嗽']],
+            ['NJ001', 'ICU', '谢明芳', 1, 74, '急性心力衰竭', ['气促', '双下肢浮肿']],
+            ['NJ001', 'ICU', '韩伟东', 0, 46, '急性重症胰腺炎', ['腹痛']],
+            ['NJ001', 'ICU', '潘桂兰', 1, 69, '糖尿病酮症酸中毒', ['乏力', '恶心']],
+            ['NJ001', 'ICU', '汪志远', 0, 53, '上消化道大出血', ['呕血', '黑便']],
+            ['NJ001', 'ICU', '卢晓燕', 1, 44, '重症哮喘发作', ['喘息', '呼吸困难']],
+            ['NJ001', 'EMERGENCY', '谭志诚', 0, 62, '胸痛待查', ['胸痛']],
+            ['NJ001', 'EMERGENCY', '白秀珍', 1, 71, '晕厥待查', ['晕厥']],
+            ['NJ001', 'EMERGENCY', '石俊杰', 0, 35, '急性酒精中毒', ['意识模糊']],
+            ['NJ001', 'EMERGENCY', '龚美华', 1, 58, '急性胆囊炎', ['腹痛', '发热']],
+            ['LJ001', 'GASTRO', '尹国平', 0, 60, '呕血2小时', ['呕血', '黑便']],
+            ['LJ001', 'GASTRO', '邹玉兰', 1, 55, '腹痛腹泻3天', ['腹痛', '腹泻']],
+            ['LJ001', 'GASTRO', '方海涛', 0, 48, '急性胰腺炎', ['腹痛', '呕吐']],
+            // 威远心血管内科 / 神经内科住院患者（对应 WY001-CARDIO-xx、WY001-NEURO-xx 占用床位）
+            ['WY001', 'CARDIO', '龚淑芬', 1, 73, '冠心病、不稳定型心绞痛', ['胸痛', '气促']],
+            ['WY001', 'CARDIO', '范建军', 0, 59, '高血压急症', ['头晕', '头痛']],
+            ['WY001', 'NEURO', '崔玉兰', 1, 68, '急性缺血性脑卒中', ['言语不清', '肢体无力']],
+            // 补足 ICU 占床：威远 ICU-02、华西 ICU-01
+            ['WY001', 'ICU', '孙宝国', 0, 64, '重症急性胰腺炎、呼吸机辅助', ['腹胀', '呼吸困难']],
+            ['HX001', 'ICU', '钱学明', 0, 57, '主动脉夹层术后监护', ['胸痛']],
+        ];
+
+        foreach ($bedded as $offset => [$org, $dept, $name, $gender, $age, $complaint, $symptoms]) {
+            $seq = 9 + $offset; // 接续上表 001~008，生成 009~041
+            $patients[] = [
+                'id' => $seq,
+                'name' => $name, 'gender' => $gender, 'age' => $age,
+                'id_card' => sprintf('511024%s%04d', str_pad((string) (1960 + ($seq % 30)), 4, '0', STR_PAD_LEFT), 20 + $seq),
+                'phone' => sprintf('1360000%04d', $seq),
+                'institution_id' => $org, 'department_id' => $dept,
+                'assigned_to' => ["{$org}-{$dept}-doctor"],
+                'stage' => 'admitted', 'chief_complaint' => $complaint,
+                'symptoms' => $symptoms,
+                'notes' => '本地虚构演示记录，不是真实病历，不用于临床判断。',
+                'source' => $seq % 3 === 0 ? '120' : 'manual',
+                'prehospital' => ['complaint' => $complaint, 'symptoms' => $symptoms],
+                'consultation_token' => null, 'consultation_doctor_id' => null, 'consultation_request_id' => null,
+                'admitted_at' => $at(7 + ($seq % 4), ($seq * 7) % 60), 'is_draft' => 0,
+            ];
+        }
 
         foreach ($patients as $index => $patient) {
             // json 列需手动编码，DB 门面 insert 不会自动转换数组

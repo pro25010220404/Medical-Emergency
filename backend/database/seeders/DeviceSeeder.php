@@ -19,8 +19,9 @@ class DeviceSeeder extends Seeder
         $day = now()->copy()->startOfDay();
         $at = fn (int $hour, int $minute) => $day->copy()->addHours($hour)->addMinutes($minute);
 
-        $p1 = 'PAT-'.$ymd.'-001';
         $p3 = 'PAT-'.$ymd.'-003';
+        $p9 = 'PAT-'.$ymd.'-009';
+        $p40 = 'PAT-'.$ymd.'-040';
 
         DB::table('medical_devices')->insert([
             [
@@ -31,19 +32,19 @@ class DeviceSeeder extends Seeder
             ],
             [
                 'id' => 2, 'device_id' => 'DEV-MON-002', 'name' => '监护仪', 'bed_id' => 'WY001-ICU-02', 'bed_label' => 'ICU-02',
-                'patient_id' => $p1, 'patient_name' => '王秀兰', 'online' => 1, 'alarm' => 1,
+                'patient_id' => $p40, 'patient_name' => '孙宝国', 'online' => 1, 'alarm' => 1,
                 'bound_at' => $at(8, 35), 'previous_bed_id' => null, 'unbound_at' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ],
             [
                 'id' => 3, 'device_id' => 'DEV-VENT-001', 'name' => '呼吸机', 'bed_id' => 'WY001-ICU-02', 'bed_label' => 'ICU-02',
-                'patient_id' => $p1, 'patient_name' => '王秀兰', 'online' => 1, 'alarm' => 0,
+                'patient_id' => $p40, 'patient_name' => '孙宝国', 'online' => 1, 'alarm' => 0,
                 'bound_at' => $at(8, 40), 'previous_bed_id' => null, 'unbound_at' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ],
             [
                 'id' => 4, 'device_id' => 'DEV-PUMP-001', 'name' => '输液泵', 'bed_id' => 'WY001-EMERGENCY-01', 'bed_label' => '急诊-01',
-                'patient_id' => $p1, 'patient_name' => '王秀兰', 'online' => 1, 'alarm' => 0,
+                'patient_id' => $p9, 'patient_name' => '陈志明', 'online' => 1, 'alarm' => 0,
                 'bound_at' => $at(8, 45), 'previous_bed_id' => null, 'unbound_at' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ],
@@ -51,6 +52,12 @@ class DeviceSeeder extends Seeder
                 'id' => 5, 'device_id' => 'DEV-MON-003', 'name' => '监护仪', 'bed_id' => null, 'bed_label' => null,
                 'patient_id' => null, 'patient_name' => null, 'online' => 0, 'alarm' => 0,
                 'bound_at' => null, 'previous_bed_id' => 'WY001-ICU-03', 'unbound_at' => $at(7, 30),
+                'created_at' => $now, 'updated_at' => $now,
+            ],
+            [
+                'id' => 6, 'device_id' => 'DEV-MON-004', 'name' => '监护仪', 'bed_id' => 'WY001-ICU-04', 'bed_label' => 'ICU-04',
+                'patient_id' => 'PAT-'.$ymd.'-012', 'patient_name' => '刘振华', 'online' => 1, 'alarm' => 1,
+                'bound_at' => $at(9, 5), 'previous_bed_id' => null, 'unbound_at' => null,
                 'created_at' => $now, 'updated_at' => $now,
             ],
         ]);

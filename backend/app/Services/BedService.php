@@ -125,13 +125,20 @@ class BedService extends Service
             );
         }
 
+        // hospitalId 为空时跨机构返回，必须带上 hospitalId/hospitalName，
+        // 否则多个机构的「急诊科」会变成同名无法区分的行
+        $orgNames = Organization::query()->pluck('org_name', 'org_code');
+
         $departments = DepartmentBed::query()
             ->when($hospitalId, fn ($q, $v) => $q->where('hospital_id', $v))
+            ->orderBy('hospital_id')
             ->orderBy('dept_id')
             ->get()
             ->map(fn (DepartmentBed $d) => [
                 'id' => $d->dept_id,
                 'name' => $d->name,
+                'hospitalId' => (string) $d->hospital_id,
+                'hospitalName' => $orgNames[$d->hospital_id] ?? '',
                 'total' => (int) $d->total,
                 'occupied' => (int) $d->occupied,
                 'reserved' => (int) $d->reserved,

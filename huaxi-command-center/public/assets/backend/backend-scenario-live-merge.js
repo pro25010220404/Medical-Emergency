@@ -41,12 +41,19 @@
       }
     }
 
+    // 床位与患者必须同源：后端床位合并成功才允许覆盖患者，否则床位的 patientId
+    // 会指向 scenario 里已不存在的演示患者，卡片全部退化成「空床」而表头仍按
+    // status==='occupied' 计数（两边对不上）。下面按 bedsMerged / patientsMerged 兜底。
+    let bedsMerged = 0
+    let patientsMerged = 0
+
     await step('patients', async () => {
       const mapRow = window.hxMapPatientFromApi
       if (typeof mapRow !== 'function') return 0
       const patients = await list('/patients', { pageSize: 100, pageNum: 1 })
       const mapped = patients.map(mapRow).filter(Boolean)
       if (!mapped.length) return 0
+      patientsMerged = 1
       out.state.patients = mapped
       try {
         localStorage.removeItem('huaxi-final-demo-v1')
@@ -88,19 +95,32 @@
     })
 
     await step('beds', async () => {
-      const bedRaw = await get('/beds/distribution')
-      const bedList = bedRaw?.beds || bedRaw?.list || []
+      // GET /beds（床位明细）返回 {list:[{bedId,institutionId,departmentId,status,patient}]}；
+      // 早期误用 /beds/distribution（返回 {institutions}）导致床位永远合并不进来。
+      const bedRaw = await get('/beds')
+      const bedList = bedRaw?.list || bedRaw?.beds || []
       if (!bedList.length) return 0
+      const orgSlug = window.hxOrgSlug || ((c) => String(c ?? 'weiyuan').toLowerCase())
+      const deptSlug = window.hxDeptSlug || ((c) => String(c ?? 'emergency').toLowerCase())
+      const bedStatus = window.hxBedStatusSlug || ((s) => (s === 1 || s === 'occupied' ? 'occupied' : 'available'))
       out.state.beds = bedList.map((b) => ({
-        id: String(b.bed_id || b.bedId || b.id),
-        label: b.bed_label || b.label || '床',
-        institutionId: b.institution_id || 'weiyuan',
-        departmentId: b.department_id || 'icu',
-        status: b.status === 1 || b.status === 'occupied' ? 'occupied' : 'available',
-        patientId: b.patient_id || b.patientId,
+        id: String(b.bedId || b.bed_id || b.id),
+        label: b.label || b.bed_label || '床',
+        institutionId: orgSlug(b.institutionId ?? b.institution_id),
+        departmentId: deptSlug(b.departmentId ?? b.department_id),
+        status: bedStatus(b.status),
+        patientId: b.patient?.patientId || b.patient?.id || b.patientId || b.patient_id || undefined,
       }))
+      bedsMerged = 1
       return 1
     })
+
+    // 后端床位不可用（未配置/接口异常）时，回退到 scenario 演示床位；
+    // 此时患者也必须回退，否则两套 ID 体系混在一起。
+    if (!bedsMerged && patientsMerged) {
+      out.state.patients = base?.state?.patients || []
+      console.warn('[hx-scenario-merge] 后端无床位数据，患者同步一并回退到 scenario.json，保持床位/患者同源')
+    }
 
     await step('emergency-events', async () => {
       const ev = await list('/emergency-events', { per_page: 40 })
