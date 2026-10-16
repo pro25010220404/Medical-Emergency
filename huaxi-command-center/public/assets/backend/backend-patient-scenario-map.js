@@ -2,23 +2,63 @@
  * Laravel GET /patients list 项 → React scenario.state.patients（#/patients 急救事件表）
  */
 ;(function () {
-  /** 后端 org_code → scenario 机构 slug（yt/ln  lookup） */
+  /**
+   * 后端 org_code → scenario 机构 slug（yt/ln lookup）。
+   * 只映射前端机构目录（BH）里存在的机构；未收录的机构会退化为原 code。
+   */
   const ORG_SLUG = {
     WY001: 'weiyuan',
     LJ001: 'lianjie',
     XC001: 'xinchang',
     HX001: 'huaxi',
+    NJ001: 'neijiang-first',
   }
 
-  /** 科室编码 → scenario 科室 slug */
+  /**
+   * 后端 dept_code → scenario 科室 slug。
+   * 值必须与前端 BH 里该机构的 departments[].id 一致，否则 ln() 会退化显示英文编码。
+   */
   const DEPT_SLUG = {
     EMERGENCY: 'emergency',
     ICU: 'icu',
-    CARDIO: 'cardio',
-    NEURO: 'neuro',
-    RESP: 'resp',
+    CARDIO: 'cardiology',
+    NEURO: 'neurology',
+    RESP: 'respiratory',
+    SURGERY: 'general-surgery',
+    GASTRO: 'gastroenterology',
     GEN: 'general',
   }
+
+  /** 后端 beds.status（0空床1占用2预留3维护）→ scenario 床位状态 */
+  const BED_STATUS_SLUG = {
+    0: 'available',
+    1: 'occupied',
+    2: 'reserved',
+    3: 'maintenance',
+    free: 'available',
+    available: 'available',
+    occupied: 'occupied',
+    reserved: 'reserved',
+    maintenance: 'maintenance',
+  }
+
+  function orgSlug(code) {
+    const raw = String(code ?? 'weiyuan')
+    return ORG_SLUG[raw] || raw.toLowerCase()
+  }
+
+  function deptSlug(code) {
+    const raw = String(code ?? 'emergency')
+    return DEPT_SLUG[raw.toUpperCase()] || raw.toLowerCase()
+  }
+
+  function bedStatusSlug(status) {
+    return BED_STATUS_SLUG[status] || 'available'
+  }
+
+  window.hxOrgSlug = orgSlug
+  window.hxDeptSlug = deptSlug
+  window.hxBedStatusSlug = bedStatusSlug
 
   function mapPatientFromApi(p) {
     if (!p || typeof p !== 'object') return null
@@ -51,10 +91,8 @@
 
     const name = String(p.name ?? p.real_name ?? p.patientName ?? '').trim()
 
-    const rawOrg = String(p.institutionId ?? p.institution_id ?? 'weiyuan')
-    const rawDept = String(p.departmentId ?? p.department_id ?? 'emergency')
-    const institutionId = ORG_SLUG[rawOrg] || rawOrg.toLowerCase()
-    const departmentId = DEPT_SLUG[rawDept] || rawDept.toLowerCase()
+    const institutionId = orgSlug(p.institutionId ?? p.institution_id ?? 'weiyuan')
+    const departmentId = deptSlug(p.departmentId ?? p.department_id ?? 'emergency')
 
     return {
       id,

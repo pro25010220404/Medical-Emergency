@@ -126,15 +126,19 @@
     }))
 
     try {
-      const bedRaw = await get('/beds/distribution')
-      const bedList = bedRaw?.beds || bedRaw?.list || []
+      // GET /beds（床位明细）；/beds/distribution 返回 {institutions}，不是床位列表
+      const bedRaw = await get('/beds')
+      const bedList = bedRaw?.list || bedRaw?.beds || []
+      const orgSlug = window.hxOrgSlug || ((c) => String(c ?? 'weiyuan').toLowerCase())
+      const deptSlug = window.hxDeptSlug || ((c) => String(c ?? 'emergency').toLowerCase())
+      const bedStatus = window.hxBedStatusSlug || ((s) => (s === 1 || s === 'occupied' ? 'occupied' : 'available'))
       base.state.beds = bedList.map((b) => ({
-        id: String(b.bed_id || b.bedId || b.id),
-        label: b.bed_label || b.label || '床',
-        institutionId: b.institution_id || 'weiyuan',
-        departmentId: b.department_id || 'icu',
-        status: b.status === 1 || b.status === 'occupied' ? 'occupied' : 'available',
-        patientId: b.patient_id || b.patientId,
+        id: String(b.bedId || b.bed_id || b.id),
+        label: b.label || b.bed_label || '床',
+        institutionId: orgSlug(b.institutionId ?? b.institution_id),
+        departmentId: deptSlug(b.departmentId ?? b.department_id),
+        status: bedStatus(b.status),
+        patientId: b.patient?.patientId || b.patient?.id || b.patientId || b.patient_id || undefined,
       }))
     } catch {
       /* optional */

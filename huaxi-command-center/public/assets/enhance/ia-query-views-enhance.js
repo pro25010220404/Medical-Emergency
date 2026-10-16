@@ -163,11 +163,56 @@
     mount(host, 'hx-grassroots-remote', html)
   }
 
-  function buildBedStatsHtml(byDept, reserved) {
-    const depts = byDept?.departments || []
+  const BED_DEPT_NAMES = {
+    emergency: '急诊科',
+    icu: '重症医学科',
+    // 名称取前端机构目录（BH）里的科室名，与床位卡片显示保持一致
+    gastroenterology: '消化、肿瘤内科',
+    respiratory: '呼吸与危重症医学科',
+    cardiology: '心血管、内分泌内科',
+    neurology: '神经内科',
+    'general-surgery': '普外科',
+    general: '全科医学科',
+  }
+
+  const BED_INST_NAMES = {
+    weiyuan: '威远县人民医院',
+    huaxi: '四川大学华西医院',
+    'neijiang-first': '内江市第一人民医院',
+    lianjie: '威远县连界镇卫生院',
+    xinchang: '威远县新场镇卫生院',
+  }
+
+  // 科室床位占用与「床位状态」取同一数据源（scenario.json 的 state.beds），
+  // 避免与后端 department_beds 台账静态列（总床/占用口径不一致）错位。
+  function deptRowsFromBeds(beds) {
+    const groups = new Map()
+    for (const b of beds || []) {
+      const key = `${b.institutionId}|${b.departmentId}`
+      if (!groups.has(key)) {
+        groups.set(key, { institutionId: b.institutionId, departmentId: b.departmentId, total: 0, occupied: 0, reserved: 0, free: 0 })
+      }
+      const g = groups.get(key)
+      g.total += 1
+      if (b.status === 'occupied') g.occupied += 1
+      else if (b.status === 'reserved') g.reserved += 1
+      else if (b.status !== 'maintenance') g.free += 1
+    }
+    return [...groups.values()]
+      .map((g) => ({
+        name: `${BED_INST_NAMES[g.institutionId] || g.institutionId} · ${BED_DEPT_NAMES[g.departmentId] || g.departmentId}`,
+        total: g.total,
+        occupied: g.occupied,
+        reserved: g.reserved,
+        free: g.free,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))
+  }
+
+  function buildBedStatsHtml(deptRows, reserved) {
     const reservedList = reserved?.list || []
-    const updated = fmtMonitorTime(byDept?.updatedAt || reserved?.updatedAt)
-    const deptRows = depts
+    const updated = fmtMonitorTime(reserved?.updatedAt)
+    const rows = (deptRows || [])
       .map((d) => {
         const total = Number(d.total) || 0
         const occupied = Number(d.occupied) || 0
@@ -200,7 +245,7 @@
       <div class="hx-beds-live-title">按科室床位</div>
       <table>
         <thead><tr><th>科室</th><th>总床</th><th>占用</th><th>预留</th><th>空床</th><th>占用率</th></tr></thead>
-        <tbody>${deptRows || '<tr><td colspan="6">暂无数据</td></tr>'}</tbody>
+        <tbody>${rows || '<tr><td colspan="6">暂无数据</td></tr>'}</tbody>
       </table>
       <div class="hx-beds-live-title">预留床位</div>
       <table>
@@ -214,12 +259,17 @@
     const { p, q } = pathAndQuery()
     remove('hx-beds-live-panel')
     if (p !== '/warning' || q.get('view') !== 'departments') return
-    if (typeof window.hxBackend?.get !== 'function') return
+    const reservedPromise =
+      typeof window.hxBackend?.get === 'function'
+        ? window.hxBackend.get('/beds/reserved').catch(() => null)
+        : Promise.resolve(null)
     Promise.all([
-      window.hxBackend.get('/beds/by-dept').catch(() => null),
-      window.hxBackend.get('/beds/reserved').catch(() => null),
-    ]).then(([byDept, reserved]) => {
-      const html = buildBedStatsHtml(byDept, reserved)
+      loadLinkCtx()
+        .then((ctx) => deptRowsFromBeds(ctx.beds))
+        .catch(() => []),
+      reservedPromise,
+    ]).then(([deptRows, reserved]) => {
+      const html = buildBedStatsHtml(deptRows, reserved)
       let tries = 0
       const tryMount = () => {
         if (pathAndQuery().p !== '/warning' || pathAndQuery().q.get('view') !== 'departments') return

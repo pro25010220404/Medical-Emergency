@@ -38,14 +38,14 @@ class WarningSeeder extends Seeder
                 'created_at' => $now->copy()->subMinutes(26), 'updated_at' => $now,
             ],
             [
-                'id' => 3, 'warning_no' => "WARN-{$ymd}-003", 'patient_id' => 'PAT-'.now()->format('Ymd').'-005', 'patient_label' => '产科 03床',
+                'id' => 3, 'warning_no' => "WARN-{$ymd}-003", 'patient_id' => 'PAT-'.now()->format('Ymd').'-005', 'patient_label' => '全科 03床',
                 'category' => 'VASOACTIVE', 'title' => '血管活性药物使用后血压偏低', 'metric' => '收缩压', 'current_value' => 88,
                 'threshold' => '≤90', 'level' => 'warning', 'status' => 'treating',
-                'institution_id' => 'WY001', 'department_id' => 'EMERGENCY', 'occurred_at' => $at(11, 15),
+                'institution_id' => 'LJ001', 'department_id' => 'GEN', 'occurred_at' => $at(11, 15),
                 'created_at' => $now->copy()->subMinutes(15), 'updated_at' => $now,
             ],
             [
-                'id' => 4, 'warning_no' => "WARN-{$ymd}-004", 'patient_id' => 'PAT-'.now()->format('Ymd').'-008', 'patient_label' => '心内科 06床',
+                'id' => 4, 'warning_no' => "WARN-{$ymd}-004", 'patient_id' => 'PAT-'.now()->format('Ymd').'-008', 'patient_label' => '心内科 08床',
                 'category' => 'COAG', 'title' => '凝血指标异常', 'metric' => 'D-二聚体', 'current_value' => 12.50,
                 'threshold' => '≥5.0', 'level' => 'warning', 'status' => 'resolved',
                 'institution_id' => 'WY001', 'department_id' => 'CARDIO', 'occurred_at' => $at(7, 45),
@@ -66,14 +66,14 @@ class WarningSeeder extends Seeder
                 'created_at' => $now->copy()->subMinutes(10), 'updated_at' => $now,
             ],
             [
-                'id' => 7, 'warning_no' => "WARN-{$ymd}-007", 'patient_id' => 'PAT-'.now()->format('Ymd').'-001', 'patient_label' => 'ICU 02床',
+                'id' => 7, 'warning_no' => "WARN-{$ymd}-007", 'patient_id' => 'PAT-'.now()->format('Ymd').'-040', 'patient_label' => 'ICU 02床',
                 'category' => 'NEWS', 'title' => '心率增快预警', 'metric' => 'HR', 'current_value' => 118.00,
                 'threshold' => '>100', 'level' => 'warning', 'status' => 'acknowledged',
                 'institution_id' => 'WY001', 'department_id' => 'icu', 'occurred_at' => $at(9, 40),
                 'created_at' => $now->copy()->subMinutes(24), 'updated_at' => $now,
             ],
             [
-                'id' => 8, 'warning_no' => "WARN-{$ymd}-008", 'patient_id' => 'PAT-'.now()->format('Ymd').'-002', 'patient_label' => 'ICU 03床',
+                'id' => 8, 'warning_no' => "WARN-{$ymd}-008", 'patient_id' => 'PAT-'.now()->format('Ymd').'-013', 'patient_label' => 'ICU 05床',
                 'category' => 'COAG', 'title' => '血小板计数下降', 'metric' => 'PLT', 'current_value' => 45.00,
                 'threshold' => '<50', 'level' => 'urgent', 'status' => 'new',
                 'institution_id' => 'WY001', 'department_id' => 'icu', 'occurred_at' => $at(10, 5),
@@ -86,7 +86,7 @@ class WarningSeeder extends Seeder
             ['id' => 2, 'trend_id' => 'TR-02', 'patient_id' => "PAT-{$ymd}-003", 'patient_label' => 'ICU 01床', 'metric' => 'SpO2', 'current_value' => 89.00, 'predicted_value' => 85.00, 'within_minutes' => 15, 'note' => '血氧持续下降', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 3, 'trend_id' => 'TR-03', 'patient_id' => "PAT-{$ymd}-002", 'patient_label' => '神经内科 08床', 'metric' => '收缩压', 'current_value' => 186.00, 'predicted_value' => 195.00, 'within_minutes' => 45, 'note' => '血压进行性升高', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 4, 'trend_id' => 'TR-04', 'patient_id' => "PAT-{$ymd}-006", 'patient_label' => '呼吸内科 05床', 'metric' => 'PaO2', 'current_value' => 58.00, 'predicted_value' => 52.00, 'within_minutes' => 20, 'note' => '呼吸衰竭风险', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 5, 'trend_id' => 'TR-05', 'patient_id' => "PAT-{$ymd}-008", 'patient_label' => '心内科 06床', 'metric' => 'D-二聚体', 'current_value' => 12.50, 'predicted_value' => 14.00, 'within_minutes' => 60, 'note' => '血栓风险升高', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 5, 'trend_id' => 'TR-05', 'patient_id' => "PAT-{$ymd}-008", 'patient_label' => '心内科 08床', 'metric' => 'D-二聚体', 'current_value' => 12.50, 'predicted_value' => 14.00, 'within_minutes' => 60, 'note' => '血栓风险升高', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         DB::table('warning_closed_loop')->insert([
