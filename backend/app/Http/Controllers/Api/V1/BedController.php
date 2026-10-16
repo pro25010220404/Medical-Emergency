@@ -13,6 +13,12 @@ class BedController extends Controller
     {
     }
 
+    /** 床位明细列表（床位全景页数据源） */
+    public function index(Request $request): array
+    {
+        return Result::success('获取成功', $this->service->index($request->only(['institutionId', 'departmentId', 'status'])));
+    }
+
     /** 科室床位统计（§3.1） */
     public function byDept(Request $request): array
     {

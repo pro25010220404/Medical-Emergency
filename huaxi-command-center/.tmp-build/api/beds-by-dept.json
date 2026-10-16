@@ -1,0 +1,10 @@
+{
+  "updatedAt": "2026-10-12T10:00:00+08:00",
+  "hospitalId": "weiyuan",
+  "departments": [
+    { "id": "icu", "name": "重症医学科", "total": 26, "occupied": 18, "reserved": 2, "free": 6 },
+    { "id": "emergency", "name": "急诊科", "total": 28, "occupied": 17, "reserved": 1, "free": 10 },
+    { "id": "internal", "name": "内科", "total": 48, "occupied": 41, "reserved": 0, "free": 7 },
+    { "id": "surgery", "name": "外科", "total": 36, "occupied": 32, "reserved": 1, "free": 3 }
+  ]
+}

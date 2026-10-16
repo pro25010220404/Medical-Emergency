@@ -17,13 +17,22 @@
   function fillOnce() {
     const grid = document.querySelector('.critical-grid')
     if (!grid) return
-    grid.querySelectorAll('.critical-bed').forEach((bed, idx) => {
+    let camIdx = 0
+    grid.querySelectorAll('.critical-bed').forEach((bed) => {
+      const bedVideo = bed.querySelector('.bed-video')
+      // 空床/已预留床位：隐藏视频占位，只显示空床
+      if (bed.querySelector('.free-bed')) {
+        if (bedVideo) bedVideo.style.display = 'none'
+        return
+      }
+      if (bedVideo) bedVideo.style.display = ''
       const pane = bed.querySelector('.video-pane')
       if (!pane || pane.querySelector('video')) return
       const state = pane.querySelector('.video-state')
       if (!state) return
 
-      const n = (idx % VIDEO_COUNT) + 1
+      const n = (camIdx % VIDEO_COUNT) + 1
+      camIdx += 1
       const v = document.createElement('video')
       v.src = `/media/v${pad(n)}.mp4`
       v.autoplay = true

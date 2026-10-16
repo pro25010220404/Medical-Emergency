@@ -1,0 +1,44 @@
+{
+  "updatedAt": "2026-10-12T16:30:00+08:00",
+  "summary24h": {
+    "activeAlerts": 8,
+    "newsAttention": 3,
+    "criticalValue": 2,
+    "closedLoopPercent": 86
+  },
+  "trends": [
+    {
+      "id": "TR-01",
+      "patientLabel": "演示 · 心内科 12 床",
+      "metric": "NEWS",
+      "current": 5,
+      "predicted": 7,
+      "withinMinutes": 30,
+      "note": "趋势升高 · 演示演算，非临床 AI 结论"
+    },
+    {
+      "id": "TR-02",
+      "patientLabel": "演示 · 急诊 3 床",
+      "metric": "SpO₂",
+      "current": 92,
+      "predicted": 89,
+      "withinMinutes": 20,
+      "note": "可能低于阈值 · 演示 Mock"
+    },
+    {
+      "id": "TR-03",
+      "patientLabel": "演示 · ICU 5 床",
+      "metric": "心率",
+      "current": 108,
+      "predicted": 118,
+      "withinMinutes": 45,
+      "note": "采集系统接入后替换为实时流"
+    }
+  ],
+  "closedLoop": [
+    { "stage": "预警触发", "count": 24 },
+    { "stage": "护士确认", "count": 22 },
+    { "stage": "医生到床", "count": 19 },
+    { "stage": "干预完成", "count": 17 }
+  ]
+}

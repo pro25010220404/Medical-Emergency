@@ -75,6 +75,9 @@ const STATUS_LABELS: Record<string, string> = {
 
 const PAGE_SIZE = 15
 
+/** 列表行无 patient_name 时，按 patient_id 调 /patients/{id} 解析出的姓名缓存 */
+const patientNames = ref<Record<string, string>>({})
+
 const events = ref<EmergencyEventRow[]>([])
 const total = ref(0)
 const lastPage = ref(1)
@@ -83,6 +86,69 @@ const page = ref(1)
 const status = ref<string>('')
 const loading = ref(false)
 const error = ref('')
+
+// 新增急救事件
+const showCreate = ref(false)
+const createSubmitting = ref(false)
+const createError = ref('')
+const createForm = ref({
+  task120Id: '',
+  level: 'CRITICAL',
+  chiefComplaint: '',
+  pickupAddress: '',
+  destination: '',
+  startedAt: '',
+})
+
+function resetCreateForm() {
+  createForm.value = {
+    task120Id: '',
+    level: 'CRITICAL',
+    chiefComplaint: '',
+    pickupAddress: '',
+    destination: '',
+    startedAt: new Date().toISOString().slice(0, 16),
+  }
+  createError.value = ''
+}
+
+function openCreate() {
+  resetCreateForm()
+  showCreate.value = true
+}
+
+function closeCreate() {
+  showCreate.value = false
+}
+
+async function submitCreate() {
+  const f = createForm.value
+  if (!f.task120Id.trim() || !f.chiefComplaint.trim() || !f.pickupAddress.trim()) {
+    createError.value = '请填写 120 任务号、主诉和接车地址'
+    return
+  }
+  createSubmitting.value = true
+  createError.value = ''
+  try {
+    if (!window.hxBackend?.enabled?.()) throw new Error('后端接口未连接')
+    await window.hxBackend.ensureAuth()
+    await window.hxBackend.post('/dispatch/events', {
+      task120Id: f.task120Id.trim(),
+      level: f.level,
+      chiefComplaint: f.chiefComplaint.trim(),
+      pickupAddress: f.pickupAddress.trim() || undefined,
+      destination: f.destination.trim() || undefined,
+      startedAt: f.startedAt ? new Date(f.startedAt).toISOString() : undefined,
+    })
+    showCreate.value = false
+    page.value = 1
+    await fetchPage()
+  } catch (e) {
+    createError.value = e instanceof Error ? e.message : String(e)
+  } finally {
+    createSubmitting.value = false
+  }
+}
 
 const activeOnPage = computed(
   () => events.value.filter((e) => e.event_status === 'EVENT_ACTIVE').length,
@@ -118,19 +184,24 @@ function patientBizId(ev: EmergencyEventRow) {
   return id
 }
 
+function resolvedName(ev: EmergencyEventRow) {
+  const biz = patientBizId(ev)
+  return (biz && patientNames.value[biz]) || ''
+}
+
 function patientPrimary(ev: EmergencyEventRow) {
   if (isTempPatient(ev)) {
     return ev.temp_summary || TEMP_GENDER_LABELS[ev.temp_gender || ''] || '临时患者'
   }
   if (ev.patient_name) return ev.patient_name
   if (ev.patient?.name) return ev.patient.name
-  return patientBizId(ev) || '已登记患者'
+  return resolvedName(ev) || patientBizId(ev) || '已登记患者'
 }
 
 function patientSecondary(ev: EmergencyEventRow) {
   if (isTempPatient(ev)) return '临时 · 待登记'
   const biz = patientBizId(ev)
-  const name = ev.patient_name || ev.patient?.name
+  const name = ev.patient_name || ev.patient?.name || resolvedName(ev)
   if (name && biz) return biz
   return biz || ''
 }
@@ -143,6 +214,31 @@ function statusTone(text: string) {
   if (/进行|现场|途中/.test(text)) return 'dh-status--warn'
   if (/关闭/.test(text)) return 'dh-status--muted'
   return 'dh-status--ok'
+}
+
+/** 列表行缺 patient_name 时按 patient_id 逐个解析（结果缓存，换页不重复请求） */
+async function resolvePatientNames(rows: EmergencyEventRow[]) {
+  const ids = [
+    ...new Set(
+      rows
+        .filter((r) => !isTempPatient(r) && !r.patient_name && !r.patient?.name)
+        .map((r) => patientBizId(r))
+        .filter((pid) => pid && !(pid in patientNames.value)),
+    ),
+  ]
+  await Promise.all(
+    ids.map(async (pid) => {
+      try {
+        // hxBackend.get 已拆 {code,data} 信封，返回的即患者对象本身
+        const res = await window.hxBackend!.get<{ name?: string | null }>(
+          `/patients/${encodeURIComponent(pid)}`,
+        )
+        patientNames.value = { ...patientNames.value, [pid]: res?.name || '' }
+      } catch {
+        patientNames.value = { ...patientNames.value, [pid]: '' }
+      }
+    }),
+  )
 }
 
 async function fetchPage() {
@@ -169,6 +265,8 @@ async function fetchPage() {
     lastPage.value = Number(payload?.meta?.last_page ?? 1) || 1
     if (page.value > lastPage.value) page.value = lastPage.value
     updated.value = formatClock(new Date().toISOString())
+    // 列表行不携带姓名：后台异步按 patient_id 解析，不阻塞表格渲染
+    void resolvePatientNames(rows)
   } catch (e) {
     error.value = e instanceof Error ? e.message : String(e)
     events.value = []
@@ -224,7 +322,6 @@ onMounted(fetchPage)
     <section class="dh-page-head">
       <div>
         <h2 class="dh-h2">事件列表</h2>
-        <p class="dh-lead">120 接警急救事件 · 数据来自 <code>GET /v1/emergency-events</code>。</p>
       </div>
       <p class="dh-stats">
         共 {{ total }} 条 · 本页进行中 {{ activeOnPage }} · 更新 {{ updated || '—' }}
@@ -244,6 +341,10 @@ onMounted(fetchPage)
           @click="pickStatus(f.value)"
         >
           {{ f.label }}
+        </button>
+        <span style="flex: 1"></span>
+        <button class="dh-date-btn dh-date-btn--primary" type="button" @click="openCreate">
+          新增急救事件
         </button>
       </div>
     </section>
@@ -333,5 +434,54 @@ onMounted(fetchPage)
         下一页
       </button>
     </section>
+
+    <!-- 新增急救事件对话框 -->
+    <Teleport to="body">
+      <div v-if="showCreate" class="dh-modal-mask" @click.self="closeCreate">
+        <div class="dh-modal" role="dialog" aria-modal="true" aria-labelledby="create-event-title">
+          <header class="dh-modal-head">
+            <h3 id="create-event-title">新增急救事件</h3>
+            <button class="dh-modal-close" type="button" @click="closeCreate">×</button>
+          </header>
+          <div class="dh-modal-body">
+            <label class="dh-field">
+              <span class="dh-field-label">120 任务号 *</span>
+              <input v-model="createForm.task120Id" type="text" placeholder="如 120-20261016-001" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">事件级别</span>
+              <select v-model="createForm.level">
+                <option value="CRITICAL">紧急（CRITICAL）</option>
+                <option value="ACUTE">重症（ACUTE）</option>
+                <option value="GENERAL">一般（GENERAL）</option>
+              </select>
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">主诉 *</span>
+              <input v-model="createForm.chiefComplaint" type="text" placeholder="如 胸痛伴呼吸急促" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">接车地址 *</span>
+              <input v-model="createForm.pickupAddress" type="text" placeholder="如 某路某号" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">目的地</span>
+              <input v-model="createForm.destination" type="text" placeholder="如 县人民医院急诊科" />
+            </label>
+            <label class="dh-field">
+              <span class="dh-field-label">开始时间</span>
+              <input v-model="createForm.startedAt" type="datetime-local" />
+            </label>
+            <p v-if="createError" class="dh-form-error">{{ createError }}</p>
+          </div>
+          <footer class="dh-modal-foot">
+            <button class="dh-date-btn" type="button" :disabled="createSubmitting" @click="closeCreate">取消</button>
+            <button class="dh-date-btn dh-date-btn--primary" type="button" :disabled="createSubmitting" @click="submitCreate">
+              {{ createSubmitting ? '提交中…' : '确认创建' }}
+            </button>
+          </footer>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>

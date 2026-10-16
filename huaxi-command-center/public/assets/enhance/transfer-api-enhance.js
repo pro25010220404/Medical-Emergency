@@ -183,6 +183,7 @@
     const { main, table } = (await waitTable(15000)) || {}
     if (!table) {
       console.warn('[hx-transfer-api] 未找到表格，放弃注入')
+      loaded = false // 允许下次 tick 重试
       return
     }
 
@@ -201,6 +202,7 @@
       records = await window.hxBackend.list(TRANSFER_API, { per_page: PER_PAGE })
     } catch (err) {
       console.error('[hx-transfer-api] 拉取转诊记录失败', err)
+      loaded = false // 允许下次 tick 重试
       // 网络失败时展示友好提示
       const loadingRow = tbody?.querySelector('.hx-loading-row')
       if (loadingRow) {
@@ -308,8 +310,14 @@
     stopObserver()
     const root = document.querySelector('#root') || document.body
     observer = new MutationObserver(() => {
-      if (isTransferPage() && !loaded) {
-        loaded = false // 重置，每次切回来都刷新
+      // React 重渲染表格可能覆盖已注入的数据，此时需要重新注入
+      if (isTransferPage() && loaded) {
+        const main = document.querySelector('main.workspace')
+        const table = main?.querySelector('.business-table table')
+        const hasInjected = table?.querySelector('tr[data-transfer-id]')
+        if (table && !hasInjected) {
+          loadAndInject()
+        }
       }
     })
     observer.observe(root, { childList: true, subtree: true })
@@ -318,6 +326,7 @@
   function tick() {
     if (!isTransferPage()) {
       stopObserver()
+      loaded = false // 离开转诊页时重置，下次进入重新加载
       return
     }
     startObserver()
