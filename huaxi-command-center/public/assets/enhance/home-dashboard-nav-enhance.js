@@ -187,8 +187,9 @@
   }
 
   function apply() {
-    if (!window.hxIntegratedNav?.integratedSpa?.()) return
+    // 车辆面板（含「出警中」卡片）统一走 app 内 #/dispatch，不随 legacy 模式跳 dispatch.html
     bindVehiclePanel(document.querySelector('.vehicle-panel'))
+    if (!window.hxIntegratedNav?.integratedSpa?.()) return
     bindCurrentPanel(document.querySelector('.current-panel'))
     bindMapPanel()
     bindRightColumn(document.querySelector('.dashboard-right'))

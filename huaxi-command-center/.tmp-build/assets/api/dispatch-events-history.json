@@ -1,0 +1,62 @@
+{
+  "events": [
+    {
+      "id": "EVT-20261011-01",
+      "task120Id": "120-WY-88301",
+      "level": "重症",
+      "chiefComplaint": "高处坠落 · 意识改变",
+      "pickupAddress": "威远县连界镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-2",
+      "vehiclePlate": "演示002",
+      "status": "已结束",
+      "startedAt": "2026-10-11T16:22:00+08:00",
+      "etaHospitalMinutes": 0,
+      "etaPatientMinutes": null,
+      "scorePlan": "创伤评估 · GCS 动态",
+      "treatPlan": "颈托固定、液体复苏，到院后 CT 全身扫描。"
+    },
+    {
+      "id": "EVT-20261011-02",
+      "task120Id": "120-WY-88318",
+      "level": "重症",
+      "chiefComplaint": "急性腹痛、休克倾向",
+      "pickupAddress": "威远县严陵镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-1",
+      "vehiclePlate": "演示001",
+      "status": "已结束",
+      "startedAt": "2026-10-11T09:15:00+08:00",
+      "etaHospitalMinutes": 0,
+      "etaPatientMinutes": null
+    },
+    {
+      "id": "EVT-20261010-01",
+      "task120Id": "120-WY-88205",
+      "level": "重症",
+      "chiefComplaint": "产后大出血",
+      "pickupAddress": "威远县新店镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-3",
+      "vehiclePlate": "演示003",
+      "status": "已结束",
+      "startedAt": "2026-10-10T21:40:00+08:00",
+      "etaHospitalMinutes": 0,
+      "etaPatientMinutes": null
+    },
+    {
+      "id": "EVT-20261010-02",
+      "task120Id": "120-WY-88192",
+      "level": "中风险",
+      "chiefComplaint": "慢阻肺急性加重",
+      "pickupAddress": "威远县镇西镇",
+      "destination": "威远县人民医院",
+      "vehicleId": "AMB-2",
+      "vehiclePlate": "演示002",
+      "status": "已结束",
+      "startedAt": "2026-10-10T11:08:00+08:00",
+      "etaHospitalMinutes": 0,
+      "etaPatientMinutes": null
+    }
+  ]
+}

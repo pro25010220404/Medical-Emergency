@@ -160,6 +160,34 @@
     }
   }
 
+  /** 等 sidebar-shell-enhance.js 加完 hx-sidebar-ready，再用 MutationObserver 监听 .app-shell */
+  let observed = false
+  function observeShell() {
+    if (observed) return
+    const shell = document.querySelector('.app-shell')
+    if (!shell) return
+    observed = true
+    const obs = new MutationObserver(() => {
+      if (document.querySelector('.app-shell.hx-sidebar-ready')) {
+        obs.disconnect()
+        renderPage()
+      }
+    })
+    obs.observe(shell, { attributes: true, attributeFilter: ['class'] })
+    /* 如果 hx-sidebar-ready 已经在了直接触发 */
+    if (document.querySelector('.app-shell.hx-sidebar-ready')) {
+      obs.disconnect()
+      renderPage()
+    }
+  }
+
+  const root = document.getElementById('root')
+  if (root) {
+    const obs = new MutationObserver(() => observeShell())
+    obs.observe(root, { childList: true })
+    observeShell()
+  }
+
   window.hxEnhance(() => renderPage(), { wait: 220, afterNav: 120 })
   window.addEventListener('hashchange', () => renderPage())
   normalizeLegacyHub()

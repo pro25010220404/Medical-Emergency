@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 
 <html lang="zh-CN">
 
@@ -35,8 +35,8 @@
     <script src="/assets/backend/backend-scenario-live-merge.js?v=4"></script>
     <script src="/assets/backend/backend-write-proxy.js"></script>
     <script src="/assets/backend/backend-api-write-dock.js" defer></script>
-    <!-- 演示 UI：预编译 React bundle（完整业务页）；API 调试壳见 src-shell.html → /src/main.tsx -->
-    <script type="module" crossorigin src="/assets/vendor/index-BA_IO3dC.js?v=app-shell-3"></script>
+    <!-- app.html 走本地入口 /src/main.tsx（vite build 自动打包，含全部业务路由） -->
+    <script type="module" crossorigin src="/src/main.tsx"></script>
     <!-- 协作三维地图：command-map-page + React MapScene（勿与 map-medical-overlay 双开） -->
     <script src="/assets/enhance/map-threemaps-enhance.js" defer></script>
     <script src="/assets/enhance/map-light-3d-enhance.js" defer></script>
@@ -46,19 +46,20 @@
     <script src="/assets/enhance/dispatch-hub-bridge.js?v=6" defer></script>
     <script src="/assets/enhance/nav-ia-enhance.js?v=14" defer></script>
     <script src="/assets/enhance/dispatch-subnav-parity-enhance.js?v=2" defer></script>
-    <script src="/assets/enhance/sidebar-shell-enhance.js?v=37" defer></script>
+    <script src="/assets/enhance/sidebar-shell-enhance.js?v=38" defer></script>
     <script src="/assets/enhance/breadcrumb-nav-enhance.js?v=15" defer></script>
     <script src="/assets/enhance/command-map-page-enhance.js?v=14" defer></script>
-    <script src="/assets/enhance/ambulances-page-enhance.js?v=1" defer></script>
+    <script src="/assets/enhance/ambulances-page-enhance.js?v=2" defer></script>
     <script src="/assets/enhance/patients-list-api-enhance.js?v=5" defer></script>
-    <script src="/assets/enhance/dispatch-vue-embed-enhance.js?v=3" defer></script>
+    <script src="/assets/enhance/dispatch-vue-embed-enhance.js?v=4" defer></script>
     <script src="/assets/enhance/consult-launch-dialog-enhance.js?v=2" defer></script>
     <script src="/assets/enhance/consult-episode-nav.js?v=4" defer></script>
     <script src="/assets/enhance/register-consult-flow-enhance.js?v=8" defer></script>
     <script src="/assets/enhance/register-create-event-enhance.js?v=1" defer></script>
-    <script src="/assets/enhance/dispatch-consult-bridge-enhance.js?v=4" defer></script>
+    <script src="/assets/enhance/dispatch-consult-bridge-enhance.js?v=6" defer></script>
     <script src="/assets/enhance/consult-nav-fix-enhance.js?v=3" defer></script>
     <script src="/assets/enhance/dispatch-ui-enhance.js?v=2" defer></script>
+    <script src="/assets/enhance/dispatch-camera-room-enhance.js?v=2" defer></script>
     <script src="/assets/enhance/dr-ui-enhance.js" defer></script>
     <script src="/assets/enhance/dr-video-enhance.js" defer></script>
     <script src="/assets/enhance/consult-stage-enhance.js" defer></script>
@@ -78,10 +79,11 @@
     <script src="/assets/enhance/critical-bed-summary-enhance.js?v=4" defer></script>
     <script src="/assets/enhance/ward-video-enhance.js?v=3" defer></script>
     <script src="/assets/enhance/town-video-fill-enhance.js?v=2" defer></script>
+    <script src="/assets/enhance/bed-detail-tabs-enhance.js?v=1" defer></script>
     <script src="/assets/enhance/consult-context-enhance.js?v=10" defer></script>
     <script src="/assets/enhance/consult-list-polish-enhance.js?v=5" defer></script>
     <script src="/assets/enhance/consult-queue-actions-enhance.js?v=1" defer></script>
-    <script src="/assets/enhance/consult-workbench-enhance.js?v=38" defer></script>
+    <script src="/assets/enhance/consult-workbench-enhance.js?v=39" defer></script>
     <script src="/assets/enhance/consult-patient-pick-enhance.js?v=11" defer></script>
     <script src="/assets/enhance/grassroots-consult-enhance.js?v=11" defer></script>
     <script src="/assets/enhance/nav-back-enhance.js?v=2" defer></script>

@@ -97,4 +97,31 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply)
   else apply()
   window.hxEnhance?.(apply, { wait: 120, observeRoot: true, afterNav: 80 })
+
+  /** 等 sidebar-shell-enhance.js 加完 hx-sidebar-ready，再用 MutationObserver 监听 .app-shell */
+  let observed = false
+  function observeShell() {
+    if (observed) return
+    const shell = document.querySelector('.app-shell')
+    if (!shell) return
+    observed = true
+    const obs = new MutationObserver(() => {
+      if (document.querySelector('.app-shell.hx-sidebar-ready')) {
+        obs.disconnect()
+        apply()
+      }
+    })
+    obs.observe(shell, { attributes: true, attributeFilter: ['class'] })
+    if (document.querySelector('.app-shell.hx-sidebar-ready')) {
+      obs.disconnect()
+      apply()
+    }
+  }
+
+  const root = document.getElementById('root')
+  if (root) {
+    const obs = new MutationObserver(() => observeShell())
+    obs.observe(root, { childList: true })
+    observeShell()
+  }
 })()

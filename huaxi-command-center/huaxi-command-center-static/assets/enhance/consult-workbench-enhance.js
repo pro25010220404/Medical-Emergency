@@ -379,6 +379,7 @@
       P + '-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 18px}',
       P + '-field{display:flex;flex-direction:column;gap:5px}',
       P + '-field label{font-size:12px;color:#64748b}',
+      P + '-req{color:#dc2626;margin-left:3px;font-weight:600}',
       P + '-field input,' + P + '-field select,' + P + '-field textarea{font-family:inherit;font-size:13px;color:#1e293b;border:1px solid #cdd7e1;border-radius:6px;padding:7px 10px;background:#fff;width:100%;box-sizing:border-box;min-height:34px}',
       P + '-field input:focus,' + P + '-field select:focus{outline:none;border-color:#1d4ed8;box-shadow:0 0 0 2px rgba(29,78,216,.08)}',
       P + '-form-foot{grid-column:1/-1;display:flex;gap:8px;align-items:center}',
@@ -486,10 +487,10 @@
       '<div class="' + HOST_ID + '-form">' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-patient">患者选择</label><select id="hx-cw-f-patient"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-complaint">主诉</label><input id="hx-cw-f-complaint" type="text" placeholder="如：胸痛2小时"></div>' +
-      '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-hospital">目标医院</label><select id="hx-cw-f-hospital"></select></div>' +
+      '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-hospital">接诊医院<span class="' + HOST_ID + '-req">*</span></label><select id="hx-cw-f-hospital"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-dept">目标科室</label><select id="hx-cw-f-dept"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-doctor">指定接诊医生</label><select id="hx-cw-f-doctor"></select></div>' +
-      '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-note">备注</label><input id="hx-cw-f-note" type="text" placeholder="选填"></div>' +
+      '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-note">备注<span class="' + HOST_ID + '-req">*</span></label><input id="hx-cw-f-note" type="text" placeholder="必填，请填写会诊说明"></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-schedule">定时开始（可选）</label>' +
       '<div class="' + HOST_ID + '-dt">' +
       '<input id="hx-cw-f-schedule" type="text" readonly placeholder="选填，到点立即可开始">' +
@@ -1158,11 +1159,12 @@
       return who + '）'
     }, '请选择患者'))
 
+    // 接诊医院：后端 organisations 列表，取机构名称作为值（POST /consultations 的 targetHospital 必填）
     fillSelect($('hx-cw-f-hospital'), options(state.orgs, function (o) {
-      return o.name
+      return o.name || o.orgId || ''
     }, function (o) {
-      return o.name
-    }, '请选择目标医院'))
+      return (o.name || o.orgId || '') + (o.levelLabel ? '（' + o.levelLabel + '）' : '')
+    }, '请选择接诊医院'))
 
     fillSelect($('hx-cw-f-dept'), options(state.depts, function (d) {
       return d.dept_name
@@ -1354,8 +1356,11 @@
     var pid = ($('hx-cw-f-patient') || {}).value || ''
     var hospital = ($('hx-cw-f-hospital') || {}).value || ''
     var dept = ($('hx-cw-f-dept') || {}).value || ''
+    var noteVal = (($('hx-cw-f-note') || {}).value || '').trim()
     if (!pid) return setFormMsg('请选择患者', 'err')
-    if (!hospital || !dept) return setFormMsg('请选择目标医院与科室', 'err')
+    if (!hospital) return setFormMsg('请选择接诊医院', 'err')
+    if (!dept) return setFormMsg('请选择目标科室', 'err')
+    if (state.scopeTab === 'grassroots' && !noteVal) return setFormMsg('请填写备注（基层会诊必填）', 'err')
 
     var patient = state.patients.filter(function (p) {
       return p.patientId === pid
@@ -1393,7 +1398,7 @@
       targetHospital: hospital,
       targetDepartment: dept,
       nominatedDoctorId: ($('hx-cw-f-doctor') || {}).value || null,
-      note: (($('hx-cw-f-note') || {}).value || '') + (noteExtra ? ' ' + noteExtra : ''),
+      note: noteVal + (noteExtra ? ' ' + noteExtra : ''),
       originRole: originRole,
       transferIntent: transferIntent,
       scheduledAt: scheduledAt,

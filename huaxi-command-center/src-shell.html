@@ -14,12 +14,16 @@
     <script src="/assets/backend/boot-recover.js"></script>
     <script src="/assets/backend/backend-api-config.js"></script>
     <script src="/assets/backend/backend-api-bridge.js?v=13"></script>
+    <!-- 一体化侧栏：dispatch/list 走 Vue iframe (/dispatch.html#live)、救护车列表直接渲染 -->
+    <script src="/assets/backend/app-integrated-nav.js?v=3"></script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script src="/assets/enhance/map-light-3d-enhance.js" defer></script>
-    <script src="/assets/enhance/sidebar-shell-enhance.js?v=29" defer></script>
+    <script src="/assets/enhance/sidebar-shell-enhance.js?v=30" defer></script>
     <script src="/assets/enhance/command-map-page-enhance.js?v=14" defer></script>
+    <script src="/assets/enhance/ambulances-page-enhance.js?v=2" defer></script>
+    <script src="/assets/enhance/dispatch-vue-embed-enhance.js?v=4" defer></script>
   </body>
 </html>
