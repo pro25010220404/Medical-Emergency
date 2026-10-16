@@ -81,9 +81,12 @@
             if (m2) chiefComplaint = m2[1].trim().slice(0, 200)
           }
         })
-        const patientLink = aside.querySelector('a[href*="/patient/"], button')
-        if (patientLink && /[\u4e00-\u9fa5]{2,4}/.test(patientLink.textContent || '')) {
-          name = (patientLink.textContent || '').trim().slice(0, 20)
+        // 仅当院前病历没给出姓名时，才用患者档案链接兜底；
+        // 原来把 aside 里任意 button 的文案当姓名，会把「查看连续患者档案」当成患者名写进会诊单。
+        const patientLink = aside.querySelector('a[href*="/patient/"]')
+        if (!name && patientLink) {
+          const label = (patientLink.textContent || '').trim()
+          if (/^[\u4e00-\u9fa5]{2,4}$/.test(label)) name = label.slice(0, 20)
         }
       }
     }
@@ -317,30 +320,11 @@
     return openRoom(sessionId)
   }
 
-  function consultHash(ctx) {
-    const q = new URLSearchParams()
-    if (ctx.task120Id) q.set('task', ctx.task120Id)
-    if (ctx.eventId) q.set('event', ctx.eventId)
-    if (ctx.vehiclePlate) q.set('plate', ctx.vehiclePlate)
-    if (ctx.vehicleId) q.set('vehicle', ctx.vehicleId)
-    if (ctx.chiefComplaint) q.set('complaint', ctx.chiefComplaint)
-    q.set('launch', '1')
-    const s = q.toString()
-    return s ? '#/consultations?' + s : '#/consultations?launch=1'
-  }
-
-  function navigate(ctx) {
-    const hash = consultHash(ctx)
-    if (typeof window.__hxNavigateConsult === 'function') {
-      window.__hxNavigateConsult('/app.html' + hash)
-      return
-    }
-    location.assign(location.pathname + location.search + hash)
-  }
-
   /**
    * 车内监控弹窗「发起会诊」：按车上患者信息直连后端建单并进入会诊室。
-   * 患者信息（姓名/主诉）未填写时先提示补填；后端不可用时回退远程会诊工作台。
+   *
+   * 患者信息（姓名/主诉）未填写先提示补填；建单或取入会链接失败时给出明确提示，
+   * 不再跳回主系统远程会诊工作台（该按钮的预期行为是点一下直接进会诊室）。
    */
   async function launchFromVehicleModal(ctx) {
     const info = readPatientInfo(ctx)
@@ -357,21 +341,36 @@
       return false
     }
 
-    // 直连后端：按车上患者信息建单，成功后直接打开会诊室（不再经远程会诊工作台）
-    if (backendEnabled()) {
-      try {
-        if (await createAndEnterRoom(info, ctx)) return true
-      } catch (e) {
-        console.warn('[hx-consult] 直接进入会诊室失败，回退远程会诊工作台', e)
-      }
+    if (!backendEnabled()) {
+      await dialog({
+        variant: 'alert',
+        title: '暂时无法进入会诊室',
+        body: '主系统后端未连接，无法按车上患者信息发起会诊。',
+        confirmText: '知道了',
+      })
+      return false
     }
 
-    // 回退：进入远程会诊工作台，选择患者并补全信息后提交
-    if (typeof window.__hxTryConsultLaunch === 'function') {
-      return window.__hxTryConsultLaunch(ctx)
+    // 直连后端：按车上患者信息建单并取入会链接，成功后直接打开会诊室
+    try {
+      if (await createAndEnterRoom(info, ctx)) return true
+      await dialog({
+        variant: 'alert',
+        title: '暂时无法进入会诊室',
+        body: '已发起会诊，但未能获取会诊室入口（音视频服务可能未就绪）。',
+        confirmText: '知道了',
+      })
+    } catch (e) {
+      console.warn('[hx-consult] 直接进入会诊室失败', e)
+      await dialog({
+        variant: 'alert',
+        title: '暂时无法进入会诊室',
+        body: '按车上患者信息发起会诊未成功，未能获取会诊室入口。',
+        lead: '原因：' + ((e && e.message) || '未知错误'),
+        confirmText: '知道了',
+      })
     }
-    navigate(ctx)
-    return true
+    return false
   }
 
   document.addEventListener(
