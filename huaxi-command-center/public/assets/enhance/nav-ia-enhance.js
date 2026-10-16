@@ -14,12 +14,10 @@
     '基层远程监护',
   ]
   const DISPATCH_GO = {
-    实时出警: '/dispatch.html#live',
     患者登记: '/dispatch.html#register',
     救护车列表: '/dispatch.html#ambulances',
   }
   const DISPATCH_HASH = {
-    '/dispatch': '/dispatch.html#live',
     '/dispatch?hub=ambulances': '/dispatch.html#ambulances',
   }
 

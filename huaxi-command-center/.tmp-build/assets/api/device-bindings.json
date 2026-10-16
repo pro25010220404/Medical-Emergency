@@ -1,0 +1,92 @@
+{
+  "updatedAt": "2026-10-12T16:55:00+08:00",
+  "notice": "演示设备台账 · 与 care-bindings.json 床号对齐 · 改绑写入 localStorage",
+  "devices": [
+    {
+      "deviceId": "MON-weiyuan-icu-1",
+      "name": "监护仪",
+      "bedId": "weiyuan-icu-1",
+      "bedLabel": "ICU 1床",
+      "patientId": "DEMO-001",
+      "patientName": "演示患者01",
+      "online": true,
+      "alarm": false,
+      "boundAt": "2026-10-12T08:20:00+08:00",
+      "previousBedId": null,
+      "unboundAt": null
+    },
+    {
+      "deviceId": "MON-weiyuan-icu-2",
+      "name": "监护仪",
+      "bedId": "weiyuan-icu-2",
+      "bedLabel": "ICU 2床",
+      "patientId": "DEMO-002",
+      "patientName": "演示患者02",
+      "online": true,
+      "alarm": false,
+      "boundAt": "2026-10-12T09:05:00+08:00",
+      "previousBedId": null,
+      "unboundAt": null
+    },
+    {
+      "deviceId": "MON-weiyuan-icu-3",
+      "name": "监护仪",
+      "bedId": "weiyuan-icu-3",
+      "bedLabel": "ICU 3床",
+      "patientId": "DEMO-003",
+      "patientName": "演示患者03",
+      "online": true,
+      "alarm": true,
+      "boundAt": "2026-10-12T09:48:00+08:00",
+      "previousBedId": "weiyuan-icu-2",
+      "unboundAt": "2026-10-12T09:40:00+08:00"
+    },
+    {
+      "deviceId": "MON-neijiang-first-emergency-1",
+      "name": "监护仪",
+      "bedId": "neijiang-first-emergency-1",
+      "bedLabel": "急诊 1床",
+      "patientId": "DEMO-017",
+      "patientName": "演示患者17",
+      "online": true,
+      "alarm": false,
+      "boundAt": "2026-10-12T07:30:00+08:00",
+      "previousBedId": null,
+      "unboundAt": null
+    },
+    {
+      "deviceId": "MON-LINKED-lianjie-gastroenterology-1",
+      "name": "监护仪",
+      "bedId": "LINKED-lianjie-gastroenterology-1",
+      "bedLabel": "协同1床",
+      "patientId": "PAT-LINKED-lianjie-gastroenterology-1",
+      "patientName": "连界协同患者",
+      "online": false,
+      "alarm": false,
+      "bedIdPending": null,
+      "boundAt": "2026-10-12T06:15:00+08:00",
+      "previousBedId": null,
+      "unboundAt": null
+    },
+    {
+      "deviceId": "PUMP-ICU-SPARE",
+      "name": "输液泵",
+      "bedId": null,
+      "bedLabel": null,
+      "patientId": null,
+      "patientName": null,
+      "online": true,
+      "alarm": false,
+      "boundAt": null,
+      "previousBedId": "weiyuan-icu-4",
+      "unboundAt": "2026-10-12T10:12:00+08:00"
+    }
+  ],
+  "beds": [
+    { "bedId": "weiyuan-icu-1", "label": "ICU 1床", "ward": "icu" },
+    { "bedId": "weiyuan-icu-2", "label": "ICU 2床", "ward": "icu" },
+    { "bedId": "weiyuan-icu-3", "label": "ICU 3床", "ward": "icu" },
+    { "bedId": "neijiang-first-emergency-1", "label": "急诊 1床", "ward": "emergency" },
+    { "bedId": "LINKED-lianjie-gastroenterology-1", "label": "协同1床", "ward": "linked" }
+  ]
+}

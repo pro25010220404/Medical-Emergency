@@ -1,0 +1,75 @@
+{
+  "updatedAt": "2026-10-12T16:40:00+08:00",
+  "notice": "演示规则 · 非正式院内质控标准",
+  "rules": [
+    { "id": "SLA-ALERT", "name": "预警后到床", "limitMinutes": 10, "audience": "当班医生 · 看自己负责患者是否超时" },
+    { "id": "SLA-DISPATCH", "name": "出警后到院", "limitMinutes": 30, "audience": "护士长 / 院长 · 看出车环节超时" }
+  ],
+  "records": [
+    {
+      "id": "SLA-20261012-01",
+      "kind": "预警到床",
+      "ruleId": "SLA-ALERT",
+      "subject": "演示患者01 · ICU 1床",
+      "owner": "张医生",
+      "roleView": "doctor",
+      "startedAt": "2026-10-12T14:08:00+08:00",
+      "arrivedAt": "2026-10-12T14:15:00+08:00",
+      "limitMinutes": 10,
+      "usedMinutes": 7,
+      "overtime": false
+    },
+    {
+      "id": "SLA-20261012-02",
+      "kind": "预警到床",
+      "ruleId": "SLA-ALERT",
+      "subject": "演示患者03 · ICU 3床",
+      "owner": "王医生",
+      "roleView": "doctor",
+      "startedAt": "2026-10-12T13:50:00+08:00",
+      "arrivedAt": "2026-10-12T14:06:00+08:00",
+      "limitMinutes": 10,
+      "usedMinutes": 16,
+      "overtime": true
+    },
+    {
+      "id": "SLA-20261012-03",
+      "kind": "出警到院",
+      "ruleId": "SLA-DISPATCH",
+      "subject": "演示001 · 120-WY-88421",
+      "owner": "张医生 / 李护士",
+      "roleView": "director",
+      "startedAt": "2026-10-12T14:05:00+08:00",
+      "arrivedAt": null,
+      "limitMinutes": 30,
+      "usedMinutes": 22,
+      "overtime": false
+    },
+    {
+      "id": "SLA-20261012-04",
+      "kind": "出警到院",
+      "ruleId": "SLA-DISPATCH",
+      "subject": "演示002 · 120-WY-88435",
+      "owner": "王医生 / 赵护士",
+      "roleView": "director",
+      "startedAt": "2026-10-12T13:58:00+08:00",
+      "arrivedAt": "2026-10-12T14:36:00+08:00",
+      "limitMinutes": 30,
+      "usedMinutes": 38,
+      "overtime": true
+    },
+    {
+      "id": "SLA-20261012-05",
+      "kind": "出警到院",
+      "ruleId": "SLA-DISPATCH",
+      "subject": "演示003 · 120-WY-88450",
+      "owner": "刘医生 / 陈护士",
+      "roleView": "director",
+      "startedAt": "2026-10-12T13:40:00+08:00",
+      "arrivedAt": "2026-10-12T14:05:00+08:00",
+      "limitMinutes": 30,
+      "usedMinutes": 25,
+      "overtime": false
+    }
+  ]
+}

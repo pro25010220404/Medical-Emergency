@@ -3626,7 +3626,7 @@
     "patients": [
       {
         "id": "FIELD-001",
-        "name": "李建国",
+        "name": "李国强",
         "gender": "男",
         "age": 63,
         "phone": "139****0101",
@@ -3640,8 +3640,8 @@
         ],
         "stage": "admitted",
         "symptoms": [
-          "胸痛（非创伤）",
-          "呼吸困难"
+          "意识模糊",
+          "呕吐"
         ],
         "notes": "本地虚构演示记录，不是真实病历，不用于临床判断。",
         "createdAt": "2026-09-24T11:42:06.139Z",
@@ -3649,14 +3649,14 @@
         "source": "manual",
         "sourceRecordId": "MOBILE-J-FIELD-001",
         "prehospital": {
-          "category": "胸痛",
+          "category": "卒中",
           "contact": "李秀英（家属）",
           "phone": "139****0101",
           "address": "威远县连界镇船石村 3 组（本机构现场）",
-          "complaint": "胸痛伴出汗约 40 分钟，含服硝酸甘油未缓解",
+          "complaint": "意识模糊伴呕吐2小时",
           "symptoms": [
-            "胸痛（非创伤）",
-            "呼吸困难"
+            "意识模糊",
+            "呕吐"
           ],
           "onset": "2小时以上",
           "consciousness": "意识清楚",
@@ -3975,7 +3975,7 @@
         "id": "J-FIELD-001",
         "patientId": "FIELD-001",
         "createdBy": "chuanshi-primary-doctor",
-        "name": "李建国",
+        "name": "李国强",
         "gender": "男",
         "age": 63,
         "entry": "field",
@@ -4014,7 +4014,7 @@
             "id": "J-FIELD-001-MSG-4",
             "kind": "service",
             "title": "转运车辆已出发",
-            "text": "演示救护车 01 · 预计 22 分钟到达威远县人民医院",
+            "text": "川K1201 · 预计 22 分钟到达威远县人民医院",
             "at": "2026-09-24T12:06:06.139Z",
             "read": false
           }
@@ -4049,7 +4049,7 @@
             "id": "J-FIELD-001-H-4",
             "at": "2026-09-24T12:06:06.139Z",
             "title": "转运车辆已出发",
-            "note": "演示救护车 01 · 预计 22 分钟到达威远县人民医院",
+            "note": "川K1201 · 预计 22 分钟到达威远县人民医院",
             "actor": "chuanshi-primary-doctor"
           }
         ]
@@ -4383,7 +4383,8 @@
         "sourceDepartmentId": "primary",
         "acceptedBy": "huaxi-emergency-doctor",
         "acceptedAt": "2026-09-24T14:36:06.139Z",
-        "feedback": []
+        "feedback": [],
+        "joinUrl": "https://chat.augensternchat.cn/#/join/58bbd67c?token=5197e863-cb6a-4440-9ab9-57a45c42735f&name=%E7%B3%BB%E7%BB%9F%E7%AE%A1%E7%90%86%E5%91%98&userId=admin"
       },
       {
         "id": "CR-F-002",
@@ -4560,11 +4561,11 @@
       {
         "id": "EV-FIELD-001",
         "patientId": "FIELD-001",
-        "patientName": "李建国",
+        "patientName": "李国强",
         "type": "registered",
         "at": "2026-09-24T11:42:06.139Z",
         "actorId": "chuanshi-primary-doctor",
-        "note": "李建国 已登记；胸痛（非创伤）、呼吸困难",
+        "note": "李国强 已登记；胸痛（非创伤）、呼吸困难",
         "scopes": [
           {
             "institutionId": "chuanshi",
@@ -4837,8 +4838,8 @@
   "vehicles": [
     {
       "id": "AMB-1",
-      "name": "演示救护车 01",
-      "plate": "演示001",
+      "name": "川K1201",
+      "plate": "川K1201",
       "status": "出警中",
       "institutionId": "weiyuan",
       "departmentId": "emergency",
