@@ -90,6 +90,7 @@ export const enhanceScripts = [
   { src: '/assets/enhance/critical-bed-summary-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/ward-video-enhance.js?v=3', defer: true },
   { src: '/assets/enhance/town-video-fill-enhance.js?v=2', defer: true },
+  { src: '/assets/enhance/bed-detail-tabs-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/consult-context-enhance.js?v=10', defer: true },
   { src: '/assets/enhance/consult-list-polish-enhance.js?v=5', defer: true },
   { src: '/assets/enhance/consult-queue-actions-enhance.js?v=1', defer: true },
