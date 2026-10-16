@@ -487,6 +487,7 @@
       '<div class="' + HOST_ID + '-form">' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-patient">患者选择</label><select id="hx-cw-f-patient"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-complaint">主诉</label><input id="hx-cw-f-complaint" type="text" placeholder="如：胸痛2小时"></div>' +
+      '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-hospital">接诊医院<span class="' + HOST_ID + '-req">*</span></label><select id="hx-cw-f-hospital"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-dept">目标科室</label><select id="hx-cw-f-dept"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-doctor">指定接诊医生</label><select id="hx-cw-f-doctor"></select></div>' +
       '<div class="' + HOST_ID + '-field"><label for="hx-cw-f-note">备注<span class="' + HOST_ID + '-req">*</span></label><input id="hx-cw-f-note" type="text" placeholder="必填，请填写会诊说明"></div>' +
@@ -1158,6 +1159,13 @@
       return who + '）'
     }, '请选择患者'))
 
+    // 接诊医院：后端 organisations 列表，取机构名称作为值（POST /consultations 的 targetHospital 必填）
+    fillSelect($('hx-cw-f-hospital'), options(state.orgs, function (o) {
+      return o.name || o.orgId || ''
+    }, function (o) {
+      return (o.name || o.orgId || '') + (o.levelLabel ? '（' + o.levelLabel + '）' : '')
+    }, '请选择接诊医院'))
+
     fillSelect($('hx-cw-f-dept'), options(state.depts, function (d) {
       return d.dept_name
     }, function (d) {
@@ -1346,9 +1354,11 @@
       return setFormMsg('演示队列：请从「患者登记/急救事件」发起会诊，或连接后端后在此提交。', 'err')
     }
     var pid = ($('hx-cw-f-patient') || {}).value || ''
+    var hospital = ($('hx-cw-f-hospital') || {}).value || ''
     var dept = ($('hx-cw-f-dept') || {}).value || ''
     var noteVal = (($('hx-cw-f-note') || {}).value || '').trim()
     if (!pid) return setFormMsg('请选择患者', 'err')
+    if (!hospital) return setFormMsg('请选择接诊医院', 'err')
     if (!dept) return setFormMsg('请选择目标科室', 'err')
     if (state.scopeTab === 'grassroots' && !noteVal) return setFormMsg('请填写备注（基层会诊必填）', 'err')
 
@@ -1385,7 +1395,7 @@
       chiefComplaint: ($('hx-cw-f-complaint') || {}).value || '',
       sourceHospital: patient.institutionName || '',
       sourceDepartment: patient.departmentName || '',
-      targetHospital: '',
+      targetHospital: hospital,
       targetDepartment: dept,
       nominatedDoctorId: ($('hx-cw-f-doctor') || {}).value || null,
       note: noteVal + (noteExtra ? ' ' + noteExtra : ''),
