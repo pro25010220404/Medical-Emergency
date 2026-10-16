@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreOrganizationRequest;
 use App\Http\Requests\UpdateOrganizationRequest;
-use App\Http\Resources\OrganizationResource;
+use App\Services\OrganizationResourceService;
 use App\Models\Organization;
 use App\Services\OrganizationService;
 use App\Support\Result;
@@ -33,9 +33,9 @@ class OrganizationController extends Controller
     /**
      * 机构详情
      */
-    public function show(Organization $organization): OrganizationResource
+    public function show(Organization $organization): OrganizationResourceService
     {
-        return new OrganizationResource($organization);
+        return new OrganizationResourceService($organization);
     }
 
     /**

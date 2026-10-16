@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreVehicleRequest;
 use App\Http\Requests\UpdateVehicleRequest;
-use App\Http\Resources\VehicleResource;
+use App\Services\VehicleService;
 use App\Models\Vehicle;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -29,7 +29,7 @@ class VehicleController extends Controller
             ->paginate($request->integer('per_page', 15))
             ->appends($request->query());
 
-        return VehicleResource::collection($vehicles);
+        return VehicleService::collection($vehicles);
     }
 
     /**
@@ -41,7 +41,7 @@ class VehicleController extends Controller
         $vehicle->refresh();
         $vehicle->load('organization');
 
-        return (new VehicleResource($vehicle))
+        return (new VehicleService($vehicle))
             ->response()
             ->setStatusCode(201);
     }
@@ -49,22 +49,22 @@ class VehicleController extends Controller
     /**
      * 车辆详情
      */
-    public function show(Vehicle $vehicle): VehicleResource
+    public function show(Vehicle $vehicle): VehicleService
     {
         $vehicle->load('organization');
 
-        return new VehicleResource($vehicle);
+        return new VehicleService($vehicle);
     }
 
     /**
      * 更新车辆
      */
-    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleResource
+    public function update(UpdateVehicleRequest $request, Vehicle $vehicle): VehicleService
     {
         $vehicle->update($request->validated());
         $vehicle->load('organization');
 
-        return new VehicleResource($vehicle);
+        return new VehicleService($vehicle);
     }
 
     /**

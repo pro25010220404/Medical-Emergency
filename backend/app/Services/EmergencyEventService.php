@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EmergencyEventResource extends JsonResource
+class EmergencyEventService extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -48,9 +48,9 @@ class EmergencyEventResource extends JsonResource
             'event_status' => $this->event_status,
             'close_reason' => $this->close_reason,
             'closed_at' => $this->closed_at?->toIso8601String(),
-            'accept_org' => new OrganizationResource($this->whenLoaded('acceptOrg')),
-            'patient' => new PatientResource($this->whenLoaded('patient')),
-            'timelines' => EventTimelineResource::collection($this->whenLoaded('timelines')),
+            'accept_org' => new OrganizationResourceService($this->whenLoaded('acceptOrg')),
+            'patient' => new PatientResourceService($this->whenLoaded('patient')),
+            'timelines' => EventTimelineService::collection($this->whenLoaded('timelines')),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];

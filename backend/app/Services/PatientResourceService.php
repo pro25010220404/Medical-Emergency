@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class PatientResource extends JsonResource
+class PatientResourceService extends JsonResource
 {
     /** 性别：0男1女2未知 ↔ MALE/FEMALE/UNKNOWN */
     private const GENDER_CODES = [

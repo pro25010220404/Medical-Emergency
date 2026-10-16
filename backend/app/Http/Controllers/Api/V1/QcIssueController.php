@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreQcIssueRequest;
 use App\Http\Requests\UpdateQcIssueRequest;
-use App\Http\Resources\QcIssueResource;
+use App\Services\QcIssueService;
 use App\Models\QcIssue;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -40,7 +40,7 @@ class QcIssueController extends Controller
             ->paginate($request->integer('per_page', 15))
             ->appends($request->query());
 
-        return QcIssueResource::collection($issues);
+        return QcIssueService::collection($issues);
     }
 
     /**
@@ -52,7 +52,7 @@ class QcIssueController extends Controller
         $issue->refresh();
         $issue->load('owner');
 
-        return (new QcIssueResource($issue))
+        return (new QcIssueService($issue))
             ->response()
             ->setStatusCode(201);
     }
@@ -60,17 +60,17 @@ class QcIssueController extends Controller
     /**
      * 整改单详情
      */
-    public function show(QcIssue $qcIssue): QcIssueResource
+    public function show(QcIssue $qcIssue): QcIssueService
     {
         $qcIssue->load(['owner', 'event']);
 
-        return new QcIssueResource($qcIssue);
+        return new QcIssueService($qcIssue);
     }
 
     /**
      * 更新整改单（乐观锁：state_version 不一致返回 409）
      */
-    public function update(UpdateQcIssueRequest $request, QcIssue $qcIssue): JsonResponse|QcIssueResource
+    public function update(UpdateQcIssueRequest $request, QcIssue $qcIssue): JsonResponse|QcIssueService
     {
         $data = $request->validated();
         $version = $data['state_version'];
@@ -88,13 +88,13 @@ class QcIssueController extends Controller
         $qcIssue->refresh();
         $qcIssue->load('owner');
 
-        return new QcIssueResource($qcIssue);
+        return new QcIssueService($qcIssue);
     }
 
     /**
      * 销号（整改闭环）：QC_OPEN / QC_RECTIFYING → QC_CLOSED
      */
-    public function close(Request $request, QcIssue $qcIssue): JsonResponse|QcIssueResource
+    public function close(Request $request, QcIssue $qcIssue): JsonResponse|QcIssueService
     {
         $validated = $request->validate([
             'check_result' => ['required', 'string', 'max:200'],
@@ -122,7 +122,7 @@ class QcIssueController extends Controller
         $qcIssue->refresh();
         $qcIssue->load('owner');
 
-        return new QcIssueResource($qcIssue);
+        return new QcIssueService($qcIssue);
     }
 
     /**

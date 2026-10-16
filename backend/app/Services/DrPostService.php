@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DrPostResource extends JsonResource
+class DrPostService extends JsonResource
 {
     /** category 整数 → 字符串码；§4.1 */
     private const CATEGORY_CODES = [0 => 'FEEDBACK', 1 => 'ISSUE'];

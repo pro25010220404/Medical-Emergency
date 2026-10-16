@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class VehicleResource extends JsonResource
+class VehicleService extends JsonResource
 {
     public function toArray(Request $request): array
     {
@@ -19,7 +19,7 @@ class VehicleResource extends JsonResource
             'latest_lng' => $this->latest_lng,
             'latest_lat' => $this->latest_lat,
             'latest_at' => $this->latest_at?->toIso8601String(),
-            'organization' => new OrganizationResource($this->whenLoaded('organization')),
+            'organization' => new OrganizationResourceService($this->whenLoaded('organization')),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

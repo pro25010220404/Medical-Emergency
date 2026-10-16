@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class QcIssueResource extends JsonResource
+class QcIssueService extends JsonResource
 {
     public function toArray(Request $request): array
     {

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DrMessageResource extends JsonResource
+class DrMessageService extends JsonResource
 {
     /** kind 整数 → 字符串码；§4.4 */
     private const KIND_CODES = [0 => 'TEXT', 1 => 'VOICE', 2 => 'IMAGE', 3 => 'FILE'];
