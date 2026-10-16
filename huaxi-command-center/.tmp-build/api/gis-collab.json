@@ -1,0 +1,38 @@
+{
+  "updatedAt": "2026-10-12T14:28:00+08:00",
+  "dafang": {
+    "erToday": 152,
+    "nodes": [
+      { "id": "df-01", "name": "大方县城 · 上级协同接收", "tier": 0, "lng": 105.609, "lat": 27.144, "er": 12, "bedsFree": 18, "tight": true },
+      { "id": "df-02", "name": "凤山", "tier": 0, "lng": 105.72, "lat": 27.28, "er": 5, "bedsFree": 9, "tight": false },
+      { "id": "df-03", "name": "达溪", "tier": 0, "lng": 105.55, "lat": 27.35, "er": 4, "bedsFree": 7, "tight": false },
+      { "id": "df-04", "name": "鼎新", "tier": 1, "lng": 105.48, "lat": 27.22, "er": 2, "bedsFree": 5, "tight": false },
+      { "id": "df-05", "name": "核桃", "tier": 1, "lng": 105.65, "lat": 27.05, "er": 3, "bedsFree": 2, "tight": true },
+      { "id": "df-06", "name": "黄泥塘", "tier": 1, "lng": 105.78, "lat": 27.12, "er": 3, "bedsFree": 4, "tight": false },
+      { "id": "df-07", "name": "理化", "tier": 2, "lng": 105.52, "lat": 27.08, "er": 1, "bedsFree": 3, "tight": false },
+      { "id": "df-08", "name": "雨冲", "tier": 2, "lng": 105.42, "lat": 27.18, "er": 1, "bedsFree": 2, "tight": false }
+    ],
+    "links": [
+      { "from": "df-04", "to": "df-01", "flow": 6 },
+      { "from": "df-05", "to": "df-01", "flow": 9 },
+      { "from": "df-07", "to": "df-04", "flow": 3 },
+      { "from": "df-08", "to": "df-03", "flow": 2 },
+      { "from": "df-06", "to": "df-02", "flow": 4 },
+      { "from": "df-02", "to": "df-01", "flow": 5 }
+    ]
+  },
+  "weiyuan": {
+    "erToday": 86,
+    "nodes": [
+      { "id": "wy-01", "name": "威远县人民医院", "tier": 0, "lng": 104.668, "lat": 29.527, "er": 8, "bedsFree": 14, "tight": false },
+      { "id": "wy-02", "name": "连界镇卫生院", "tier": 1, "lng": 104.55, "lat": 29.65, "er": 3, "bedsFree": 6, "tight": true },
+      { "id": "wy-03", "name": "新店镇卫生院", "tier": 1, "lng": 104.62, "lat": 29.58, "er": 2, "bedsFree": 4, "tight": false },
+      { "id": "wy-04", "name": "船石村卫生室", "tier": 2, "lng": 104.45, "lat": 29.58, "er": 1, "bedsFree": 2, "tight": false }
+    ],
+    "links": [
+      { "from": "wy-04", "to": "wy-03", "flow": 2 },
+      { "from": "wy-03", "to": "wy-01", "flow": 5 },
+      { "from": "wy-02", "to": "wy-01", "flow": 7 }
+    ]
+  }
+}
