@@ -58,6 +58,7 @@
   function criticalBedChips() {
     // 重症监护床位视频区由 bed-video-fill-enhance 用本地录像填充，不再叠加「演示未接」角标
     document.querySelectorAll('.critical-bed').forEach((el) => {
+      if (el.querySelector('.free-bed')) return // 空床不加「演示未接」角标
       if (el.querySelector('.video-pane video, .hx-video-chip-foot, video, iframe')) return
       el.classList.add('hx-critical-bed-video')
       const foot = document.createElement('div')
@@ -97,6 +98,31 @@
     pane.appendChild(btn)
   }
 
+  function fillVehicleCameras() {
+    // 实时出警 · 查看车内画面弹窗：用本地录像填充车内摄像头视频区
+    const mon = document.querySelector('.vehicle-monitor')
+    if (!mon) return
+    mon.querySelectorAll('.video-pane').forEach((pane) => {
+      if (pane.querySelector('video[data-hx-vehicle-cam]')) return
+      const state = pane.querySelector('.video-state')
+      if (!state) return
+      const v = document.createElement('video')
+      v.src = '/media/v09.mp4'
+      v.autoplay = true
+      v.muted = true
+      v.loop = true
+      v.playsInline = true
+      v.setAttribute('playsinline', '')
+      v.dataset.hxVehicleCam = '9'
+      state.replaceWith(v)
+      const sig = pane.querySelector('.signal')
+      if (sig) {
+        sig.textContent = '实时画面'
+        sig.classList.add('online')
+      }
+    })
+  }
+
   function scan() {
     bedTileChips()
     criticalBedChips()
@@ -104,7 +130,7 @@
     document.querySelectorAll('.dh-video').forEach((el) => normalizeBlock(el, 'vehicle'))
 
     document.querySelectorAll('.video-pane, .video-state, .clinical-device-frame').forEach((el) => {
-      if (el.closest('.critical-grid, .town-monitor')) return
+      if (el.closest('.critical-grid, .town-monitor, .vehicle-monitor')) return
       const t = (el.textContent || '').trim()
       if (!t && !el.querySelector('video, iframe, canvas')) normalizeBlock(el, 'bed')
       else if (/未接|占位|摄像头|画面/.test(t) && !el.querySelector('.hx-video-placeholder__title')) {
@@ -127,4 +153,9 @@
 
   window.hxVideoPlaceholder = { blockHtml, chipHtml, scan }
   window.hxEnhance(scanAndSyncStrip, { wait: 350, observeRoot: true, afterNav: 100 })
+
+  // 车内画面弹窗由 React 状态切换（非 hashchange）打开，需独立轮询填充
+  fillVehicleCameras()
+  setInterval(fillVehicleCameras, 1500)
+  window.addEventListener('hashchange', () => setTimeout(fillVehicleCameras, 200))
 })()
