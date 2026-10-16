@@ -58,6 +58,7 @@
   function criticalBedChips() {
     // 重症监护床位视频区由 bed-video-fill-enhance 用本地录像填充，不再叠加「演示未接」角标
     document.querySelectorAll('.critical-bed').forEach((el) => {
+      if (el.querySelector('.free-bed')) return // 空床不加「演示未接」角标
       if (el.querySelector('.video-pane video, .hx-video-chip-foot, video, iframe')) return
       el.classList.add('hx-critical-bed-video')
       const foot = document.createElement('div')
@@ -97,6 +98,44 @@
     pane.appendChild(btn)
   }
 
+  function ensureVehicleLiveBox() {
+    // 实时出警 · 查看车内画面弹窗：单独一个「车内实时画面」盒子放本地录像；
+    // 云台 / 网络 / 终端三路摄像头保持「未接」占位，不再逐个注入视频
+    const mon = document.querySelector('.vehicle-monitor')
+    if (!mon || mon.querySelector('.hx-vehicle-live')) return
+
+    const box = document.createElement('section')
+    box.className = 'hx-vehicle-live'
+    box.style.cssText =
+      'grid-column:1/-1;display:flex;flex-direction:column;gap:8px;' +
+      'background:#fff;border:1px solid #e2e8f0;border-radius:10px;' +
+      'padding:10px 12px 12px;box-sizing:border-box;'
+
+    const head = document.createElement('div')
+    head.style.cssText = 'font-size:13px;font-weight:600;color:#0f172a;line-height:1.35;'
+    head.textContent = '车内实时画面'
+
+    const wrap = document.createElement('div')
+    wrap.style.cssText =
+      'position:relative;height:min(48dvh,400px);min-height:220px;' +
+      'background:#040c15;border:1px solid #204771;border-radius:8px;overflow:hidden;'
+
+    const v = document.createElement('video')
+    v.src = '/media/v09.mp4'
+    v.autoplay = true
+    v.muted = true
+    v.loop = true
+    v.playsInline = true
+    v.setAttribute('playsinline', '')
+    v.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;'
+    v.dataset.hxVehicleLive = '1'
+
+    wrap.appendChild(v)
+    box.appendChild(head)
+    box.appendChild(wrap)
+    mon.insertBefore(box, mon.firstChild)
+  }
+
   function scan() {
     bedTileChips()
     criticalBedChips()
@@ -104,7 +143,7 @@
     document.querySelectorAll('.dh-video').forEach((el) => normalizeBlock(el, 'vehicle'))
 
     document.querySelectorAll('.video-pane, .video-state, .clinical-device-frame').forEach((el) => {
-      if (el.closest('.critical-grid, .town-monitor')) return
+      if (el.closest('.critical-grid, .town-monitor, .vehicle-monitor')) return
       const t = (el.textContent || '').trim()
       if (!t && !el.querySelector('video, iframe, canvas')) normalizeBlock(el, 'bed')
       else if (/未接|占位|摄像头|画面/.test(t) && !el.querySelector('.hx-video-placeholder__title')) {
@@ -127,4 +166,9 @@
 
   window.hxVideoPlaceholder = { blockHtml, chipHtml, scan }
   window.hxEnhance(scanAndSyncStrip, { wait: 350, observeRoot: true, afterNav: 100 })
+
+  // 车内画面弹窗由 React 状态切换（非 hashchange）打开，需独立轮询注入单视频盒
+  ensureVehicleLiveBox()
+  setInterval(ensureVehicleLiveBox, 1500)
+  window.addEventListener('hashchange', () => setTimeout(ensureVehicleLiveBox, 200))
 })()
