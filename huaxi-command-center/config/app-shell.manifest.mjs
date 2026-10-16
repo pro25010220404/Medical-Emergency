@@ -37,8 +37,8 @@ export const backendScripts = [
 
 export const reactEntry = {
   comment:
-    '演示 UI：预编译 React bundle（完整业务页）；API 调试壳见 src-shell.html → /src/main.tsx',
-  src: `/assets/vendor/index-BA_IO3dC.js?v=${APP_SHELL_VERSION.reactBundle}`,
+    'app.html 走本地入口 /src/main.tsx（vite build 自动打包，含全部业务路由）',
+  src: '/src/main.tsx',
   type: 'module',
   crossorigin: true,
 }
@@ -59,9 +59,9 @@ export const mapScripts = [
 ]
 
 export const enhanceScripts = [
-  { src: '/assets/enhance/ambulances-page-enhance.js?v=1', defer: true },
+  { src: '/assets/enhance/ambulances-page-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/patients-list-api-enhance.js?v=5', defer: true },
-  { src: '/assets/enhance/dispatch-vue-embed-enhance.js?v=3', defer: true },
+  { src: '/assets/enhance/dispatch-vue-embed-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/consult-launch-dialog-enhance.js?v=2', defer: true },
   { src: '/assets/enhance/consult-episode-nav.js?v=4', defer: true },
   { src: '/assets/enhance/register-consult-flow-enhance.js?v=8', defer: true },
@@ -90,6 +90,7 @@ export const enhanceScripts = [
   { src: '/assets/enhance/critical-bed-summary-enhance.js?v=4', defer: true },
   { src: '/assets/enhance/ward-video-enhance.js?v=3', defer: true },
   { src: '/assets/enhance/town-video-fill-enhance.js?v=2', defer: true },
+  { src: '/assets/enhance/bed-detail-tabs-enhance.js?v=1', defer: true },
   { src: '/assets/enhance/consult-context-enhance.js?v=10', defer: true },
   { src: '/assets/enhance/consult-list-polish-enhance.js?v=5', defer: true },
   { src: '/assets/enhance/consult-queue-actions-enhance.js?v=1', defer: true },
