@@ -23,7 +23,6 @@
         ['/ambulances', '救护车列表'],
         ['/patients', '患者列表'],
         ['/register', '患者登记'],
-        ['/consultations', '远程会诊'],
         ['/consultations?tab=grassroots', '基层会诊'],
         ['/transfers?scope=grassroots', '医院转诊'],
         ['/critical?mode=grassroots-remote', '基层远程监护'],
