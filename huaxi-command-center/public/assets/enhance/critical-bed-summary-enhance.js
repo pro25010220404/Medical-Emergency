@@ -157,9 +157,21 @@
       </p>`
   }
 
+  let syncing = false
+
   function syncOnce() {
+    if (syncing) return
     if (path() !== '/critical') return
     if (document.querySelector('.town-monitor')) return
+    syncing = true
+    try {
+    syncOnceBody()
+    } finally {
+      syncing = false
+    }
+  }
+
+  function syncOnceBody() {
 
     applyOrgFromHash()
     ensureDeptWarningLink()
@@ -221,8 +233,6 @@
   function boot() {
     syncOnce()
     setInterval(syncOnce, 2000)
-    const mo = new MutationObserver(() => syncOnce())
-    mo.observe(document.body, { childList: true, subtree: true })
     window.addEventListener('hashchange', () => {
       ctx = null
       loadPromise = null

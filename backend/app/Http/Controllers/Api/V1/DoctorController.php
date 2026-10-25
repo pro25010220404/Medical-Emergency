@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDoctorRequest;
 use App\Http\Requests\UpdateDoctorRequest;
-use App\Http\Resources\DoctorResource;
+use App\Services\DoctorService;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -38,7 +38,7 @@ class DoctorController extends Controller
             ->paginate($request->integer('per_page', 15))
             ->appends($request->query());
 
-        return DoctorResource::collection($doctors);
+        return DoctorService::collection($doctors);
     }
 
     /**
@@ -56,7 +56,7 @@ class DoctorController extends Controller
         $doctor->refresh();
         $doctor->load('organization');
 
-        return (new DoctorResource($doctor))
+        return (new DoctorService($doctor))
             ->response()
             ->setStatusCode(201);
     }
@@ -64,18 +64,18 @@ class DoctorController extends Controller
     /**
      * 医生详情
      */
-    public function show(User $doctor): DoctorResource
+    public function show(User $doctor): DoctorService
     {
         abort_unless($doctor->identity_type === 'DOCTOR', 404);
         $doctor->load('organization');
 
-        return new DoctorResource($doctor);
+        return new DoctorService($doctor);
     }
 
     /**
      * 更新医生信息（密码可选，修改时重新哈希）
      */
-    public function update(UpdateDoctorRequest $request, User $doctor): DoctorResource
+    public function update(UpdateDoctorRequest $request, User $doctor): DoctorService
     {
         abort_unless($doctor->identity_type === 'DOCTOR', 404);
 
@@ -88,7 +88,7 @@ class DoctorController extends Controller
         $doctor->update($data);
         $doctor->load('organization');
 
-        return new DoctorResource($doctor);
+        return new DoctorService($doctor);
     }
 
     /**

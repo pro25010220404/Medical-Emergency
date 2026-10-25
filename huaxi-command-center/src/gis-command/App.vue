@@ -139,35 +139,42 @@ watch(region, () => {
     <div class="gis-stage">
       <header class="gis-header">
         <div class="gis-header-left">
-          <h1>县域医疗协同 GIS 指挥大屏</h1>
-          <p class="gis-sub">16:9 浅色 · 协作节点与转诊连线</p>
+          <p class="gis-kicker">县域医疗协同</p>
+          <h1>GIS 指挥大屏</h1>
           <p class="gis-region-hint">{{ REGION_HINT[region] }}</p>
         </div>
-        <nav class="gis-tabs" aria-label="区域切换">
-          <button type="button" :class="{ active: region === 'dafang' }" @click="onTab('dafang')">
-            大方参考
-          </button>
-          <button type="button" :class="{ active: region === 'weiyuan' }" @click="onTab('weiyuan')">
-            威远协作
-          </button>
-        </nav>
-        <div class="gis-header-actions">
-          <span class="gis-demo-tag">实时数据</span>
-          <button type="button" class="gis-pref primary" @click="applyReportLayout">汇报布局</button>
-          <button type="button" class="gis-pref" @click="resetLayout">恢复布局</button>
-          <button type="button" class="gis-pref" @click="toggleUi('leftPanel')">
-            {{ ui.leftPanel ? '隐藏列表' : '显示列表' }}
-          </button>
-          <button type="button" class="gis-pref" @click="toggleUi('legend')">
-            {{ ui.legend ? '隐藏图例' : '显示图例' }}
-          </button>
-          <button type="button" class="gis-pref" @click="toggleUi('erCard')">
-            {{ ui.erCard ? '隐藏急诊数' : '显示急诊数' }}
-          </button>
-          <a class="gis-back strong" href="/dispatch.html#live">120 院前 →</a>
-          <a class="gis-back" href="/meeting-portal.html">会议交付</a>
-          <a class="gis-back" :href="`/smart-city.html?theme=${resolveMapThemeId('light')}`">3D 态势</a>
-          <a class="gis-back" href="/#/">返回指挥中枢</a>
+        <div class="gis-header-tools">
+          <nav class="gis-tabs" aria-label="区域切换">
+            <button type="button" :class="{ active: region === 'dafang' }" @click="onTab('dafang')">
+              大方参考
+            </button>
+            <button type="button" :class="{ active: region === 'weiyuan' }" @click="onTab('weiyuan')">
+              威远协作
+            </button>
+          </nav>
+          <div class="gis-header-actions">
+            <div class="gis-chip-row">
+              <span class="gis-demo-tag">实时数据</span>
+              <button type="button" class="gis-pref primary" @click="applyReportLayout">汇报布局</button>
+              <button type="button" class="gis-pref" @click="resetLayout">恢复布局</button>
+            </div>
+            <div class="gis-chip-row">
+              <button type="button" class="gis-pref" @click="toggleUi('leftPanel')">
+                {{ ui.leftPanel ? '隐藏列表' : '显示列表' }}
+              </button>
+              <button type="button" class="gis-pref" @click="toggleUi('legend')">
+                {{ ui.legend ? '隐藏图例' : '显示图例' }}
+              </button>
+              <button type="button" class="gis-pref" @click="toggleUi('erCard')">
+                {{ ui.erCard ? '隐藏急诊数' : '显示急诊数' }}
+              </button>
+            </div>
+            <div class="gis-chip-row">
+              <a class="gis-pref" href="/dispatch.html#live">120 院前</a>
+              <a class="gis-pref" :href="`/smart-city.html?theme=${resolveMapThemeId('light')}`">3D 态势</a>
+              <a class="gis-pref" href="/#/">返回指挥中枢</a>
+            </div>
+          </div>
         </div>
       </header>
 

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSlaRecordRequest;
 use App\Http\Requests\UpdateSlaRecordRequest;
-use App\Http\Resources\SlaRecordResource;
+use App\Services\SlaRecordService;
 use App\Models\SlaRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class SlaRecordController extends Controller
         return response()->json([
             'updatedAt' => now()->toIso8601String(),
             'rules' => self::RULES,
-            'records' => SlaRecordResource::collection($records),
+            'records' => SlaRecordService::collection($records),
         ]);
     }
 
@@ -48,25 +48,25 @@ class SlaRecordController extends Controller
     {
         $record = SlaRecord::create($this->withUsage($request->validated()));
 
-        return (new SlaRecordResource($record))
+        return (new SlaRecordService($record))
             ->response()
             ->setStatusCode(201);
     }
 
-    public function show(SlaRecord $slaRecord): SlaRecordResource
+    public function show(SlaRecord $slaRecord): SlaRecordService
     {
-        return new SlaRecordResource($slaRecord);
+        return new SlaRecordService($slaRecord);
     }
 
     /**
      * 更新时限记录（如补登到达时间，重算超时）
      */
-    public function update(UpdateSlaRecordRequest $request, SlaRecord $slaRecord): SlaRecordResource
+    public function update(UpdateSlaRecordRequest $request, SlaRecord $slaRecord): SlaRecordService
     {
         $data = array_merge($slaRecord->only(['started_at', 'arrived_at', 'limit_minutes']), $request->validated());
         $slaRecord->update($this->withUsage($data));
 
-        return new SlaRecordResource($slaRecord);
+        return new SlaRecordService($slaRecord);
     }
 
     public function destroy(SlaRecord $slaRecord): Response

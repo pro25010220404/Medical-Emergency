@@ -7,11 +7,11 @@ import { apiGet } from '../../lib/apiClient'
 import {
   formatPatientTime,
   genderBadgeClass,
-  genderLabel,
   parsePatientListPayload,
   patientDisplayName,
+  patientGenderDisplay,
 } from '../../lib/patientDisplay'
-import type { PatientRecord } from '../../types/patient'
+import type { PatientRecord, PatientStageStat } from '../../types/patient'
 
 /** 与后端 §3.2 pageSize 保持一致，用于推算总页数 */
 const PAGE_SIZE = 30
@@ -20,12 +20,24 @@ export function PatientsListPage() {
   const { ready, authenticated } = useAuth()
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
+  const [stageFilter, setStageFilter] = useState('')
   const [page, setPage] = useState(1)
   const [rows, setRows] = useState<PatientRecord[]>([])
+  const [stages, setStages] = useState<PatientStageStat[]>([])
   const [lastPage, setLastPage] = useState(1)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const loadStages = useCallback(async () => {
+    try {
+      const raw = await apiGet<{ stages?: PatientStageStat[] }>('/patients/stages')
+      const list = Array.isArray(raw?.stages) ? raw.stages : []
+      setStages(list)
+    } catch {
+      setStages([])
+    }
+  }, [])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -36,23 +48,31 @@ export function PatientsListPage() {
       qs.set('pageSize', String(PAGE_SIZE))
       qs.set('pageNum', String(page))
       if (keyword.trim()) qs.set('keyword', keyword.trim())
+      if (stageFilter) qs.set('stage', stageFilter)
       const raw = await apiGet<unknown>(`/patients?${qs}`)
       const parsed = parsePatientListPayload(raw, PAGE_SIZE)
       setRows(parsed.rows)
       setLastPage(parsed.meta.last_page)
       setTotal(parsed.meta.total)
+      void loadStages()
     } catch (e) {
       setError(e instanceof Error ? e.message : '加载失败')
       setRows([])
     } finally {
       setLoading(false)
     }
-  }, [keyword, page])
+  }, [keyword, page, stageFilter, loadStages])
 
   useEffect(() => {
     if (!ready || !authenticated) return
+    void loadStages()
     void load()
-  }, [load, ready, authenticated])
+  }, [load, loadStages, ready, authenticated])
+
+  function onStageClick(value: string) {
+    setStageFilter((cur) => (cur === value ? '' : value))
+    setPage(1)
+  }
 
   function onSearch(e: FormEvent) {
     e.preventDefault()
@@ -66,7 +86,7 @@ export function PatientsListPage() {
       <header className="workspace-heading">
         <div>
           <h2>患者列表</h2>
-          <p className="api-muted">在治患者 · 检索与详情 · GET /patients</p>
+          <p className="api-muted">快速登记（急救医生）· GET /api/v1/patients · 阶段 /patients/stages</p>
         </div>
         <Link to="/register" className="btn-primary">
           院前登记
@@ -91,7 +111,32 @@ export function PatientsListPage() {
         </span>
       </form>
 
-      <DashboardPanel title="患者台账">
+      {stages.length ? (
+        <div className="filter-bar" role="group" aria-label="病程阶段筛选">
+          <button
+            type="button"
+            className={`btn-ghost${stageFilter === '' ? ' active' : ''}`}
+            onClick={() => onStageClick('')}
+          >
+            全部
+          </button>
+          {stages.map((s) => (
+            <button
+              key={s.value}
+              type="button"
+              className={`btn-ghost${stageFilter === s.value ? ' active' : ''}`}
+              onClick={() => onStageClick(s.value)}
+            >
+              {s.label}
+              <span className="badge muted" style={{ marginLeft: 6 }}>
+                {s.count}
+              </span>
+            </button>
+          ))}
+        </div>
+      ) : null}
+
+      <DashboardPanel title={`患者台账 · 共 ${total} 人`}>
         {loading ? <p className="api-muted">正在加载…</p> : null}
         {error ? <p className="api-muted">{error}</p> : null}
         {!loading && !error && !rows.length ? (
@@ -106,8 +151,13 @@ export function PatientsListPage() {
                   <th>姓名</th>
                   <th>性别</th>
                   <th>年龄</th>
+                  <th>阶段</th>
+                  <th>机构</th>
+                  <th>科室</th>
+                  <th>床位</th>
+                  <th>主诉</th>
+                  <th>来源</th>
                   <th>电话</th>
-                  <th>建档时间</th>
                 </tr>
               </thead>
               <tbody>
@@ -127,11 +177,24 @@ export function PatientsListPage() {
                       <strong>{patientDisplayName(p)}</strong>
                     </td>
                     <td>
-                      <span className={genderBadgeClass(p.gender)}>{genderLabel(p.gender)}</span>
+                      <span className={genderBadgeClass(p.gender)}>{patientGenderDisplay(p)}</span>
                     </td>
                     <td>{p.age != null ? `${p.age}` : '—'}</td>
+                    <td>
+                      <span className="badge muted">{p.stage_label ?? p.stage ?? '—'}</span>
+                    </td>
+                    <td>{p.institution_name ?? '—'}</td>
+                    <td>{p.department_name ?? '—'}</td>
+                    <td>{p.bed_label ?? '—'}</td>
+                    <td title={p.chief_complaint ?? undefined}>
+                      {p.chief_complaint
+                        ? p.chief_complaint.length > 24
+                          ? `${p.chief_complaint.slice(0, 24)}…`
+                          : p.chief_complaint
+                        : '—'}
+                    </td>
+                    <td>{p.source_label ?? p.source ?? '—'}</td>
                     <td>{p.phone ?? '—'}</td>
-                    <td>{formatPatientTime(p.created_at)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,0 +1,1653 @@
+/**
+ * 侧栏布局 v5：浅色一体侧栏（排除全局白 button 后正常显示）
+ */
+:root {
+  --hx-sidebar-w: 216px;
+  --hx-topbar-h: 44px;
+  --hx-sidebar-bg: #ffffff;
+  --hx-sidebar-border: #e8ecf1;
+  --hx-shell-bg: #f0f3f7;
+  --hx-nav-muted: #64748b;
+  --hx-nav-text: #1e293b;
+  --hx-nav-accent: #0d9488;
+  --hx-nav-accent-bg: #ecfdf5;
+}
+
+html:has(body.hx-sidebar-shell),
+body.hx-sidebar-shell {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* 侧栏挂在 body 上，避免 React 重渲染清掉 .app-shell 内的增强 DOM */
+body.hx-sidebar-shell {
+  display: grid !important;
+  grid-template-columns: var(--hx-sidebar-w) minmax(0, 1fr) !important;
+  grid-template-rows: 1fr !important;
+  margin: 0;
+  background: var(--hx-shell-bg) !important;
+}
+
+body.hx-sidebar-shell > #root {
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+}
+
+body.hx-sidebar-shell #root,
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready {
+  height: 100%;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: var(--hx-topbar-h) minmax(0, 1fr) !important;
+  background: var(--hx-shell-bg) !important;
+  padding-bottom: 0 !important;
+  gap: 0 !important;
+  width: 100%;
+  min-width: 0;
+}
+
+body.hx-sidebar-shell .app-shell:has(main.dashboard.screen) {
+  display: grid !important;
+  flex-direction: unset !important;
+  --header: var(--hx-topbar-h) !important;
+  --hx-footer: 30px !important;
+  padding-bottom: var(--hx-footer) !important;
+}
+
+body.hx-sidebar-shell .app-shell:has(main.dashboard.screen) .command-header,
+body.hx-sidebar-shell .app-shell:has(main.dashboard.screen) .command-header.home-header {
+  height: var(--hx-topbar-h) !important;
+  min-height: var(--hx-topbar-h) !important;
+  max-height: var(--hx-topbar-h) !important;
+}
+
+body.hx-sidebar-shell header .main-nav[aria-label='五个业务模块'] {
+  display: none !important;
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+body.hx-sidebar-shell .command-header .header-rail {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+body.hx-sidebar-shell .command-header .hx-sidebar-page-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  line-height: var(--hx-topbar-h);
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .command-header .hx-sidebar-page-title {
+  color: #475569;
+  font-weight: 500;
+}
+
+/* 顶栏页签：与时间同一行，横向滚动，不占第二行 */
+body.hx-sidebar-shell.hx-nav-tabs-active .command-header .header-left {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell.hx-nav-tabs-active .command-header .header-left time {
+  flex: 0 0 auto !important;
+}
+
+body.hx-sidebar-shell .command-header .header-left .hx-nav-tabs {
+  position: static !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: stretch !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #f5f7fa !important;
+  border: 1px solid #dcdfe6 !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  z-index: auto !important;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs[hidden] {
+  display: none !important;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__scroll {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch;
+  gap: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  padding: 0;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__item {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  max-width: 168px;
+  min-height: 30px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid #dcdfe6;
+  overflow: hidden;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__item.is-active {
+  background: #fff;
+  z-index: 1;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__item.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: #fff;
+  pointer-events: none;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__item.is-active .hx-nav-tabs__tab {
+  color: #303133;
+  font-weight: 500;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  font: inherit;
+  font-size: 13px;
+  color: #606266;
+  height: 30px;
+  line-height: 1;
+  padding: 0 8px 0 10px;
+  margin: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: left;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__tab:hover {
+  color: #303133;
+  background: transparent !important;
+  border: none !important;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__close {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  opacity: 0.55;
+  transition:
+    opacity 0.12s ease,
+    background 0.12s ease;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__close::before,
+body.hx-sidebar-shell .hx-nav-tabs__close::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 1px;
+  margin: -0.5px 0 0 -4px;
+  background: #909399;
+  border-radius: 1px;
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__close::before {
+  transform: rotate(45deg);
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__close::after {
+  transform: rotate(-45deg);
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+body.hx-sidebar-shell .hx-nav-tabs__item.is-pinned .hx-nav-tabs__tab {
+  padding: 0 14px;
+}
+
+body.hx-sidebar-shell.hx-nav-tabs-active .command-header .hx-sidebar-page-title {
+  display: none !important;
+}
+
+
+body.hx-sidebar-shell nav.subnav {
+  display: none !important;
+}
+
+/* 侧栏 IA 已含二级链接：勿再露出 React PlateSubNav（否则会叠在侧栏列里像「弹出菜单」） */
+body.hx-sidebar-shell nav.filter-bar[aria-label='模块二级导航'],
+body.hx-sidebar-shell .app-shell > nav.filter-bar[aria-label='模块二级导航'],
+.app-shell.hx-sidebar-ready > nav.filter-bar[aria-label='模块二级导航'] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  border: none !important;
+}
+
+/* —— 侧栏 —— */
+body.hx-sidebar-shell > aside.hx-sidebar,
+body.hx-sidebar-shell .hx-sidebar {
+  grid-column: 1;
+  grid-row: 1;
+  height: 100dvh;
+  max-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--hx-sidebar-bg);
+  border-right: 1px solid var(--hx-sidebar-border);
+  z-index: 40;
+}
+
+body.hx-sidebar-shell .hx-sidebar-brand {
+  flex-shrink: 0;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--hx-sidebar-border);
+}
+
+body.hx-sidebar-shell .hx-sidebar-brand__mark {
+  display: none;
+}
+
+body.hx-sidebar-shell .hx-sidebar-brand__text strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--hx-nav-text);
+  line-height: 1.3;
+}
+
+body.hx-sidebar-shell .hx-sidebar-brand__text small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--hx-nav-muted);
+  line-height: 1.4;
+}
+
+body.hx-sidebar-shell .hx-sidebar-section {
+  margin: 12px 16px 6px;
+  padding: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+}
+
+body.hx-sidebar-shell .hx-sidebar-menu {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  /* 均分剩余高度，但不压缩分组（避免子项叠字） */
+  justify-content: space-evenly;
+  align-content: flex-start;
+  gap: clamp(6px, 1.2vh, 14px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 6px 10px 14px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body.hx-sidebar-shell .hx-sidebar-menu::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+body.hx-sidebar-shell .hx-sidebar-menu > .hx-sidebar-section {
+  flex: 0 0 auto;
+  margin: 4px 6px 2px;
+}
+
+body.hx-sidebar-shell .hx-sidebar-menu > .hx-nav-group {
+  flex: 0 0 auto;
+  min-height: min-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+body.hx-sidebar-shell .hx-sidebar-menu > .hx-nav-group .hx-nav-l2 {
+  flex: 0 0 auto;
+}
+
+/* 一级：分组标题（不可点，子菜单常显） */
+body.hx-sidebar-shell .hx-sidebar .hx-nav-l1.hx-nav-l1--label {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 10px 10px 4px;
+  margin: 0;
+  color: #94a3b8 !important;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: default;
+  user-select: none;
+}
+
+body.hx-sidebar-shell .hx-nav-group.is-active-group > .hx-nav-l1.hx-nav-l1--label {
+  color: var(--hx-nav-text) !important;
+}
+
+body.hx-sidebar-shell .hx-nav-group.is-active-group > .hx-nav-l1.hx-nav-l1--label .hx-nav-l1__icon {
+  color: var(--hx-nav-accent);
+}
+
+body.hx-sidebar-shell .hx-nav-l1__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+}
+
+body.hx-sidebar-shell .hx-nav-l1__icon svg {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+body.hx-sidebar-shell .hx-nav-l2 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 8px 10px 10px;
+}
+
+body.hx-sidebar-shell .hx-nav-l2__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 10px 6px 28px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b !important;
+  text-decoration: none !important;
+  line-height: 1.35;
+}
+
+body.hx-sidebar-shell .hx-nav-l2__link:hover {
+  color: var(--hx-nav-text);
+  background: #f8fafc;
+}
+
+body.hx-sidebar-shell .hx-nav-l2__link.active {
+  color: var(--hx-nav-accent);
+  font-weight: 600;
+  background: var(--hx-nav-accent-bg);
+}
+
+body.hx-sidebar-shell .hx-nav-l2__group-label {
+  margin: 6px 0 2px;
+  padding: 4px 10px 2px 28px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+body.hx-sidebar-shell .hx-nav-l3__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 10px 5px 38px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b !important;
+  text-decoration: none !important;
+  line-height: 1.35;
+}
+
+body.hx-sidebar-shell .hx-nav-l3__link:hover {
+  color: var(--hx-nav-text);
+  background: #f8fafc;
+}
+
+body.hx-sidebar-shell .hx-nav-l3__link.active {
+  color: var(--hx-nav-accent);
+  font-weight: 600;
+  background: var(--hx-nav-accent-bg);
+}
+
+body.hx-sidebar-shell .hx-nav-l3__link.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 2px 0 0 2px;
+  background: var(--hx-nav-accent);
+}
+
+body.hx-sidebar-shell .hx-nav-badge {
+  flex-shrink: 0;
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  color: #fff;
+  background: #dc2626;
+}
+
+body.hx-sidebar-shell .hx-nav-l2__link.active::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 3px;
+  border-radius: 2px 0 0 2px;
+  background: var(--hx-nav-accent);
+}
+
+/* —— 顶栏 —— */
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready > header.command-header {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  height: var(--hx-topbar-h) !important;
+  min-height: var(--hx-topbar-h) !important;
+  max-height: var(--hx-topbar-h) !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #fff !important;
+  border-bottom: 1px solid var(--hx-sidebar-border) !important;
+  box-shadow: none !important;
+}
+
+body.hx-sidebar-shell .command-header .header-rail,
+body.hx-sidebar-shell .command-header h1 {
+  display: none !important;
+}
+
+body.hx-sidebar-shell .command-header .header-left,
+body.hx-sidebar-shell .command-header .header-right {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+}
+
+body.hx-sidebar-shell .command-header .header-left time,
+body.hx-sidebar-shell .command-header .header-left span {
+  font-size: 12px !important;
+}
+
+body.hx-sidebar-shell .command-header .phone-trigger,
+body.hx-sidebar-shell .command-header .identity,
+body.hx-sidebar-shell .command-header .header-right > button {
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: 12px !important;
+}
+
+body.hx-sidebar-shell .command-header .compact-brand {
+  display: none !important;
+}
+
+/* 出警地图 · 底部车辆条：避免被顶栏裁切、字号过小 */
+body.hx-sidebar-shell main.dispatch-screen.screen .dispatch-map-wrap {
+  position: relative !important;
+  padding-bottom: 52px !important;
+  box-sizing: border-box !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar {
+  position: absolute !important;
+  bottom: 6px !important;
+  left: 6px !important;
+  right: 6px !important;
+  z-index: 500 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 6px 8px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  max-height: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scrollbar-width: thin;
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.07) !important;
+  color: #475569 !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar > div:first-child {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex-shrink: 0 !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar strong {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  color: #0f172a !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar > span,
+body.hx-sidebar-shell .vehicle-detail-bar > div > span {
+  font-size: 11px !important;
+  flex-shrink: 1 !important;
+  min-width: 0 !important;
+  max-width: 11em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar .kt,
+body.hx-sidebar-shell .vehicle-detail-bar [class*='chip'],
+body.hx-sidebar-shell .vehicle-detail-bar [class*='badge'] {
+  font-size: 10px !important;
+  padding: 1px 6px !important;
+  line-height: 1.4 !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar button {
+  flex-shrink: 0 !important;
+  min-height: 26px !important;
+  padding: 3px 8px !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  gap: 4px !important;
+  border-radius: 6px !important;
+  border: 1px solid #e2e8f0 !important;
+  background: #fff !important;
+  color: #334155 !important;
+}
+
+body.hx-sidebar-shell .vehicle-detail-bar button svg {
+  width: 14px !important;
+  height: 14px !important;
+  flex-shrink: 0;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready {
+  padding-bottom: 38px !important;
+}
+
+body.hx-sidebar-shell footer.system-footer {
+  left: var(--hx-sidebar-w) !important;
+  width: calc(100% - var(--hx-sidebar-w)) !important;
+  min-height: 36px !important;
+  padding: 8px 14px !important;
+  box-sizing: border-box !important;
+}
+
+body.hx-sidebar-shell nav.detail-trail {
+  display: none !important;
+}
+
+/* React 的 PlateSubNav（nav.filter-bar[aria-label=模块二级导航]）是 .app-shell 的直接子节点，
+   但网格里只给 aside / header / main 定了位，它会被自动塞进隐式第 3 行、落到第 1 列
+   （216px 宽的侧栏列），把 main 的 1fr 行挤矮近 200px。远程会诊工作台是按 .workspace
+   的 rect 定位的固定层，于是只盖住上半屏，下半屏露出这排按钮，看上去像页面被切成两截。
+   侧栏（aside.hx-sidebar）已经按 IA_PLATES 渲染了完全相同的二级导航，这里隐藏即可，
+   隐式行随之消失，workspace 恢复整屏。 */
+
+body.hx-sidebar-shell.hx-sidebar-home .app-shell.hx-sidebar-ready:has(#hx-panel-toggles) {
+  grid-template-rows: var(--hx-topbar-h) auto minmax(0, 1fr) !important;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready > main {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .app-shell.hx-sidebar-ready:has(#hx-panel-toggles) > main.dashboard.screen {
+  grid-row: 3 !important;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready > #hx-panel-toggles {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  align-self: stretch !important;
+  justify-self: stretch !important;
+  z-index: 5 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  border-bottom: 1px solid var(--hx-sidebar-border) !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+body.hx-sidebar-shell #hx-panel-toggles.hx-panel-toggles--strip .hx-panel-toggles-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 8px 14px;
+}
+
+body.hx-sidebar-shell #hx-panel-toggles.hx-panel-toggles--strip .hx-panel-toggles-row--sub {
+  padding-top: 0;
+  padding-bottom: 10px;
+  gap: 8px 10px;
+  border-top: none;
+}
+
+body.hx-sidebar-shell #hx-panel-toggles.hx-panel-toggles--strip .hx-preset-btn,
+body.hx-sidebar-shell #hx-panel-toggles.hx-panel-toggles--strip .hx-preset-link {
+  font-size: 11px !important;
+  padding: 3px 8px !important;
+}
+
+body.hx-sidebar-shell #hx-panel-toggles.hx-panel-toggles--strip .hx-toolbar-links {
+  display: none;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen {
+  margin: 0 !important;
+  padding: 6px 8px 6px !important;
+  height: 100% !important;
+  gap: 8px !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen .dashboard-center .center-metrics {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 10px 14px !important;
+  padding: 14px 16px 12px !important;
+  margin: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .center-metrics .metric {
+  padding: 4px 6px !important;
+  min-width: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .center-metrics .metric strong {
+  font-size: 1.25rem !important;
+  line-height: 1.2 !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .center-metrics .metric span,
+body.hx-sidebar-shell.hx-sidebar-home .center-metrics .metric small,
+body.hx-sidebar-shell.hx-sidebar-home .center-metrics .metric label {
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-left {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  align-content: stretch !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-left .vehicle-panel,
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-left .current-panel {
+  min-height: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-left .panel-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-right {
+  display: grid !important;
+  grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  align-content: stretch !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home main.dashboard.screen > .dashboard-center {
+  min-height: 0 !important;
+  align-content: stretch !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .dashboard-right > .panel {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .dashboard-right > .panel {
+  border-radius: 10px !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell.hx-sidebar-home .dashboard-right .event-feed button,
+body.hx-sidebar-shell.hx-sidebar-home .dashboard-right .event-feed .event-feed-item,
+body.hx-sidebar-shell.hx-sidebar-home .dashboard-right .event-feed a.event-feed-item {
+  padding: 9px 8px !important;
+  line-height: 1.55 !important;
+}
+
+/* hash 已离开首页时勿再露出指挥概览 dashboard（避免与 #/consultations 等视图叠在一起） */
+body.hx-sidebar-shell:not(.hx-sidebar-home):not(.hx-page-map-only):not(.hx-sidebar-map-view)
+  .app-shell.hx-sidebar-ready
+  > main.dashboard.screen {
+  display: none !important;
+}
+
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.workspace,
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.dispatch-screen,
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.warning-screen,
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.department-overview,
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > main.dr-page,
+body.hx-sidebar-shell:not(.hx-sidebar-home) .app-shell.hx-sidebar-ready > #hx-ambulances-page {
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  overflow: auto !important;
+  height: 100% !important;
+}
+
+body.hx-sidebar-shell.hx-page-ambulances .app-shell.hx-sidebar-ready > main:not(#hx-ambulances-page) {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-ambulances .app-shell.hx-sidebar-ready > #hx-ambulances-page {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  min-height: 0 !important;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body.hx-sidebar-shell .hx-ambulances-page .hx-amb-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+body.hx-sidebar-shell .hx-ambulances-page .hx-amb-head h1 {
+  margin: 0;
+  font-size: 18px;
+}
+
+body.hx-sidebar-shell .hx-ambulances-page .hx-amb-meta {
+  margin: 0;
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+body.hx-sidebar-shell .hx-ambulances-page .hx-amb-empty {
+  padding: 24px;
+  color: #64748b;
+}
+
+/* 指挥中枢 · 协作三维地图全屏 — 主内容区铺满（勿留空侧栏列） */
+body.hx-sidebar-shell.hx-page-map-only {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only > #root {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only #hx-panel-toggles,
+body.hx-sidebar-shell.hx-page-map-only .huaxi-demo-links {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready:has(#hx-panel-toggles) {
+  grid-template-rows: var(--hx-topbar-h) minmax(0, 1fr) !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > #hx-panel-toggles {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > main.dashboard.screen {
+  grid-row: 1 / -1 !important;
+  grid-column: 1 / -1 !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only footer.system-footer {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell:has(main.dashboard.screen) {
+  padding-bottom: 0 !important;
+  --hx-footer: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  background: #eef4fa !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen > .dashboard-left,
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen > .dashboard-right {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen > .dashboard-center {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-rows: none !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen .dashboard-center .center-metrics,
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen .dashboard-center .center-caption {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen .dashboard-center .main-map {
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  border-radius: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen .dashboard-center .county-map,
+body.hx-sidebar-shell.hx-page-map-only main.dashboard.screen .dashboard-center .map-stage {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .dashboard-center .main-map.hx-map-light-3d {
+  background: radial-gradient(
+    ellipse 100% 80% at 50% 55%,
+    #dceaf6 0%,
+    #e8f0f8 40%,
+    #f0f5fa 100%
+  ) !important;
+}
+
+/* 协作三维地图：侧栏/顶栏默认收起，地图占满视口 */
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > header.command-header {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-page-map-only .hx-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 130;
+  width: min(var(--hx-sidebar-w), 88vw);
+  max-width: 280px;
+  transform: translateX(-105%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: none;
+}
+
+body.hx-sidebar-shell.hx-page-map-only.hx-map-drawer-open .hx-sidebar {
+  transform: translateX(0);
+  box-shadow: 12px 0 40px rgba(15, 23, 42, 0.14);
+}
+
+body.hx-sidebar-shell.hx-page-map-only .app-shell.hx-sidebar-ready > main.dashboard.screen {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 / -1 !important;
+}
+
+/* Vue 120 嵌入：侧栏四入口对应 dispatch.html 子页，无 Tab 壳 */
+body.hx-dispatch-vue-embed .app-shell > main,
+body.hx-dispatch-vue-embed .app-shell > nav.subnav,
+body.hx-dispatch-vue-embed .app-shell > #hx-panel-toggles,
+body.hx-dispatch-vue-embed .app-shell > #hx-ambulances-page {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-dispatch-vue-embed .app-shell > #hx-dispatch-embed-wrap,
+body.hx-dispatch-vue-embed .app-shell > #hx-dispatch-embed-wrap {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  justify-self: stretch !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body.hx-sidebar-shell.hx-dispatch-vue-embed .hx-dispatch-embed-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 0;
+  display: block;
+  background: #fff;
+}
+
+/* —— 院内早期预警 / 科室监控：侧栏模式下不与全屏三列规则打架 —— */
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready:has(main.warning-screen.screen) {
+  padding-bottom: 0 !important;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready main.warning-screen.screen {
+  display: grid !important;
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  grid-template-columns: minmax(228px, 0.88fr) minmax(0, 2.35fr) minmax(268px, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  padding: 6px 8px !important;
+  margin: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen > .hx-warning-demo,
+body.hx-sidebar-shell main.warning-screen.screen > #hx-warning-demo-page {
+  display: none !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left,
+body.hx-sidebar-shell main.warning-screen.screen .warning-center,
+body.hx-sidebar-shell main.warning-screen.screen .warning-right {
+  grid-row: 1 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left {
+  display: grid !important;
+  /* 仅 2 块面板，勿留第三空行 */
+  grid-template-rows: minmax(0, 0.92fr) minmax(0, 1.08fr) !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .plain-title {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .plain-title small {
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  margin-left: 6px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .warning-metrics {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  padding: 8px 10px !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .warning-metrics button {
+  padding: 8px 8px !important;
+  min-height: 52px !important;
+  text-align: left !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .warning-metrics strong {
+  display: block !important;
+  font-size: 12px !important;
+  margin-bottom: 4px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .closed-loop {
+  flex: 1 1 58% !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .panel {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .indicator-table {
+  flex: 1 1 34% !important;
+  min-height: 120px !important;
+  max-height: 42% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .indicator-table table {
+  width: 100% !important;
+  font-size: 11px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center > .indicator-table.table-scroll {
+  overflow: auto !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .loop-body {
+  display: grid !important;
+  grid-template-columns: minmax(132px, 0.38fr) minmax(0, 1fr) !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  height: 100% !important;
+  padding: 8px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .loop-stages {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 5px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .loop-stages::before {
+  display: none !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .loop-stage {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .risk-list {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .risk-list > header {
+  flex: 0 0 auto !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-center .closed-loop .risk-list button {
+  flex: 0 0 auto !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right {
+  display: grid !important;
+  grid-template-rows: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 0.85fr) !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .panel,
+body.hx-sidebar-shell main.warning-screen.screen .closed-loop {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .panel-title {
+  padding: 10px 12px 8px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .panel-title h2 {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .panel-body,
+body.hx-sidebar-shell main.warning-screen.screen .closed-loop .loop-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  padding: 8px 10px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left .metric-grid,
+body.hx-sidebar-shell main.warning-screen.screen .warning-left .panel-body {
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .risk-list button {
+  padding: 8px 6px !important;
+  border-radius: 6px !important;
+  line-height: 1.45 !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .hx-video-placeholder,
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .panel-body {
+  font-size: 12px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .panel {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .panel-body {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  padding: 6px 8px 8px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .donut-chart,
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .chart-area {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .recharts-responsive-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-right .chart-legend {
+  flex: 0 0 auto !important;
+  margin-bottom: 4px !important;
+  gap: 4px 8px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left .data-sources {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left .coverage-group {
+  margin-bottom: 6px !important;
+}
+
+body.hx-sidebar-shell main.warning-screen.screen .warning-left .screening-grid {
+  gap: 6px !important;
+}
+
+/* —— 科室监控（main.department-overview）侧栏模式：填满视口、内部滚动，避免大块留白 —— */
+body.hx-sidebar-shell:has(main.department-overview.screen) {
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready:has(main.department-overview.screen) {
+  padding-bottom: 0 !important;
+}
+
+body.hx-sidebar-shell .app-shell.hx-sidebar-ready main.department-overview.screen {
+  grid-column: 1 !important;
+  grid-row: 2 !important;
+  display: grid !important;
+  grid-template-columns: 260px minmax(0, 1fr) 268px !important;
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 10px !important;
+  padding: 8px 10px !important;
+  margin: 0 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  align-content: stretch !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type,
+body.hx-sidebar-shell main.department-overview.screen > section,
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type {
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+  align-items: stretch !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .panel {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .panel-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  font-size: 12px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > section {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: 100% !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-totals {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix {
+  flex: 0 0 auto !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix > a {
+  display: grid !important;
+  grid-template-columns: 28px minmax(0, 1fr) !important;
+  column-gap: 8px !important;
+  align-items: start !important;
+  border-radius: 10px !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 10px !important;
+  min-height: 78px !important;
+  background: #fff !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix > a > div {
+  min-width: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix h3 {
+  margin: 0 !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+  color: #0f172a !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .department-matrix small,
+body.hx-sidebar-shell main.department-overview.screen .department-matrix p {
+  display: block !important;
+  margin: 2px 0 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  margin: 0 0 8px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts span {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px !important;
+  padding: 6px 2px !important;
+  border-radius: 8px !important;
+  background: #f8fafc !important;
+  color: #64748b !important;
+  font-size: 11px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .warning-counts b {
+  order: -1 !important;
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+  color: #0f172a !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .compact-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:first-of-type .compact-table td {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  padding: 10px 12px 8px !important;
+  overflow: auto !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel th,
+body.hx-sidebar-shell main.department-overview.screen #hx-beds-live-panel td {
+  padding: 6px 8px !important;
+  text-align: left !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > section > .panel {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > section > .panel .panel-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type .panel {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type .panel:first-child {
+  flex: 1.15 1 0 !important;
+}
+
+/* 科室监控为桌面工作台：「手机通知」属于独立手机演示页，不在此展示 */
+body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:last-child,
+body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen .panel[data-hx-desktop-hidden='1'] {
+  display: none !important;
+}
+
+body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:nth-child(2) {
+  flex: 0 0 auto !important;
+  max-height: none !important;
+}
+
+body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:nth-child(2) .panel-body {
+  padding: 8px 12px 10px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  overflow: hidden !important;
+}
+
+body.hx-sidebar-shell.hx-ia-departments-view main.department-overview.screen > aside:last-of-type .panel:first-child {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen > aside:last-of-type .panel:first-child .panel-body {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #f8fafc !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .panel-title {
+  padding: 8px 12px 6px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .panel-title h2 {
+  font-size: 13px !important;
+  margin: 0 !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen #hx-dept-beds-panel.hx-dept-beds-panel {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 10px 12px 4px !important;
+  border-top: 1px solid #e2e8f0 !important;
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .hx-dept-beds-grid {
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  gap: 8px !important;
+}
+
+body.hx-sidebar-shell main.department-overview.screen .hx-dept-bed-card {
+  padding: 10px 12px !important;
+}
+
+/* 远程会诊路由：侧栏高亮与顶栏标题以 hash 为准（防仍亮「实时出警」） */
+body.hx-sidebar-shell.hx-route-consultations:not(.hx-route-grassroots-consult)
+  .hx-nav-l2__link[data-nav-href='/dispatch'],
+body.hx-sidebar-shell.hx-route-consultations:not(.hx-route-grassroots-consult)
+  .hx-nav-l2__link[data-nav-href='/dispatch/list'] {
+  background: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+body.hx-sidebar-shell.hx-route-consultations:not(.hx-route-grassroots-consult)
+  .hx-nav-l2__link[data-nav-href='/consultations'] {
+  background: var(--hx-nav-accent-bg, rgba(16, 185, 129, 0.12)) !important;
+  color: var(--hx-nav-accent, #059669) !important;
+  font-weight: 600 !important;
+}
+
+body.hx-sidebar-shell.hx-route-grassroots-consult
+  .hx-nav-l2__link[data-nav-href='/consultations'],
+body.hx-sidebar-shell.hx-route-grassroots-consult
+  .hx-nav-l2__link[data-nav-href='/dispatch'] {
+  background: transparent !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+body.hx-sidebar-shell.hx-route-grassroots-consult
+  .hx-nav-l2__link[data-nav-href='/consultations?tab=grassroots'] {
+  background: var(--hx-nav-accent-bg, rgba(16, 185, 129, 0.12)) !important;
+  color: var(--hx-nav-accent, #059669) !important;
+  font-weight: 600 !important;
+}

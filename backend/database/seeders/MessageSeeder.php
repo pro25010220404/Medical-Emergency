@@ -16,6 +16,7 @@ class MessageSeeder extends Seeder
         $ymd = now()->format('Ymd');
         $p1 = 'PAT-'.$ymd.'-001';
         $p2 = 'PAT-'.$ymd.'-002';
+        $p40 = 'PAT-'.$ymd.'-040';
 
         // 站内消息 category：alert/consult/transfer
         DB::table('messages')->insert([
@@ -26,7 +27,7 @@ class MessageSeeder extends Seeder
             ['id' => 5, 'message_id' => "MSG-{$ymd}-005", 'title' => '会诊已接诊', 'text' => '刘敏医生已接诊卒中会诊', 'is_read' => 1, 'patient_id' => $p2, 'patient_name' => '李国强', 'category' => 'consult', 'link' => '/consult/consult-'.$ymd.'-002', 'at' => now()->subMinutes(24), 'created_at' => $now, 'updated_at' => $now],
             ['id' => 6, 'message_id' => "MSG-{$ymd}-006", 'title' => '转诊单待确认', 'text' => '新场镇卫生院转诊单 TR-'.$ymd.'-002 待接收', 'is_read' => 0, 'patient_id' => null, 'patient_name' => null, 'category' => 'transfer', 'link' => '/transfer/TR-'.$ymd.'-002', 'at' => now()->subMinutes(6), 'created_at' => $now, 'updated_at' => $now],
             ['id' => 7, 'message_id' => "MSG-{$ymd}-007", 'title' => '床位预警', 'text' => '重症医学科床位占用率已达 80%', 'is_read' => 1, 'patient_id' => null, 'patient_name' => null, 'category' => 'alert', 'link' => '/beds/WY001', 'at' => now()->subHours(2), 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 8, 'message_id' => "MSG-{$ymd}-008", 'title' => '设备报警', 'text' => 'ICU-02 监护仪报警，请检查', 'is_read' => 0, 'patient_id' => $p1, 'patient_name' => '王秀兰', 'category' => 'alert', 'link' => '/device/DEV-MON-002', 'at' => now()->subMinutes(12), 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 8, 'message_id' => "MSG-{$ymd}-008", 'title' => '设备报警', 'text' => 'ICU-02 监护仪报警，请检查', 'is_read' => 0, 'patient_id' => $p40, 'patient_name' => '孙宝国', 'category' => 'alert', 'link' => '/device/DEV-MON-002', 'at' => now()->subMinutes(12), 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         // 服务通知 channel：wechat/sms

@@ -72,8 +72,12 @@ class Handler extends ExceptionHandler
         }
 
         if ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException) {
+            $path = $request->getPathInfo();
+            $method = $request->getMethod();
+            $message = "接口不存在 {$method} {$path}";
+
             return response()->json(
-                Result::error(ResponseCode::NOT_FOUND),
+                Result::error(ResponseCode::NOT_FOUND, $message),
                 ResponseCode::NOT_FOUND->value
             );
         }

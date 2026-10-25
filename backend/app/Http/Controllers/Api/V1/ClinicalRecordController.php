@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreClinicalRecordRequest;
 use App\Http\Requests\UpdateClinicalRecordRequest;
-use App\Http\Resources\ClinicalRecordResource;
+use App\Services\ClinicalRecordService;
 use App\Models\ClinicalRecord;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,7 +39,7 @@ class ClinicalRecordController extends Controller
             ->paginate($request->integer('per_page', 15))
             ->appends($request->query());
 
-        return ClinicalRecordResource::collection($records);
+        return ClinicalRecordService::collection($records);
     }
 
     /**
@@ -51,7 +51,7 @@ class ClinicalRecordController extends Controller
         $record->refresh();
         $record->load(['patient', 'doctor', 'organization']);
 
-        return (new ClinicalRecordResource($record))
+        return (new ClinicalRecordService($record))
             ->response()
             ->setStatusCode(201);
     }
@@ -59,22 +59,22 @@ class ClinicalRecordController extends Controller
     /**
      * 诊疗记录详情
      */
-    public function show(ClinicalRecord $clinicalRecord): ClinicalRecordResource
+    public function show(ClinicalRecord $clinicalRecord): ClinicalRecordService
     {
         $clinicalRecord->load(['patient', 'doctor', 'organization']);
 
-        return new ClinicalRecordResource($clinicalRecord);
+        return new ClinicalRecordService($clinicalRecord);
     }
 
     /**
      * 更新诊疗记录
      */
-    public function update(UpdateClinicalRecordRequest $request, ClinicalRecord $clinicalRecord): ClinicalRecordResource
+    public function update(UpdateClinicalRecordRequest $request, ClinicalRecord $clinicalRecord): ClinicalRecordService
     {
         $clinicalRecord->update($request->validated());
         $clinicalRecord->load(['patient', 'doctor', 'organization']);
 
-        return new ClinicalRecordResource($clinicalRecord);
+        return new ClinicalRecordService($clinicalRecord);
     }
 
     /**

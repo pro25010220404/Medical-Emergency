@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Http\Resources\DrMessageResource;
-use App\Http\Resources\DrPostResource;
+use App\Services\DrMessageService;
+use App\Services\DrPostService;
 use App\Models\DrMessage;
 use App\Models\DrPost;
 
@@ -54,7 +54,7 @@ class DrService extends Service
 
         return [
             'total' => $paginator->total(),
-            'list' => DrPostResource::collection($paginator->items())->resolve(),
+            'list' => DrPostService::collection($paginator->items())->resolve(),
         ];
     }
 
@@ -120,7 +120,7 @@ class DrService extends Service
 
         return [
             'total' => $paginator->total(),
-            'list' => DrMessageResource::collection($paginator->items())->resolve(),
+            'list' => DrMessageService::collection($paginator->items())->resolve(),
         ];
     }
 

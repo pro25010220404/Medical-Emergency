@@ -4,12 +4,10 @@
 ;(function () {
   function hasSession() {
     try {
-      if (localStorage.getItem('huaxi-jwt-token') || sessionStorage.getItem('huaxi-jwt-token')) return true
-      if (localStorage.getItem('huaxi-demo-only') === '1') return true
+      return !!(localStorage.getItem('huaxi-jwt-token') || sessionStorage.getItem('huaxi-jwt-token'))
     } catch {
-      /* ignore */
+      return false
     }
-    return false
   }
 
   function mountLogout() {

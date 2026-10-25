@@ -3,9 +3,11 @@
 namespace App\Services;
 
 use App\Enums\ResponseCode;
+use App\Models\ConsultParticipant;
 use App\Models\ConsultRoom;
 use App\Models\ConsultSession;
 use App\Models\Department;
+use App\Models\Organization;
 use App\Models\Patient;
 use App\Models\User;
 use Illuminate\Support\Str;
@@ -37,16 +39,29 @@ class ConsultationService extends Service
      */
     public function index(array $params): array
     {
-        $query = ConsultSession::query()
-            ->with(['participants', 'room'])
-            ->whereIn('status', $this->parseStatuses($params['status'] ?? 'WAITING'));
+        $params = $this->normalizeListQuery($params);
+
+        $query = ConsultSession::query()->with(['participants', 'room']);
+
+        if (array_key_exists('consultStatus', $params) && $params['consultStatus'] !== '' && $params['consultStatus'] !== null) {
+            $query->whereIn('status', $this->parseConsultStatusFilter((int) $params['consultStatus']));
+        } else {
+            $query->whereIn('status', $this->parseStatuses($params['status'] ?? 'WAITING'));
+        }
 
         $query->when($params['institutionId'] ?? null, fn ($q, $v) => $q->where('hospital', $v))
             ->when($params['departmentId'] ?? null, fn ($q, $v) => $q->where('department', $v))
+            ->when($params['patientId'] ?? null, fn ($q, $v) => $q->where('patient_id', $v))
+            ->when(($params['sourceType'] ?? null) === 'grassroots', function ($q) {
+                $q->whereNotNull('source_hospital')
+                    ->where('source_hospital', '!=', '')
+                    ->whereColumn('source_hospital', '!=', 'hospital');
+            })
             ->when($params['keyword'] ?? null, function ($q, $v) {
                 $q->where(function ($sub) use ($v) {
                     $sub->where('patient_name', 'like', "%{$v}%")
-                        ->orWhere('session_id', 'like', "%{$v}%");
+                        ->orWhere('session_id', 'like', "%{$v}%")
+                        ->orWhere('consult_code', 'like', "%{$v}%");
                 });
             });
 
@@ -64,6 +79,167 @@ class ConsultationService extends Service
             'total' => $total,
             'list' => $rows->map(fn (ConsultSession $s) => $this->queueItem($s, $nominatedNames))->all(),
         ];
+    }
+
+    /**
+     * 会诊队列状态计数（全模块 V1.0 §3.65）
+     */
+    public function summary(array $params): array
+    {
+        $params = $this->normalizeListQuery($params);
+        $base = ConsultSession::query()
+            ->when($params['institutionId'] ?? null, fn ($q, $v) => $q->where('hospital', $v))
+            ->when($params['departmentId'] ?? null, fn ($q, $v) => $q->where('department', $v));
+
+        return [
+            'waiting' => (clone $base)->where('status', 0)->count(),
+            'inCall' => (clone $base)->where('status', 1)->count(),
+            'finished' => (clone $base)->where('status', 2)->count(),
+            'total' => (clone $base)->count(),
+        ];
+    }
+
+    /**
+     * 会诊参与人列表（§3.47）
+     */
+    public function members(string $sessionId): array
+    {
+        $session = ConsultSession::where('session_id', $sessionId)->first();
+        $this->assert($session !== null, ResponseCode::NOT_FOUND, '会诊会话不存在');
+
+        $list = $session->participants()->orderBy('id')->get()->map(fn (ConsultParticipant $p) => [
+            'memberId' => $p->id,
+            'role' => $p->role,
+            'name' => $p->name,
+            'online' => (bool) $p->online,
+            'deviceType' => $p->device_type,
+            'joinMode' => $p->join_mode,
+            'joinedAt' => optional($p->joined_at)->toIso8601String(),
+        ])->all();
+
+        return ['list' => $list];
+    }
+
+    /**
+     * 添加会诊参与人（§3.48）
+     */
+    public function addMember(string $sessionId, array $data): array
+    {
+        $session = ConsultSession::where('session_id', $sessionId)->first();
+        $this->assert($session !== null, ResponseCode::NOT_FOUND, '会诊会话不存在');
+
+        $member = ConsultParticipant::create([
+            'session_id' => $sessionId,
+            'role' => $data['role'] ?? '参与医生',
+            'name' => $data['name'],
+            'online' => (bool) ($data['online'] ?? false),
+            'device_type' => $data['deviceType'] ?? null,
+            'join_mode' => $data['joinMode'] ?? null,
+            'joined_at' => ! empty($data['joinedAt']) ? \Carbon\Carbon::parse($data['joinedAt']) : now(),
+        ]);
+
+        return [
+            'memberId' => $member->id,
+            'role' => $member->role,
+            'name' => $member->name,
+        ];
+    }
+
+    /**
+     * 领取/接诊会诊（§3.45 claim，与 accept 同义）
+     */
+    public function claim(string $sessionId, array $data): array
+    {
+        return $this->accept($sessionId, $data);
+    }
+
+    /**
+     * 会诊状态流转（§3.46）
+     */
+    public function updateStatus(string $sessionId, array $data): array
+    {
+        $session = ConsultSession::where('session_id', $sessionId)->first();
+        $this->assert($session !== null, ResponseCode::NOT_FOUND, '会诊会话不存在');
+
+        $code = null;
+        if (isset($data['consultStatus']) && $data['consultStatus'] !== '') {
+            $code = $this->consultStatusToInternal((int) $data['consultStatus']);
+        } elseif (! empty($data['status'])) {
+            $map = array_flip(self::STATUS_NAMES);
+            $name = strtoupper(trim((string) $data['status']));
+            $this->assert(isset($map[$name]), ResponseCode::BAD_REQUEST, '无效的状态值');
+            $code = $map[$name];
+        } else {
+            $this->assert(false, ResponseCode::BAD_REQUEST, '请提供 status 或 consultStatus');
+        }
+
+        $updates = ['status' => $code];
+        if ($code === 1 && $session->opened_at === null) {
+            $updates['opened_at'] = now();
+        }
+        if ($code === 2) {
+            $updates['closed_at'] = now();
+            ConsultRoom::where('session_id', $sessionId)->update(['status' => 2, 'closed_at' => now()]);
+        }
+        $session->update($updates);
+        $session->refresh();
+
+        return [
+            'sessionId' => $session->session_id,
+            'status' => self::STATUS_NAMES[$session->status] ?? 'UNKNOWN',
+            'statusLabel' => self::STATUS_LABELS[$session->status] ?? '',
+            'consultStatus' => $this->internalToConsultStatus((int) $session->status),
+        ];
+    }
+
+    /**
+     * 指定接诊医生（§3.61 assign）
+     */
+    public function assign(string $sessionId, array $data): array
+    {
+        $session = ConsultSession::where('session_id', $sessionId)->first();
+        $this->assert($session !== null, ResponseCode::NOT_FOUND, '会诊会话不存在');
+        $this->assert($session->status === 0, ResponseCode::CONFLICT, '仅待接诊会诊可指定医生');
+
+        $doctorId = $data['assignUserId'] ?? $data['doctorId'] ?? $data['nominatedDoctorId'] ?? null;
+        $this->assert(! empty($doctorId), ResponseCode::BAD_REQUEST, '请提供 assignUserId 或 doctorId');
+
+        $session->update(['nominated_doctor_id' => $doctorId]);
+
+        return [
+            'sessionId' => $session->session_id,
+            'nominatedDoctorId' => $doctorId,
+            'nominatedDoctorName' => User::where('username', $doctorId)->value('real_name') ?? $doctorId,
+        ];
+    }
+
+    /**
+     * 更新会诊单（§3.64，待接诊可改）
+     */
+    public function update(string $sessionId, array $data): array
+    {
+        $session = ConsultSession::where('session_id', $sessionId)->first();
+        $this->assert($session !== null, ResponseCode::NOT_FOUND, '会诊会话不存在');
+
+        $patch = [];
+        foreach ([
+            'chiefComplaint' => 'chief_complaint',
+            'targetDepartment' => 'department',
+            'targetHospital' => 'hospital',
+            'sourceHospital' => 'source_hospital',
+            'sourceDepartment' => 'source_department',
+            'note' => 'note',
+            'nominatedDoctorId' => 'nominated_doctor_id',
+        ] as $in => $col) {
+            if (array_key_exists($in, $data)) {
+                $patch[$col] = $data[$in];
+            }
+        }
+        if ($patch !== []) {
+            $session->update($patch);
+        }
+
+        return $this->show($sessionId);
     }
 
     /**
@@ -609,13 +785,17 @@ class ConsultationService extends Service
         $applicant = $session->participants->firstWhere('role', '发起医生')
             ?? $session->participants->first();
 
-        return [
+        $patientName = self::displayPatientName($session->patient_name);
+        $roomToken = $session->room->token ?? $session->token;
+        $chief = $session->chief_complaint ?: '会诊';
+
+        $item = [
             'sessionId' => $session->session_id,
             'token' => $session->token,
             'consultCode' => $session->consult_code,
             'patient' => [
                 'patientId' => $session->patient_id,
-                'name' => self::displayPatientName($session->patient_name),
+                'name' => $patientName,
                 'gender' => $this->genderName($session->patient_gender),
                 'age' => (int) $session->patient_age,
                 'chiefComplaint' => $session->chief_complaint,
@@ -632,7 +812,73 @@ class ConsultationService extends Service
             'status' => self::STATUS_NAMES[$session->status] ?? 'UNKNOWN',
             'statusLabel' => self::STATUS_LABELS[$session->status] ?? '',
             'createdAt' => optional($session->created_at)->toIso8601String(),
+            // 全模块 V1.0 §3.42 兼容字段（与 §5.1 队列字段并存）
+            'consultationId' => $session->id,
+            'consultationCode' => $session->session_id,
+            'roomCode' => $session->consult_code ?: $session->session_id,
+            'roomUrl' => '/#/room/'.($roomToken ?: $session->session_id),
+            'title' => $patientName.'·'.$chief,
+            'patientName' => $patientName,
+            'applyOrgName' => $session->source_hospital,
+            'receiveOrgName' => $session->hospital,
+            'consultStatus' => $this->internalToConsultStatus((int) $session->status),
+            'consultStatusLabel' => self::STATUS_LABELS[$session->status] ?? '',
+            'linkStatus' => 0,
+            'linkStatusLabel' => '短信待接入',
+            'startedAt' => optional($session->opened_at)->toIso8601String(),
+            'endedAt' => optional($session->closed_at)->toIso8601String(),
         ];
+
+        return $item;
+    }
+
+    /**
+     * 列表 Query 归一：V1.0 consultStatus/receiveOrgId 与 §5.1 status/institutionId 互通
+     */
+    private function normalizeListQuery(array $params): array
+    {
+        if (! empty($params['receiveOrgId']) && empty($params['institutionId'])) {
+            $org = Organization::query()->find($params['receiveOrgId']);
+            if ($org !== null) {
+                $params['institutionId'] = $org->org_code ?? (string) $org->id;
+            }
+        }
+
+        return $params;
+    }
+
+    /** V1.0 consultStatus 过滤 → 内部 status 码集合 */
+    private function parseConsultStatusFilter(int $consultStatus): array
+    {
+        return match ($consultStatus) {
+            0 => [0],
+            1 => [1],
+            2 => [1],
+            3 => [2],
+            default => [0],
+        };
+    }
+
+    /** 内部 status → V1.0 consultStatus 对外码 */
+    private function internalToConsultStatus(int $internal): int
+    {
+        return match ($internal) {
+            0 => 0,
+            1 => 1,
+            2 => 3,
+            default => 0,
+        };
+    }
+
+    /** V1.0 consultStatus → 内部单值 status */
+    private function consultStatusToInternal(int $consultStatus): int
+    {
+        return match ($consultStatus) {
+            0 => 0,
+            1, 2 => 1,
+            3 => 2,
+            default => 0,
+        };
     }
 
     private function participantsOf(ConsultSession $session): array

@@ -3,15 +3,55 @@
 namespace App\Services;
 
 use App\Enums\ResponseCode;
+use App\Exceptions\BusinessException;
 use App\Models\Department;
 use App\Models\Organization;
 use App\Models\OrganizationMember;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * 机构名录、科室结构与权限范围
+ * 同时作为机构 JSON 资源输出（原 OrganizationResource）。
  */
-class OrganizationService extends Service
+class OrganizationService extends JsonResource
 {
+    public function __construct($resource = null)
+    {
+        parent::__construct($resource);
+    }
+
+    /**
+     * 业务断言，条件不满足时抛出业务异常
+     */
+    protected function assert(bool $condition, ResponseCode $code, ?string $message = null): void
+    {
+        if (! $condition) {
+            throw new BusinessException($code, $message);
+        }
+    }
+
+    /**
+     * 机构 JSON 资源输出（嵌套于事件 / 医生 / 诊疗记录等场景）
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'orgId' => $this->org_code,
+            'name' => $this->org_name,
+            'shortName' => $this->short_name,
+            'level' => $this->level,
+            'levelLabel' => self::LEVEL_LABELS[$this->level] ?? '',
+            'province' => $this->province,
+            'city' => $this->city,
+            'county' => $this->county_name,
+            'town' => $this->town,
+            'verified' => (bool) $this->verified,
+            'currentOperationVerified' => (bool) $this->current_operation_verified,
+            'verificationScope' => $this->verification_scope,
+        ];
+    }
+
     private const LEVEL_LABELS = [
         'center' => '中心医院',
         'city' => '市级医院',

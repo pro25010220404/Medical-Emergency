@@ -244,3 +244,89 @@ body,
 .map-med-row-stat .warn {
   color: #dc2626;
 }
+
+/* 急救事件详情（/episode/:id，GET /v1/emergency-events/{id} 患者360结构） */
+.ev-vital-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.ev-vital-cell {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+}
+
+.ev-vital-cell.is-alert {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.ev-vital-label {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ev-vital-value {
+  font-size: 16px;
+}
+
+.ev-sub-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.ev-control-list {
+  display: grid;
+  gap: 8px;
+}
+
+.ev-control-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 6px;
+}
+
+.ev-control-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ev-control-steps {
+  margin: 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.ev-control-steps li {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+
+.ev-control-stage {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11px;
+}
+
+.ev-predict-list {
+  margin: 0;
+  padding-left: 16px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
